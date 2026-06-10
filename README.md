@@ -1,11 +1,12 @@
 # 🛒 TechStore - Modern E-Commerce Web Application
 
 ![.NET Core](https://img.shields.io/badge/.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
-![C#](https://img.shields.io/badge/c%23-%23239120.style=for-the-badge&logo=csharp&logoColor=white)
+![C#](https://img.shields.io/badge/C#-ASP.NET10)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoft%20sql%20server&logoColor=white)
-![Bootstrap](https://img.shields.io/badge/bootstrap-%238511FA.style=for-the-badge&logo=bootstrap&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap%3-8A2BE2)
 
-*[🇻🇳 Đọc phiên bản tiếng Việt ở bên dưới](#-phiên-bản-tiếng-việt)*
+
+
 
 ## 📖 Overview
 **TechStore** is a full-stack, feature-rich e-commerce web application built with **ASP.NET Core MVC** and **Entity Framework Core**. Designed with a focus on performance, security, and user experience, this project serves as a comprehensive solution for online tech gadget retail.
@@ -42,9 +43,9 @@
 # 🛒 TechStore - Ứng Dụng Web Thương Mại Điện Tử Hiện Đại
 
 ![.NET Core](https://img.shields.io/badge/.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
-![C#](https://img.shields.io/badge/c%23-%23239120.style=for-the-badge&logo=csharp&logoColor=white)
+![C#](https://img.shields.io/badge/C#-ASP.NET10)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoft%20sql%20server&logoColor=white)
-![Bootstrap](https://img.shields.io/badge/bootstrap-%238511FA.style=for-the-badge&logo=bootstrap&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap%3-8A2BE2)
 
 ## 📖 Tổng quan dự án
 **TechStore** là một ứng dụng web thương mại điện tử đa nền tảng được xây dựng bằng kiến trúc **ASP.NET Core MVC** và **Entity Framework Core**. Dự án được thiết kế không chỉ để đáp ứng các nghiệp vụ bán lẻ các thiết bị công nghệ mà còn tập trung sâu vào việc tối ưu hóa hiệu năng hệ thống, bảo mật dữ liệu và mang lại trải nghiệm mượt mà cho người dùng cuối.
