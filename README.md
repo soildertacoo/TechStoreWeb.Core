@@ -38,13 +38,17 @@
 * SQL Server Management Studio 2022 (SSMS)
 
 ### Installation
-1. Clone the repository:
+1. Clone the repository on VS Studio or VS Code:
    ```bash
    git clone https://github.com/soildertacoo/TechStoreWeb.Core.git
 2. Download .NET 10 SDK :
+   
    [Linux here](https://learn.microsoft.com/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website)
+   
    [Windows](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-windows-x64-binaries)
+   
    [macOS(M1-later)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-arm64-installer)
+   
    [macOS(Intel)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-x64-installer)
 
 ---------------------------------------------------------------------------------------------------------------------------
@@ -80,11 +84,15 @@ Trong quá trình phát triển dự án, tôi đã nghiên cứu và giải quy
 * SQL Server / SQL Server Management Studio (SSMS)
 
 ### Các bước triển khai
-1. Clone mã nguồn về máy local:
+1. Clone mã nguồn về máy local và clone trực tiếp trong VS Studio hay VS Code:
    ```bash
       git clone https://github.com/soildertacoo/TechStoreWeb.Core.git
 2. Download .NET 10 SDK :
+  
    [Linux here](https://learn.microsoft.com/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website)
+   
    [Windows](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-windows-x64-binaries)
+   
    [macOS(M1-later)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-arm64-installer)
+   
    [macOS(Intel)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-x64-installer)
