@@ -1,0 +1,335 @@
+﻿    @model IEnumerable<TechStore.Models.OrderPro>
+    @{
+        ViewBag.Title = "Order History";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-gray: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .order-history-container {
+            max-width: 1000px; /* Thu gọn chiều rộng để dễ nhìn hơn */
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+
+        /* HEADER */
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .page-title {
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .page-title i { color: var(--primary); }
+
+        /* DANH SÁCH ĐƠN HÀNG DẠNG CARD */
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Phần đầu Card: Mã đơn & Trạng thái */
+        .order-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .order-id { font-weight: 700; color: #0f172a; font-size: 1.1rem; }
+        .order-date { color: var(--secondary); font-size: 0.9rem; margin-left: 10px; }
+
+        /* Trạng thái */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-pending { background: #fef3c7; color: #b45309; } /* Đang xử lý */
+        .status-shipping { background: #e0e7ff; color: #4338ca; } /* Đang giao */
+        .status-completed { background: #d1fae5; color: #047857; } /* Thành công */
+        .status-cancelled { background: #fee2e2; color: #b91c1c; } /* Hủy */
+
+        /* Phần thân Card: Chi tiết thông tin */
+        .order-body {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+        }
+        .info-group { display: flex; flex-direction: column; gap: 5px; }
+        .info-label { color: var(--secondary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+        .info-value { color: #334155; font-size: 0.95rem; font-weight: 500; }
+        .address-text { line-height: 1.5; }
+
+        /* Phần cuối Card: Tiền & Nút bấm */
+        .order-footer {
+            padding: 1.2rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+        }
+        .total-amount {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--danger);
+        }
+        .amount-detail { font-size: 0.85rem; color: var(--secondary); font-weight: 400; margin-left: 8px;}
+
+        /* Nút bấm */
+        .action-group { display: flex; gap: 10px; }
+        .btn-action {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-detail {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-detail:hover { background: #4338ca; color: white; }
+        .btn-cancel {
+            background: white;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        .btn-cancel:hover { background: #fef2f2; color: var(--danger); }
+
+        /* TRẠNG THÁI TRỐNG */
+        .empty-state { text-align: center; padding: 4rem 2rem; background: white; border-radius: 16px; border: 1px solid var(--border-color); }
+        .empty-icon { font-size: 5rem; color: #e2e8f0; margin-bottom: 1rem; }
+
+        /* RESPONSIVE CHO MOBILE */
+        @@media (max-width: 768px) {
+            .order-body { grid-template-columns: 1fr; gap: 15px; }
+            .order-footer { flex-direction: column; align-items: flex-end; gap: 15px; }
+            .action-group { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+            .btn-action { text-align: center; }
+        }
+        
+        @@keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <div class="order-history-container">
+        <div class="page-header">
+            <h1 class="page-title"><i class="fas fa-shopping-bag me-3"></i> Lịch sử đơn hàng</h1>
+            <p class="text-muted mb-0">Quản lý và theo dõi hành trình các đơn hàng của bạn</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger mb-4 shadow-sm" style="border-radius: 12px;">
+                <i class="fas fa-exclamation-circle me-2"></i> @ViewBag.Error
+            </div>
+        }
+
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <span class="order-id"><i class="fas fa-hashtag text-muted me-1"></i>@item.TrackingNumber</span>
+                            <span class="order-date"><i class="far fa-clock me-1"></i>@item.DateOrder</span>
+                        </div>
+                        
+                        @{
+                            // Gán class CSS dựa theo Text Trạng Thái (bạn cần điều chỉnh "Đang xử lý", "Đang giao" cho khớp với DB của bạn)
+                            string statusClass = "status-pending";
+                            if (item.Status == "Đã giao" || item.Status == "Completed") statusClass = "status-completed";
+                            else if (item.Status == "Đang giao") statusClass = "status-shipping";
+                            else if (item.Status == "Đã hủy" || item.Status == "Cancelled") statusClass = "status-cancelled";
+                        }
+                        <span class="status-badge @statusClass">
+                            @item.Status
+                        </span>
+                    </div>
+
+                    <div class="order-body">
+                        <div class="info-group">
+                            <span class="info-label"><i class="fas fa-map-marker-alt me-1"></i> Giao đến</span>
+                            <span class="info-value address-text">
+                                <strong>@item.Customer.NameCus</strong><br />
+                                @item.AddressDeliverry
+                            </span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label"><i class="fas fa-credit-card me-1"></i> Phương thức</span>
+                            <span class="info-value">@item.PaymentMethod</span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label"><i class="fas fa-check-circle me-1"></i> Thanh toán</span>
+                            @{
+                                string payColor = item.PaymentStatus == "Đã thanh toán" || item.PaymentStatus == "Paid" ? "text-success" : "text-danger";
+                            }
+                            <span class="info-value @payColor fw-bold">@item.PaymentStatus</span>
+                        </div>
+                    </div>
+
+                    <div class="order-footer">
+                        <div>
+                            <span class="text-muted fw-bold">Tổng thanh toán:</span>
+                            <div class="total-amount">
+                                @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.TotalAmount)
+                                <span class="amount-detail">(Đã bao gồm phí ship: @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.ShippingCost))</span>
+                            </div>
+                        </div>
+                        
+                        <div class="action-group">
+                            @if (item.Status == "Đang xử lý" || item.Status == "Pending")
+                            {
+                                <button id="btnCancel" class="btn-action btn-cancel cancel-btn" data-tracking="@item.TrackingNumber">
+                                    Hủy đơn
+                                </button>
+                            }
+                            <a href="@Url.Action("Details_KH", new { id = item.ID })" class="btn-action btn-detail">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-box-open empty-icon"></i>
+                <h4 class="fw-bold text-dark mt-3">Chưa có đơn hàng nào</h4>
+                <p class="text-muted">Bạn chưa thực hiện giao dịch nào. Hãy khám phá các sản phẩm tuyệt vời của chúng tôi nhé!</p>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-3 px-4 py-2" style="border-radius: 8px;">
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        }
+    </div>
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function () {
+            const cancelBtn = document.querySelectorAll('.btn-cancel');
+            //Nếu là dạng danh sách và id giống nhau cho mỗi phần tử thì
+            cancelBtn.forEach( button => {
+                button.addEventListener('click', async function () { // 1. Sửa 'change' thành 'click'
+                    const trackingNumber = this.getAttribute('data-tracking');
+                    if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?: ' + trackingNumber)) {
+                        try {
+                            // Tạm thời tắt nút để tránh spam
+                            this.style.pointerEvents = 'none';
+                            const response = await fetch('@Url.Action("Delete_KH", "OrderPro")', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ id: trackingNumber })
+                            });
+                            
+                            const data = await response.json(); 
+                            
+                            if (data.success) {
+                                if (confirm('Đã hủy thành công, nhấn ok để reset trang lại')) {
+                                    window.location.reload(); // Thêm lệnh reload trang
+                                }
+                            } else {
+                                if (confirm('Hủy đơn không thành công, nhấn ok để reload lại trang và hủy lại')) {
+                                    window.location.reload(); 
+                                } else {
+                                    this.style.pointerEvents = 'auto';
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Lỗi khi fetch dữ liệu:', error);
+                            alert('Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau.');
+                            
+                            // Khôi phục lại nút nếu xảy ra lỗi mạng/server
+                            this.style.pointerEvents = 'auto';
+                        }
+                    }
+                });
+            });
+            
+           
+            // Smooth horizontal scroll for table
+            const tableContainer = document.querySelector('.table-responsive');
+            if (tableContainer) {
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                tableContainer.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    tableContainer.style.cursor = 'grabbing';
+                    startX = e.pageX - tableContainer.offsetLeft;
+                    scrollLeft = tableContainer.scrollLeft;
+                });
+
+                tableContainer.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    tableContainer.style.cursor = 'grab';
+                });
+
+                tableContainer.addEventListener('mouseup', () => {
+                    isDown = false;
+                    tableContainer.style.cursor = 'grab';
+                });
+
+                tableContainer.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - tableContainer.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    tableContainer.scrollLeft = scrollLeft - walk;
+                });
+
+                // Set initial cursor
+                tableContainer.style.cursor = 'grab';
+            }
+        });
+    </script>

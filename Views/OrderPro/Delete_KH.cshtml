@@ -1,0 +1,60 @@
+﻿@model TechStore.Models.OrderPro
+
+@{
+    ViewBag.Title = "Cancel Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">Xóa đơn hàng</h2>
+    <div class="alert alert-warning" role="alert">
+        Bạn có chắc chắn muốn xóa đơn hàng này không?
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ID)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ID)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DateOrder)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.DateOrder)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.AddressDeliverry)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.AddressDeliverry)</dd>
+                
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Status)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TotalAmount)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.TotalAmount)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PaymentMethod)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.PaymentMethod)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DeliveryDate)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.DeliveryDate)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TrackingNumber)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.TrackingNumber)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PaymentStatus)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.PaymentStatus)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ShippingCost)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ShippingCost)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Customer.NameCus)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Customer.NameCus)</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="text-center mt-3">
+        @using (Html.BeginForm("Delete_KH", "OrderPro", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.ID" />
+            <input type="submit" value="Xóa" class="btn btn-danger" />
+            
+        }
+    </div>
+</div>

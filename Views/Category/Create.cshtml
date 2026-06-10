@@ -1,0 +1,76 @@
+﻿@model TechStore.Models.Category
+
+@{
+    ViewBag.Title = "Tạo danh mục mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6"> <div class="card shadow rounded-3 border-0">
+                
+                <div class="card-header bg-primary text-white py-3 rounded-top-3">
+                    <h4 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-folder-plus me-2"></i> Tạo danh mục mới
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    
+                    @if (ViewBag.Loi != null)
+                    {
+                        <div class="alert alert-warning text-center mb-4 rounded-3 border-0" style="background-color: #fff3cd; color: #856404;">
+                            <i class="fas fa-exclamation-triangle me-1"></i> @ViewBag.Loi
+                        </div>
+                    }
+
+                    @using (Html.BeginForm(null, null, FormMethod.Post, new { @class = "needs-validation" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+                        <div class="mb-4">
+                            <div class="form-floating shadow-sm rounded">
+                                @Html.EditorFor(model => model.IDCate, new { htmlAttributes = new { @class = "form-control border-0", placeholder = "Mã danh mục", @id = "firstInput" } })
+                            </div>
+                            <div class="mt-1">
+                                @Html.ValidationMessageFor(model => model.IDCate, "", new { @class = "text-danger" })
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Nhập mã danh mục duy nhất (Ví dụ: DT, LT...)</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-floating shadow-sm rounded">
+                                @Html.EditorFor(model => model.NameCate, new { htmlAttributes = new { @class = "form-control border-0", placeholder = "Tên danh mục" } })
+                            </div>
+                            <div class="mt-1">
+                                @Html.ValidationMessageFor(model => model.NameCate, "", new { @class = "text-danger" })
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Nhập tên danh mục sản phẩm (Ví dụ: Điện thoại, Laptop...)</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 text-muted">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="@Url.Action("Index")" class="btn btn-light border text-secondary rounded-pill px-4 py-2">
+                                <i class="fas fa-arrow-left me-1"></i> Trở về
+                            </a>
+                            <button type="submit" class="btn btn-success rounded-pill px-4 py-2 shadow-sm">
+                                <i class="fas fa-save me-1"></i> Tạo danh mục
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Focus vào ô input đầu tiên có id là firstInput
+            $('#firstInput').focus();
+        });
+    </script>
+}

@@ -1,0 +1,174 @@
+﻿@{ViewBag.Title ="Chi tiết giỏ hàng";}
+<div style="margin: 20px auto; width: 80%; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Giỏ hàng</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="text-align: center;">Tên sản phẩm</th>
+                    <th style="text-align: center;">Hình ảnh</th>
+                    <th style="text-align: center;">Số lượng</th>
+                    <th style="text-align: center;">Giá</th>
+                    <th style="text-align: center;">Xóa</th>
+                </tr>
+            </thead>
+            <tbody id="tableCart">
+            </tbody>
+        </table>
+    </div>
+    <div style="text-align: right; margin-top: 20px;" id="footer">
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        //Load dữ liệu cart từ GetCart()
+        loadCartData();
+
+        //Xử lý sự kiện
+        const cartContent = document.getElementById('tableCart');
+        cartContent.addEventListener('click', async function(e){
+            const plus = e.target.closest('.btn-outline-success');
+            const minus = e.target.closest('.btn-outline-danger');
+            const remove = e.target.closest('.btn-danger');
+            if (plus){
+                try {
+                    const trackingNumber = this.getAttribute('data-tracking') || plus.getAttribute('data-tracking'); // FIX NHẸ: Đảm bảo lấy đúng ID từ nút được bấm
+                    const formData = new FormData();
+                    formData.append("productID", trackingNumber)
+                    
+                    const response = await fetch('@Url.Action("UpdateCart", "Cart")', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error("Mã lỗi máy chủ: " + response.status);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        loadCartData();
+                    }
+                } catch (error) {
+                    alert('Bị lỗi khi gửi yêu cầu: ' + error.message);
+                    // LỖI ĐÃ XÓA: btn và originalText chưa được khai báo ở đây, nếu để lại code sẽ bị sập khi có lỗi mạng.
+                }
+            }
+            else if(minus){
+                try {
+                    const trackingNumber = this.getAttribute('data-tracking') || minus.getAttribute('data-tracking'); // FIX NHẸ
+                    const formData = new FormData();
+                    formData.append("productID", trackingNumber)
+                    
+                    const response = await fetch('@Url.Action("RemoveSubtractionCart", "Cart")', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error("Mã lỗi máy chủ: " + response.status);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        loadCartData();
+                    }
+                } catch (error) {
+                    alert('Bị lỗi khi gửi yêu cầu: ' + error.message);
+                    // LỖI ĐÃ XÓA: Xóa các biến không tồn tại (btn, originalText)
+                }
+            }
+            else if (remove){
+                try {
+                    const proId = this.getAttribute('data-tracking') || remove.getAttribute('data-tracking');
+                    const response = await fetch('/Cart/RemoveFromCart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({productID: proId})
+                    });
+
+                    if (!response.ok) throw new Error('Lỗi máy chủ');
+                    const data = await response.json();
+                    if (data.success) {
+                        // 2. XÓA THÀNH CÔNG -> VẼ LẠI GIAO DIỆN
+                        loadCartData(); 
+                    }
+                    else console.log("Lỗi gì đó ko xóa được")
+                } catch (error) {
+                    console.error("Lỗi khi xóa sản phẩm:", error);
+                    
+                }
+            }
+        });
+    });
+
+    async function loadCartData() {
+        const cartContentDiv = document.getElementById('tableCart');
+        try {
+            const response = await fetch('/Cart/ShowCart', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Lỗi máy chủ');
+            const data = await response.json();
+
+            // NẾU GIỎ HÀNG TRỐNG
+            if (!data.success || !data.cart || data.cart.length === 0) {
+                
+                // Xóa luôn phần tính tiền nếu giỏ hàng trống
+                document.getElementById('footer').innerHTML = ''; 
+                
+            }
+
+            // NẾU CÓ HÀNG
+            let html = '';
+
+            data.cart.forEach(item => {
+
+                const formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.Price || item.price); // Thêm fallback chữ thường để phòng hờ
+                
+                html += `
+                <tr>
+                    <td style="vertical-align: middle; text-align: center;">
+                        <p>${item.NamePro || item.namePro}</p>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="/Images/${item.ImagePro || item.imagePro}" style="width: 100px; height: auto; border-radius: 8px;" />
+                    </td>
+                    <td style="vertical-align: middle; text-align: center;">
+                        <div class="quantity-control">
+                            <button class="btn btn-outline-danger btn-sm quantity-btn" data-tracking="${item.ProductID || item.productID}">-</button>
+                            <span class="quantity-display">${item.Number || item.number}</span>
+                            <button class="btn btn-outline-success btn-sm quantity-btn" data-tracking="${item.ProductID || item.productID}">+</button>
+                        </div>
+                    </td>
+                    <td style="vertical-align: middle; text-align: center;">
+                        <p style="font-weight: bold;">
+                            ${formattedPrice} 
+                            <span style="font-size: 14px;">/ sản phẩm</span>
+                        </p>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-danger btn-sm" data-tracking="${item.ProductID || item.productID}">Gỡ khỏi giỏ</a>
+                    </td>
+                </tr>
+                `;
+            });
+            
+            cartContentDiv.innerHTML = html;
+
+            //Thêm footer 
+            const formattedTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.total);
+            const footer = document.getElementById('footer');
+            footer.innerHTML = `
+                <p style="font-size: 20px; font-weight: bold;">
+                    Tổng số tiền thanh toán: <span style="color: red;">${formattedTotal}</span>
+                </p>
+                <a href="/Cart/PaymentCart" class="btn btn-success btn-lg">Thanh toán</a>
+            `;
+            
+        } catch (error) {
+            console.error("Lỗi tải cart:", error);
+            cartContentDiv.innerHTML = `<tr><td colspan="5"><div class="p-3 text-danger text-center">Không tải được giỏ hàng.</div></td></tr>`;
+        }
+    }
+</script>

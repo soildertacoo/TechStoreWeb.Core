@@ -1,0 +1,141 @@
+<style>
+    /* 1. KHUNG CHỨA (Giữ nguyên) */
+#toast-stack-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column; 
+    width: 340px;
+    pointer-events: none;
+}
+
+/* 2. GIAO DIỆN TỪNG TẤM THẺ (Card) */
+.chat-toast-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-left: 5px solid #667eea;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    pointer-events: auto;
+    overflow: hidden; /* Cực kỳ quan trọng để cắt gọt phần thừa khi thẻ bị xẹp */
+    
+    /* TRẠNG THÁI BỊ ẨN (Nằm tít ở trên và bị xẹp lép) */
+    transform: translateY(-60px) scale(0.9); /* Nằm cao hơn 60px và hơi nhỏ một chút */
+    opacity: 0;
+    max-height: 0;       /* Chiều cao bằng 0 */
+    padding: 0 16px;     /* Bóp nghẹt padding dọc */
+    margin-bottom: 0;    /* Không có khoảng cách với thẻ dưới */
+    border-left-width: 0;
+    
+    /* Animation: Nảy, trượt và nở ra cùng lúc */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 3. TRẠNG THÁI HIỂN THỊ (Rơi xuống & Nở ra) */
+.chat-toast-card.show {
+    transform: translateY(0) scale(1); /* Rơi về vị trí chuẩn, to ra bình thường */
+    opacity: 1;
+    max-height: 150px;   /* Nở chiều cao ra để chứa nội dung */
+    padding: 16px;       /* Phục hồi đệm dọc */
+    margin-bottom: 12px; /* Tạo khoảng cách để đẩy thẻ cũ xuống 12px */
+    border-left-width: 5px;
+}
+
+/* 4. TRẠNG THÁI BIẾN MẤT (Trượt sang phải và Bay màu) */
+/* Khi hết 5 giây hoặc khách bấm nút X, nó sẽ trượt ngang để biến mất cho lãng mạn */
+.chat-toast-card.hide {
+    transform: translateX(120%); /* Trượt sang mép phải màn hình */
+    opacity: 0;
+    max-height: 0;
+    padding: 0 16px;
+    margin-bottom: 0; /* Hút các thẻ bên dưới trượt lên lấp chỗ trống */
+    border-width: 0;
+    transition: all 0.4s ease; /* Chuyển động biến mất mượt mà hơn */
+}
+
+/* --- TRANG TRÍ NỘI DUNG BÊN TRONG (Giữ nguyên) --- */
+.toast-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.toast-content { flex: 1; min-width: 0; }
+.toast-name { font-weight: bold; color: #2c3e50; font-size: 0.95rem; margin-bottom: 3px; }
+.toast-msg { color: #6c757d; font-size: 0.85rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.toast-close { background: none; border: none; color: #adb5bd; font-size: 1.2rem; cursor: pointer; line-height: 1; transition: 0.2s; }
+.toast-close:hover { color: #e74c3c; }`
+</style>
+<div id="toast-stack-container"></div>
+
+@* <button onclick="testNotification()" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000; padding: 10px 20px; border-radius: 8px; background: #667eea; color: white; border: none; cursor: pointer;">
+    Gửi 1 tin nhắn test 💬
+</button> *@
+<script>
+    // HÀM CHÍNH: TẠO VÀ ĐẨY THÔNG BÁO
+function pushChatNotification(senderName, message, avatarUrl) {
+    const container = document.getElementById('toast-stack-container');
+    
+    // 1. Tạo một thẻ <div> mới
+    const card = document.createElement('div');
+    card.className = 'chat-toast-card';
+    
+    // Nếu không truyền avatar thì xài ảnh mặc định
+    const imgUrl = avatarUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+    // 2. Nhồi HTML vào trong tấm thẻ
+    card.innerHTML = `
+        <div class="toast-content">
+            <div class="toast-name">${senderName}</div>
+            <div class="toast-msg">${message}</div>
+        </div>
+        <button class="toast-close" onclick="removeToast(this.parentElement)">&times;</button>
+    `;
+    
+    // 3. Nhét thẻ vào đầu rổ (prepend để thẻ mới nhất luôn nằm trên cùng)
+    container.prepend(card);
+    
+    // 4. Mồi một chút delay nhỏ để CSS kịp kích hoạt hiệu ứng văng ra
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            card.classList.add('show');
+        }, 10);
+    });
+    
+    // 5. Cài đặt đồng hồ cát: Tự động xóa thẻ sau 5 giây
+    setTimeout(() => {
+        if (container.contains(card)) {
+            removeToast(card);
+        }
+    }, 5000);
+}
+
+// HÀM XÓA THẺ (Kèm hiệu ứng thu gọn mượt mà)
+function removeToast(card) {
+    card.classList.remove('show');
+    card.classList.add('hide'); 
+    
+    // Chờ 0.4s cho hiệu ứng bay ra hoàn tất rồi mới chém bỏ thẻ HTML
+    setTimeout(() => {
+        card.remove();
+    }, 400); 
+}
+
+// ==========================================
+// HÀM TEST (Bạn bấm nút chạy thử hàm này nhé)
+function testNotification() {
+    const names = ["Nguyễn Văn A", "Trần Thị B", "Lê Văn C", "Admin TechStore"];
+    const msgs = [
+        "Sản phẩm này còn hàng không shop?",
+        "Mình muốn đổi địa chỉ giao hàng ạ.",
+        "Web xịn quá, code mượt thật sự! 👍",
+        "Đơn hàng #12345 của bạn đã được duyệt."
+    ];
+    
+    // Chọn ngẫu nhiên tên và nội dung để test
+    let randomName = names[Math.floor(Math.random() * names.length)];
+    let randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+    
+    pushChatNotification(randomName, randomMsg);
+}
+</script>

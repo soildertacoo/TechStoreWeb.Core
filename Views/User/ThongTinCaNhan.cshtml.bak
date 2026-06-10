@@ -1,0 +1,377 @@
+﻿@model TechStore.Models.Customer
+@{
+    ViewBag.Title = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // ==========================================
+    // 1. TỐI ƯU: GOM TOÀN BỘ LOGIC C# LÊN ĐÂY
+    // ==========================================
+    int totalOrders = ViewBag.SoDonHang != null ? (int)ViewBag.SoDonHang : 0;
+    decimal totalSpent = ViewBag.TongTien != null ? (decimal)ViewBag.TongTien : 0;
+    
+    decimal muctoida = 0;
+    string membershipClass = "membership-bronze";
+    string memberShip = "Chưa phải là VIP";
+    string progressBarColor = "vip-progress-bar-inner-bronze";
+    decimal progressPercent = 0;
+
+    if (Model.MembershipLevel == "Đồng")
+    {
+        muctoida = 5000000m; // 5 triệu
+        progressBarColor = "vip-progress-bar-inner-bronze";
+        membershipClass = "membership-bronze";
+        memberShip = "VIP Đồng";
+    }
+    else if (Model.MembershipLevel == "Bạc")
+    {
+        muctoida = 50000000m; // 50 triệu
+        progressBarColor = "vip-progress-bar-inner-silver"; // Fix lỗi chính tả sliver -> silver
+        membershipClass = "membership-silver";
+        memberShip = "VIP Bạc";
+    }
+    else if (Model.MembershipLevel == "Vàng")
+    {
+        progressBarColor = "vip-progress-bar-inner-gold";
+        membershipClass = "membership-gold";
+        memberShip = "VIP Vàng";
+    }
+    else
+    {
+        muctoida = 1000000m; // 1 triệu để lên hạng Đồng
+    }
+
+    // Tính phần trăm
+    if (memberShip != "VIP Vàng" && muctoida > 0)
+    {
+        progressPercent = totalSpent >= muctoida ? 100 : (totalSpent / muctoida) * 100;
+    }
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-info">
+        @ViewBag.Error
+    </div>
+}
+
+<style>
+    /* ==========================================
+       2. CSS ĐÃ ĐƯỢC DỌN DẸP
+       ========================================== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; }
+    
+    .vip-progress-container { margin: 1rem 0; text-align: center; }
+    .progress-info { margin-bottom: 0.5rem; font-weight: 500; }
+    .vip-progress-bar-outer { width: 80%; max-width: 400px; margin: 0 auto; background: rgb(189, 186, 186); border-radius: 8px; overflow: hidden; height: 15px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); }
+    
+    .vip-progress-bar-inner-gold { background: linear-gradient(90deg, #FFFACD 0%, #FFD700 40%, #FFA500 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.15); height: 100%; transition: width 0.4s ease; }
+    .vip-progress-bar-inner-silver { background: linear-gradient(90deg, #f8f9fa 0%, #C0C0C0 50%, #808080 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(192, 192, 192, 0.15); height: 100%; transition: width 0.4s ease; }
+    .vip-progress-bar-inner-bronze { background: linear-gradient(90deg, #fff4e0 0%, #CD7F32 50%, #B8860B 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(205, 127, 50, 0.15); height: 100%; transition: width 0.4s ease; }
+
+    .main-container { max-width: 1200px; margin: 2rem auto; padding: 0 20px; position: relative; }
+    .profile-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 25px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); position: relative; overflow: hidden; animation: fadeInUp 0.8s ease-out; }
+    .profile-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #fcc468); background-size: 300% 100%; animation: gradient 3s ease infinite; }
+    
+    @@keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .action-buttons-options { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+    .avatar-section { text-align: center; margin-bottom: 2rem; position: relative; }
+    .avatar-container { 
+        position: relative; 
+        display: inline-block; 
+        margin-bottom: 1.5rem; 
+    }
+    /* KHUNG CHỨA 2 NÚT BO TRÒN (NẰM TRÊN CẠNH VIỀN) */
+    .action-buttons {
+        position: absolute;
+        /* CHÌA KHÓA LÀ 2 DÒNG NÀY: Chỉnh số để di chuyển cụm nút dọc theo viền tròn */
+        bottom: -19px;   
+        right: -17px;  /* Kéo lệch ra ngoài viền một chút cho đẹp */
+        transform: rotate(-46deg);
+        display: flex; 
+        gap: 5px;      /* Khoảng cách 2 nút sát lại */
+        
+        /* Tạo hiệu ứng khung nền trắng ôm lấy 2 nút */
+        padding: 4px;
+        border-radius: 30px; /* Bo tròn nguyên cụm thành hình viên thuốc */
+        @* Đè lên một element *@
+        z-index: 10; 
+      
+    }
+
+    /* Hiển thị khi hover vào avatar */
+    
+
+    /* ĐỊNH DẠNG TỪNG NÚT NHỎ HƠN MỘT CHÚT */
+    .btn-action {
+        width: 32px;  /* Nhỏ lại chút để gắn lên viền không bị thô */
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+         @* //Xoay icon *@
+        transform: rotate(45deg); 
+    }
+    .hidden {
+        display: none !important;
+    }
+
+    /* MÀU SẮC RIÊNG CHO TỪNG NÚT */
+    .btn-save {
+        background-color: #28a745; 
+    }
+    .btn-save:hover { background-color: #218838; } /* Đậm hơn khi di chuột vào nút */
+
+    .btn-delete {
+        background-color: #dc3545; 
+    }
+   
+    .btn-delete:hover { background-color: #c82333; }    
+    .avatar-img { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: all 0.3s ease; position: relative; z-index: 1; }
+    .avatar-container::before { content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border-radius: 50%; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); animation: rotate 3s linear infinite; z-index: 0; }
+    @@keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .avatar-img:hover { transform: scale(1.05); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+
+    .customer-name { font-size: 2.5rem; font-weight: 700; background: linear-gradient(45deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+
+    .membership-level { display: inline-block; color: #fff; padding: 0.7rem 2rem; border-radius: 30px; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1.5rem; position: relative; overflow: hidden; transition: all 0.3s ease; text-shadow: 0 2px 4px rgba(0,0,0,0.3); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .membership-gold { background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4); }
+    .membership-silver { background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 50%, #808080 100%); box-shadow: 0 6px 20px rgba(192, 192, 192, 0.4); }
+    .membership-bronze { background: linear-gradient(135deg, #CD7F32 0%, #B8860B 50%, #8B4513 100%); box-shadow: 0 6px 20px rgba(205, 127, 50, 0.4); }
+
+    .action-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+    .btn-modern { padding: 0.8rem 2rem; border: none; border-radius: 25px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+    .btn-primary-modern { background: linear-gradient(45deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+    .btn-danger-modern { background: linear-gradient(45deg, #ff6b6b, #ee5a52); color: white; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); }
+    .btn-info-modern { background: linear-gradient(45deg, #4ecdc4, #44a08d); color: white; box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4); }
+    .btn-modern:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); color: white; }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .info-item { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); padding: 1.5rem; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease; animation: fadeInUp 0.8s ease-out; }
+    .info-item:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .info-label { font-size: 0.9rem; font-weight: 600; color: #667eea; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+    .info-value { font-size: 1.1rem; color: #333; font-weight: 500; }
+
+    .history-section { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); padding: 2rem; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+    .history-title { font-size: 1.8rem; font-weight: 700; color: #667eea; margin-bottom: 1rem; }
+
+    @@media (max-width: 768px) {
+        .customer-name { font-size: 2rem; }
+        .action-buttons { flex-direction: column; align-items: center; }
+        .info-grid { grid-template-columns: 1fr; }
+    }
+    @@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<div class="main-container">
+
+    <div class="profile-card">
+        @* thêm onclick để nhấn vào -> mở expoloer lên để lựa hình  *@
+        <div class="avatar-section">
+            <div class="avatar-container" onclick="document.getElementById('AvatarBtn').click()">
+            <div class="action-buttons hidden" >
+                <button type="button" class="btn-action btn-save" title="Lưu ảnh">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button type="button" class="btn-action btn-delete" title="Xóa ảnh">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            @* //Nếu ko hình thì dùng ảnh mặc định , dùng Url.Content *@
+            <img src="@(Url.Content($"~/Images/{Model.ImagePro ?? "Donald_Trump.jpg"}"))" alt="Avatar" class="avatar-img" id="mainAvatar">
+            <input type="file" id="i" name="AvatarFile" accept="image/*" style="display: none;" />
+        </div>
+            <h1 class="customer-name">@Model.NameCus</h1>
+
+            <div class="membership-level @membershipClass">@memberShip</div>
+            
+            <div class="action-buttons-options">
+                @Html.ActionLink("Chỉnh sửa thông tin", "Edit_KH", "Customer", new { id = Model.IDCus }, htmlAttributes: new { @class = "btn-modern btn-primary-modern" })
+                <button onclick="openSettingsModal()" class="btn-modern btn-info-modern">
+                    <i class="fas fa-cog"></i> Mở Cài đặt
+                </button>
+                <a href="@Url.Action("DangXuat", "User")" class="btn-modern btn-danger-modern">Đăng xuất</a>
+            </div>
+
+            <div class="voip-progress-container">
+                <div class="progress-info">
+                    Tổng đơn: <strong>@totalOrders</strong> &middot; Đã chi: <strong>@totalSpent.ToString("n0")₫</strong>
+                </div>
+                
+                @if (memberShip == "VIP Vàng")
+                {
+                    <small style="color: #44a08d; font-weight: bold;">🎉 Bạn đã đạt đến mức VIP cao nhất!</small>
+                }
+                else
+                {
+                    <div class="vip-progress-bar-outer">
+                        <div class="@progressBarColor" style="width:@progressPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                    <small>@progressPercent.ToString("0.0")% đến mức VIP kế tiếp (@muctoida.ToString("n0")₫)</small>
+                }
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Số điện thoại</div>
+                <div class="info-value">@Model.PhoneCus</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">@Model.EmailCus</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Địa chỉ</div>
+                <div class="info-value">@Model.StreetAddress, @Model.Ward, @Model.City</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Ngày sinh</div>
+                <div class="info-value">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Ngày đăng ký</div>
+                <div class="info-value">@(Model.RegisteredDate?.ToString("dd/MM/yyyy") ?? "Chưa rõ")</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Thành viên VIP</div>
+                <div class="info-value">@(Model.IsVIP.HasValue && Model.IsVIP.Value ? "Có" : "Không")</div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h3 class="history-title">Lịch sử đơn hàng</h3>
+            <p style="margin-bottom: 20px; color: #666;">Xem tất cả các đơn hàng bạn đã đặt tại TechStore</p>
+            <a href="@Url.Action("Index_KH", "OrderPro", new { id = Model.IDCus })" class="btn-modern btn-info-modern">Xem lịch sử đơn hàng</a>
+        </div>
+    </div>
+</div> @await Html.PartialAsync("~/Views/User/_SettingsPartial.cshtml")
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    
+    // 1. Chạy hàm cập nhật VIP
+    updateVIP();
+
+    const avatarInput = document.getElementById('AvatarBtn');
+    const mainAvatar = document.getElementById('mainAvatar');
+    const btnSave = document.querySelector('.btn-save');
+    const btnDelete = document.querySelector('.btn-delete');
+    let imageURL = "";
+    let originalURL = mainAvatar.src; //Lưu hình cũ vào để reset lại
+    if (avatarInput && mainAvatar) {
+        //Khi bấm đổi hình hiện Explorer
+        avatarInput.addEventListener("change", function(event) {
+            const file = event.target.files[0]; //Lấy file hình đã có
+            if (!file) return;
+            
+            if (!file.type.startsWith("image/")) {
+                Swal.fire({
+                    icon: "error", title: "Oops...", text: "Đã có lỗi, không tải ảnh lên được!",
+                    footer: "Vui lòng chỉ chọn file định dạng hình ảnh (.jpg, .png)"
+                });
+                return;
+            }
+            //Lấy tên hình đã chọn
+            imageURL = file.name; 
+            console.log("Tên hình đã chọn" + imageURL);
+            // Xử lý hiện hình lên sau khi chọn file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mainAvatar.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            //Hiện lên và disable nút để tránh nhấn đè lên 
+            hideButton();
+        });
+    }
+    btnSave.addEventListener('click', async function (event){
+        //Gọi hàm save
+        event.stopPropagation(); //Khi bấm gọi trực tiếp nút bên trong div cha có onclick mở chọn file để ngắn ấn đè
+        try {
+            const formData = new FormData();
+            const imgPreview = avatarInput.files[0];
+            formData.append("imageURL", imgPreview);
+            // 1. Gửi lệnh XÓA lên Server, fetch (/Controller/Ham_controller,{method:'POST',body:FromData})
+            const response = await fetch('/Customer/saveAvatar', {
+                method: 'POST',
+                body: formData
+            });
+            //reponse.ok sau khi goi ham tu fecth 
+            if (!response.ok) throw new Error('Lỗi máy chủ');
+            const data = await response.json(); //gan du lieu json da lay
+            if (data.success) {
+               Swal.fire("Thông báo", "Đã up hình lên thành công", "success");
+               hideButton();
+               return;
+            }
+            else {console.log("Lỗi gì đó ko up hình được")
+             Swal.fire({
+                title: "Thất bại!",
+                text: data.message || "Không thể gửi hình lên server, vui lòng kiểm tra lại.",
+                icon: "error", 
+                confirmButtonColor: "#d33"
+            });
+            hideButton();
+            }
+        } catch (error) {
+            hideButton();
+            iconBTN.classList.toggle('hidden');
+        }
+
+    });
+    btnDelete.addEventListener('click', async function (event){
+        //Gọi hàm delete gỡ hình
+        event.stopPropagation(); //Khi bấm gọi trực tiếp nút bên trong div cha có onclick mở chọn file để ngắn ấn đè
+        hideButton();
+        //Set hình trở lại 
+        mainAvatar.src = originalURL;
+    });
+});
+function hideButton(){
+    const iconBTN =  document.querySelector('.action-buttons');
+    const avatar_container = document.querySelector('.avatar-container');
+    //An nut len
+    iconBTN.classList.toggle('hidden');
+    //So sánh điều kiện
+    if(avatar_container.getAttribute('onclick') !== "")
+        avatar_container.removeAttribute('onclick');
+    else 
+        avatar_container.setAttribute('onclick','document.getElementById("AvatarBtn").click()');
+}
+function updateVIP() {
+    var totalSpent = @(totalSpent.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+    var currentMembership = '@Model.MembershipLevel';
+    let newMembership = "";
+
+    
+    if (totalSpent >= 1000000 && totalSpent < 5000000) {
+        newMembership = "Đồng";
+    } else if (totalSpent >= 5000000 && totalSpent < 50000000) {
+        newMembership = "Bạc";
+    } else if (totalSpent >= 50000000) {
+        newMembership = "Vàng";
+    }
+
+    if (newMembership !== "" && newMembership !== currentMembership) {
+        fetch('@Url.Action("SetVIP", "User")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: @Model.IDCus, membership: newMembership, message: "Đang cập nhật VIP" })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Đã nâng cấp lên VIP: " + newMembership);
+                // Bạn có thể dùng Swal.fire báo tin vui cho khách hàng ở đây!
+            }
+        })
+        .catch(error => { console.error('Lỗi khi nâng cấp VIP:', error); });
+    }
+}
+</script>

@@ -1,0 +1,1677 @@
+﻿@model TechStore.Models.indexProducts
+@{
+    ViewBag.Title = "Home Page";
+}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --text-dark: #2d3748;
+        --text-light: #4a5568;
+        --text-muted: #718096;
+        --bg-light: #f8fafc;
+        --bg-white: #ffffff;
+        --border-light: #e2e8f0;
+        --shadow-soft: 0 10px 40px rgba(0,0,0,0.1);
+        --shadow-hover: 0 20px 60px rgba(0,0,0,0.15);
+        --border-radius: 16px;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: var(--text-dark);
+        background: var(--bg-light);
+    }
+    /* Đã bán styling */
+    .Products-sold {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+        .Products-sold i {
+            color: #ff6b9d;
+            font-size: 0.9rem;
+        }
+
+    .sold-count {
+        font-weight: 600;
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .homepage-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        background: transparent;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero-section {
+        position: relative;
+        margin: 40px 0 80px 0;
+        border-radius: 24px;
+        overflow: hidden;
+        height: 500px;
+        background: var(--primary-gradient);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .hero-carousel {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: scale(1.1);
+    }
+
+        .carousel-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.6));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+    }
+
+    .hero-content {
+        text-align: center;
+        color: white;
+        max-width: 600px;
+        padding: 0 20px;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #fff, #f093fb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.15);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: all 0.3s ease;
+    }
+
+        .hero-cta:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+    /* Navigation Controls */
+    .carousel-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.15);
+        border: none;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        font-size: 20px;
+        transition: all 0.3s ease;
+    }
+
+        .carousel-nav:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+    .carousel-prev {
+        left: 30px;
+    }
+
+    .carousel-next {
+        right: 30px;
+    }
+
+    .carousel-indicators {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+        z-index: 10;
+    }
+
+    .indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .indicator.active {
+            background: white;
+            transform: scale(1.5);
+        }
+
+    /* ===== SECTIONS ===== */
+    .section {
+        margin-bottom: 80px;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .section-badge {
+        display: inline-block;
+        background: var(--accent-gradient);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .section-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 15px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+        font-weight: 300;
+    }
+
+    /* ===== Products GRID ===== */
+    .Products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        margin-bottom: 50px;
+    }
+
+    .featured-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 40px;
+    }
+
+    /* ===== Products CARDS ===== */
+    .Products-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        border: 1px solid var(--border-light);
+    }
+
+        .Products-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+            border-color: transparent;
+        }
+
+    .featured-card {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        position: relative;
+    }
+
+        .featured-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-gradient);
+            border-radius: var(--border-radius);
+            padding: 2px;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            z-index: -1;
+        }
+
+    .Products-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+        background: var(--bg-light);
+    }
+
+    .Products-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .Products-card:hover .Products-image {
+        transform: scale(1.1);
+    }
+
+    .Products-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .Products-card:hover .Products-overlay {
+        opacity: 1;
+    }
+
+    .view-details {
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateY(20px);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .Products-card:hover .view-details {
+        transform: translateY(0);
+    }
+
+    /* Discount Badge */
+    .discount-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--secondary-gradient);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 25px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        z-index: 5;
+        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        text-align: center;
+        min-width: 60px;
+    }
+
+    .discount-percent {
+        display: block;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .discount-text {
+        display: block;
+        font-size: 0.7rem;
+        opacity: 0.9;
+        margin-top: 2px;
+    }
+
+    /* Products Info */
+    .Products-info {
+        padding: 25px;
+    }
+
+    .Products-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+
+    .price-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .Products-price {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .price-current, .price-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .price-original {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        text-decoration: line-through;
+        font-weight: 500;
+    }
+
+    .currency {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    /* ===== FEATURED SECTION SPECIAL STYLING ===== */
+    .featured-section {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+        padding: 60px 0;
+        border-radius: 24px;
+        margin: 80px 0;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--text-muted);
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 30px;
+        opacity: 0.6;
+    }
+
+    .empty-state h3 {
+        font-size: 1.75rem;
+        margin-bottom: 15px;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    /* ===== LOADING STATE ===== */
+    .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(102, 126, 234, 0.1);
+        border-left: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .slide-in-left {
+        animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .slide-in-right {
+        animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @@media (max-width: 1024px) {
+        .homepage-container {
+            padding: 0 15px;
+        }
+
+        .hero-title {
+            font-size: 2.75rem;
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hero-section {
+            height: 350px;
+            margin: 20px 0 60px 0;
+        }
+
+        .hero-title {
+            font-size: 2.25rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .carousel-nav {
+            width: 50px;
+            height: 50px;
+            font-size: 16px;
+        }
+
+        .carousel-prev {
+            left: 15px;
+        }
+
+        .carousel-next {
+            right: 15px;
+        }
+
+        .Products-grid, .featured-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .Products-image-wrapper {
+            height: 220px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .hero-section {
+            height: 300px;
+        }
+
+        .hero-title {
+            font-size: 1.875rem;
+        }
+
+        .Products-grid, .featured-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+        }
+
+        .hero-cta {
+            padding: 12px 24px;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* ===== ACCESSIBILITY ===== */
+    @@media (prefers-reduced-motion: reduce) {
+        .carousel-slide,
+        .Products-image,
+        .Products-card,
+        .hero-cta,
+        .carousel-nav,
+        .indicator {
+            transition: none;
+        }
+
+        .loading-spinner {
+            animation: none;
+        }
+    }
+
+    /* Focus states for accessibility */
+    .Products-card:focus,
+    .hero-cta:focus,
+    .carousel-nav:focus,
+    .indicator:focus {
+        outline: 3px solid #667eea;
+        outline-offset: 2px;
+    }
+     /* ===== WISHLIST BUTTON ===== */
+    .wishlist-btn {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(255,255,255,0.8);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+    }
+
+        .wishlist-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.15);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .wishlist-btn.active {
+            background: var(--secondary-gradient);
+            color: white;
+            border-color: rgba(245, 87, 108, 0.5);
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.4);
+        }
+
+            .wishlist-btn.active:hover {
+                background: var(--secondary-gradient);
+                transform: scale(1.2);
+                box-shadow: 0 10px 35px rgba(245, 87, 108, 0.5);
+            }
+
+    .wishlist-icon {
+        font-size: 22px;
+        transition: all 0.3s ease;
+        color: #ff6b9d;
+    }
+
+    .wishlist-btn.active .wishlist-icon {
+        color: white;
+        animation: heartBeat 0.6s ease-in-out;
+    }
+
+    .wishlist-count {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: var(--accent-gradient);
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 4px 8px;
+        border-radius: 15px;
+        min-width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        border: 2px solid white;
+        transform: scale(1);
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    /* ===== RATING STARS ===== */
+    .Products-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 2px;
+    }
+
+    .star {
+        font-size: 14px;
+        color: #ddd;
+        transition: color 0.2s ease;
+    }
+
+        .star.filled {
+            color: #ffd700;
+        }
+
+        .star.half-filled {
+            background: linear-gradient(90deg, #ffd700 50%, #ddd 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+    .rating-value {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .rating-count {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+
+/* ===== ANIMATIONS ===== */
+ @@keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1.1); }
+    75% { transform: scale(1.15); }
+}
+
+@@keyframes wishlistPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.wishlist-btn.pulse {
+    animation: wishlistPulse 0.6s ease-in-out;
+}
+
+
+/* ===== RESPONSIVE ===== */
+ @@media (max-width: 768px) {
+    .wishlist-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .wishlist-icon {
+        font-size: 16px;
+    }
+
+  }
+    /* Fix carousel indicators - Đặt ở cuối file CSS */
+    .carousel-indicators {
+        position: absolute !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 12px !important;
+        z-index: 20 !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Đảm bảo các nút chấm hiển thị chính xác */
+    .indicator {
+        width: 12px !important;
+        height: 12px !important;
+        border-radius: 50% !important;
+        border: none !important;
+        background: rgba(255,255,255,0.4) !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        display: block !important;
+    }
+
+        .indicator.active {
+            background: white !important;
+            transform: scale(1.5) !important;
+        }
+
+</style>
+
+<main class="homepage-container">
+    <!-- Hero Carousel Section -->
+    <section class="hero-section" aria-label="Bannières promotionnelles">
+        <div class="hero-carousel"
+             onmouseover="carouselController.pause()"
+             onmouseout="carouselController.resume()">
+
+            <div class="carousel-wrapper" id="carousel-wrapper">
+                <div class="carousel-slide active">
+                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=500&fit=crop" alt="Promotion spéciale iPad" loading="lazy" />
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=500&fit=crop" alt="Nouveaux smartphones" loading="lazy" />
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200&h=500&fit=crop" alt="Accessoires high-tech" loading="lazy" />
+                </div>
+            </div>
+
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <h1 class="hero-title">TechStore</h1>
+                    <p class="hero-subtitle">Khám phá thế giới công nghệ tuyệt vời với những sản phẩm chất lượng cao</p>
+                    <a href="#Products" class="hero-cta">
+                        <i class="fas fa-shopping-bag"></i>
+                        Khám phá ngay
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <button class="carousel-nav carousel-prev"
+                    onclick="carouselController.moveSlide(-1)"
+                    aria-label="Image précédente">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel-nav carousel-next"
+                    onclick="carouselController.moveSlide(1)"
+                    aria-label="Image suivante">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <!-- Indicators -->
+            <div class="carousel-indicators" role="tablist" aria-label="Sélection de slide">
+                <button class="indicator active"
+                        onclick="carouselController.goToSlide(0)"
+                        aria-label="Aller au slide 1"></button>
+                <button class="indicator"
+                        onclick="carouselController.goToSlide(1)"
+                        aria-label="Aller au slide 2"></button>
+                <button class="indicator"
+                        onclick="carouselController.goToSlide(2)"
+                        aria-label="Aller au slide 3"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <!--<section class="section featured-section" aria-labelledby="featured-title">
+        <div class="section-header">
+            <span class="section-badge">Nổi bật</span>
+            <h2 id="featured-title" class="section-title">🌟 Sản phẩm nổi bật</h2>
+            <p class="section-subtitle">Những sản phẩm được yêu thích nhất từ khách hàng</p>
+        </div>
+
+        <div class="Products-grid featured-grid">
+            <article class="Products-card featured-card"
+                     onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = 1 })')"
+                     tabindex="0"
+                     role="button"
+                     onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
+                <div class="Products-image-wrapper">-->
+                    <!-- Nút Yêu Thích -->
+                    <!--<button class="favorite-btn"
+                            onclick="event.stopPropagation(); toggleFavorite(1, this)"
+                            aria-label="Thêm vào yêu thích">
+                        <i class="fas fa-heart heart-icon"></i>
+                        <span class="favorite-count" id="fav-count-1">0</span>
+                    </button>
+
+                    <img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop" alt="iPad Pro - Tablet cao cấp" class="Products-image" loading="lazy" />
+                    <div class="Products-overlay">
+                        <span class="view-details">
+                            <i class="fas fa-eye"></i>
+                            Xem chi tiết
+                        </span>
+                    </div>
+                </div>
+                <div class="Products-info">-->
+                    <!-- Đánh giá sao -->
+                    <!--<div class="Products-rating">
+                        <div class="stars-container" data-rating="4.8">
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                        </div>
+                        <span class="rating-text">4.8</span>
+                        <span class="rating-count">(89 đánh giá)</span>
+                    </div>
+
+                    <h3 class="Products-name">iPad Pro</h3>
+                    <p class="Products-price">
+                        <span class="price-value">8.000.000</span>
+                        <span class="currency">₫</span>
+                    </p>
+                </div>
+            </article>
+
+            <article class="Products-card featured-card"
+                     onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = 1 })')"
+                     tabindex="0"
+                     role="button"
+                     onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
+                <div class="Products-image-wrapper">-->
+                    <!-- Nút Yêu Thích -->
+                    <!--<button class="favorite-btn"
+                            onclick="event.stopPropagation(); toggleFavorite(1, this)"
+                            aria-label="Thêm vào yêu thích">
+                        <i class="fas fa-heart heart-icon"></i>
+                        <span class="favorite-count" id="fav-count-1">0</span>
+                    </button>
+
+                    <img src="~/Images/tainghe18.jpg" alt="iPad Pro - Tablet cao cấp" class="Products-image" loading="lazy" />
+                    <div class="Products-overlay">
+                        <span class="view-details">
+                            <i class="fas fa-eye"></i>
+                            Xem chi tiết
+                        </span>
+                    </div>
+                </div>
+                <div class="Products-info">-->
+                    <!-- Đánh giá sao -->
+                    <!--<div class="Products-rating">
+                        <div class="stars-container" data-rating="4.8">
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                        </div>
+                        <span class="rating-text">4.8</span>
+                        <span class="rating-count">(89 đánh giá)</span>
+                    </div>
+
+                    <h3 class="Products-name">Tai Nghe Siêu Bass</h3>
+                    <p class="Products-price">
+                        <span class="price-value">1.000.000</span>
+                        <span class="currency">₫</span>
+                    </p>
+                </div>
+            </article>
+
+            <article class="Products-card featured-card"
+                     onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = 1 })')"
+                     tabindex="0"
+                     role="button"
+                     onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
+                <div class="Products-image-wrapper">-->
+                    <!-- Nút Yêu Thích -->
+                    <!--<button class="favorite-btn"
+                            onclick="event.stopPropagation(); toggleFavorite(1, this)"
+                            aria-label="Thêm vào yêu thích">
+                        <i class="fas fa-heart heart-icon"></i>
+                        <span class="favorite-count" id="fav-count-1">0</span>
+                    </button>
+
+                    <img src="~/Images/trumpphone.png" alt="iPad Pro - Tablet cao cấp" class="Products-image" loading="lazy" />
+                    <div class="Products-overlay">
+                        <span class="view-details">
+                            <i class="fas fa-eye"></i>
+                            Xem chi tiết
+                        </span>
+                    </div>
+                </div>
+                <div class="Products-info">-->
+                    <!-- Đánh giá sao -->
+                    <!--<div class="Products-rating">
+                        <div class="stars-container" data-rating="4.8">
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                            <i class="fas fa-star star filled"></i>
+                        </div>
+                        <span class="rating-text">4.8</span>
+                        <span class="rating-count">(89 đánh giá)</span>
+                    </div>
+
+                    <h3 class="Products-name">Trump Phone</h3>
+                    <p class="Products-price">
+                        <span class="price-value">5.000.000</span>
+                        <span class="currency">₫</span>
+                    </p>
+                </div>
+            </article>
+        </div>
+    </section>-->
+
+    <!-- All Products Section -->
+    <section class="section" id="Products" aria-labelledby="Products-title">
+        <div class="section-header">
+            <span class="section-badge">Sản phẩm</span>
+            <h2 id="Products-title" class="section-title">📱 Tất cả sản phẩm</h2>
+            <p class="section-subtitle">Khám phá bộ sưu tập công nghệ đa dạng và chất lượng cao</p>
+        </div>
+        @if (Model != null && Model.products != null && Model.products.Any())
+        {
+            <div class="Products-grid">
+                @foreach (var item in Model.products.ToList())
+                {
+                    // 🌟 1. MÓC DỮ LIỆU TỪ DICTIONARY (Cực kỳ an toàn với ContainsKey)
+                    int? totalSold = (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID)) 
+                                    ? Model.soldQuantities[item.ProductID] 
+                                    : 0;
+
+                    decimal avgScore = 0;
+                    int totalReviews = 0;
+                    if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
+                    {
+                        avgScore = Model.scoreProducts[item.ProductID].Item1; // Điểm trung bình
+                        totalReviews = Model.scoreProducts[item.ProductID].Item2; // Số lượt đánh giá
+                    }
+
+                    <article class="Products-card"
+                            onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')"
+                            tabindex="0"
+                            role="button"
+                            onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')">
+
+                        <div class="Products-image-wrapper">
+                            @if (item.Discount > 0)
+                            {
+                                <div class="discount-badge">
+                                    <span class="discount-percent">-@item.Discount%</span>
+                                    <span class="discount-text">GIẢM GIÁ</span>
+                                </div>
+                            }
+
+                            <img src="~/Images/@item.ImagePro"
+                                alt="@item.NamePro - Sản phẩm công nghệ"
+                                class="Products-image"
+                                loading="lazy" />
+                            <div class="Products-overlay">
+                                <span class="view-details">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
+                                </span>
+                            </div>
+
+                            <button class="wishlist-btn"
+                                    onclick="event.stopPropagation(); wishlistController.toggleWishlist(@item.ProductID, this)"
+                                    aria-label="Thả tim">
+                                <i class="wishlist-icon fas fa-heart"></i>
+                                <span class="wishlist-count" id="wishlist-count-@item.ProductID">0</span>
+                            </button>
+                        </div>
+
+                        <div class="Products-info">
+                            <h3 class="Products-name">@item.NamePro</h3>
+                            
+                            <div class="Products-rating">
+                                @if (totalReviews > 0)
+                                {
+                                    <div class="rating-stars" data-rating="@avgScore.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)">
+                                        </div>
+                                    <span class="rating-value">@avgScore.ToString("0.0")</span>
+                                    <span class="rating-count">(@totalReviews đánh giá)</span>
+                                }
+                                else
+                                {
+                                    <span class="rating-count" style="font-style: italic;">Chưa có đánh giá</span>
+                                }
+                            </div>
+
+                            <div class="Products-sold">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="sold-count">Đã bán: @totalSold</span>
+                            </div>
+
+                            <div class="price-container">
+                                @if (item.Discount > 0)
+                                {
+                                    var originalPrice = item.Price / (1 - (decimal)item.Discount / 100);
+                                    <p class="Products-price">
+                                        <span class="price-original">
+                                            @((decimal)originalPrice).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
+                                        </span>
+                                        <span class="price-current">
+                                            @((decimal)item.Price).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
+                                        </span>
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="Products-price">
+                                        <span class="price-current">@(decimal.TryParse(item.Price.ToString(), out decimal price) ? price.ToString("N0") : item.Price) ₫</span>
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>Không có sản phẩm nào</h3>
+                <p>Hiện tại chúng tôi đang cập nhật sản phẩm mới. Vui lòng quay lại sau!</p>
+            </div>
+        }
+    </section>
+</main>
+
+<script>
+    function navigateToProducts(url) {
+        window.location.href = url;
+    }
+    // ===== MODERN CAROUSEL CONTROLLER =====
+    const carouselController = {
+        currentIndex: 0,
+        slides: null,
+        indicators: null,
+        autoPlayInterval: null,
+        isPlaying: true,
+        touchStartX: 0,
+        touchEndX: 0,
+
+        init() {
+            this.slides = document.querySelectorAll('.carousel-slide');
+            this.indicators = document.querySelectorAll('.indicator');
+            if (this.slides.length === 0) return;
+
+            this.updateSlide();
+            this.startAutoPlay();
+            this.setupKeyboardNavigation();
+            this.setupTouchNavigation();
+            this.setupIntersectionObserver();
+            this.setupIndicatorListeners();
+            this.setupControlButtons();
+        },
+
+        updateSlide() {
+            // Update slides with smooth transition
+            this.slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === this.currentIndex);
+                slide.setAttribute('aria-hidden', index !== this.currentIndex);
+            });
+
+            // Update indicators
+            this.indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === this.currentIndex);
+                indicator.setAttribute('aria-selected', index === this.currentIndex);
+            });
+
+            // Update carousel position if using transform method
+            const carousel = document.querySelector('.carousel-container');
+            if (carousel) {
+                carousel.style.transform = `translateX(-${this.currentIndex * 100}%)`;
+            }
+
+            // Dispatch custom event
+            this.dispatchSlideChange();
+        },
+
+        nextSlide() {
+            this.currentIndex = (this.currentIndex + 1) % this.slides.length;
+            this.updateSlide();
+        },
+
+        prevSlide() {
+            this.currentIndex = this.currentIndex === 0 ? this.slides.length - 1 : this.currentIndex - 1;
+            this.updateSlide();
+        },
+
+        goToSlide(index) {
+            if (index >= 0 && index < this.slides.length) {
+                this.currentIndex = index;
+                this.updateSlide();
+            }
+        },
+
+        startAutoPlay() {
+            if (this.autoPlayInterval) this.stopAutoPlay();
+            this.autoPlayInterval = setInterval(() => {
+                if (this.isPlaying) {
+                    this.nextSlide();
+                }
+            }, 5000); // 5 seconds interval
+        },
+
+        stopAutoPlay() {
+            if (this.autoPlayInterval) {
+                clearInterval(this.autoPlayInterval);
+                this.autoPlayInterval = null;
+            }
+        },
+
+        toggleAutoPlay() {
+            this.isPlaying = !this.isPlaying;
+            const playBtn = document.querySelector('.play-pause-btn');
+            if (playBtn) {
+                playBtn.textContent = this.isPlaying ? '⏸️' : '▶️';
+                playBtn.setAttribute('aria-label', this.isPlaying ? 'Pause slideshow' : 'Play slideshow');
+            }
+        },
+
+        setupKeyboardNavigation() {
+            document.addEventListener('keydown', (e) => {
+                if (e.target.closest('.carousel')) {
+                    switch (e.key) {
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            this.prevSlide();
+                            break;
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            this.nextSlide();
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            this.toggleAutoPlay();
+                            break;
+                        case 'Home':
+                            e.preventDefault();
+                            this.goToSlide(0);
+                            break;
+                        case 'End':
+                            e.preventDefault();
+                            this.goToSlide(this.slides.length - 1);
+                            break;
+                    }
+                }
+            });
+        },
+
+        setupTouchNavigation() {
+            const carousel = document.querySelector('.carousel');
+            if (!carousel) return;
+
+            carousel.addEventListener('touchstart', (e) => {
+                this.touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            carousel.addEventListener('touchend', (e) => {
+                this.touchEndX = e.changedTouches[0].screenX;
+                this.handleSwipe();
+            }, { passive: true });
+
+            // Mouse drag support
+            let isMouseDown = false;
+            let startX = 0;
+
+            carousel.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                startX = e.clientX;
+                carousel.style.cursor = 'grabbing';
+            });
+
+            carousel.addEventListener('mousemove', (e) => {
+                if (!isMouseDown) return;
+                e.preventDefault();
+            });
+
+            carousel.addEventListener('mouseup', (e) => {
+                if (!isMouseDown) return;
+                isMouseDown = false;
+                carousel.style.cursor = 'grab';
+
+                const endX = e.clientX;
+                const diff = startX - endX;
+
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        this.nextSlide();
+                    } else {
+                        this.prevSlide();
+                    }
+                }
+            });
+
+            carousel.addEventListener('mouseleave', () => {
+                isMouseDown = false;
+                carousel.style.cursor = 'grab';
+            });
+        },
+
+        handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = this.touchStartX - this.touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    this.nextSlide();
+                } else {
+                    this.prevSlide();
+                }
+            }
+        },
+
+        setupIntersectionObserver() {
+            const carousel = document.querySelector('.carousel');
+            if (!carousel) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (!this.isPlaying) {
+                            this.isPlaying = true;
+                            this.startAutoPlay();
+                        }
+                    } else {
+                        this.isPlaying = false;
+                        this.stopAutoPlay();
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            observer.observe(carousel);
+        },
+
+        setupIndicatorListeners() {
+            this.indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    this.goToSlide(index);
+                });
+
+                indicator.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.goToSlide(index);
+                    }
+                });
+            });
+        },
+
+        setupControlButtons() {
+            const prevBtn = document.querySelector('.carousel-prev');
+            const nextBtn = document.querySelector('.carousel-next');
+            const playPauseBtn = document.querySelector('.play-pause-btn');
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => this.prevSlide());
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => this.nextSlide());
+            }
+
+            if (playPauseBtn) {
+                playPauseBtn.addEventListener('click', () => this.toggleAutoPlay());
+            }
+
+            // Pause on hover
+            const carousel = document.querySelector('.carousel');
+            if (carousel) {
+                carousel.addEventListener('mouseenter', () => {
+                    this.stopAutoPlay();
+                });
+
+                carousel.addEventListener('mouseleave', () => {
+                    if (this.isPlaying) {
+                        this.startAutoPlay();
+                    }
+                });
+            }
+        },
+
+        dispatchSlideChange() {
+            const event = new CustomEvent('slideChange', {
+                detail: {
+                    currentIndex: this.currentIndex,
+                    currentSlide: this.slides[this.currentIndex]
+                }
+            });
+            document.dispatchEvent(event);
+        },
+
+        // Public API methods
+        destroy() {
+            this.stopAutoPlay();
+
+            // Remove event listeners
+            const carousel = document.querySelector('.carousel');
+            if (carousel) {
+                carousel.replaceWith(carousel.cloneNode(true));
+            }
+
+            // Reset properties
+            this.currentIndex = 0;
+            this.slides = null;
+            this.indicators = null;
+            this.isPlaying = true;
+        },
+
+        pause() {
+            this.isPlaying = false;
+            this.stopAutoPlay();
+        },
+
+        play() {
+            this.isPlaying = true;
+            this.startAutoPlay();
+        },
+
+        getCurrentSlide() {
+            return this.slides[this.currentIndex];
+        },
+
+        getSlideCount() {
+            return this.slides.length;
+        }
+    };
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            carouselController.init();
+        });
+    } else {
+        carouselController.init();
+    }
+
+    // Export for module use
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = carouselController;
+    }
+    //Thêm vô đánh giá sao
+    // ===== WISHLIST FUNCTIONALITY - PHIÊN BẢN CẬP NHẬT =====
+    const wishlistController = {
+        likeCounts: JSON.parse(localStorage.getItem('likeCounts') || '{}'),
+        likedProducts: JSON.parse(localStorage.getItem('likedProducts') || '{}'), // Thêm mới: theo dõi sản phẩm đã like
+
+        init() {
+            this.updateAllWishlistUI();
+            this.initializeRatings();
+        },
+
+        // HÀM MỚI: Toggle wishlist thay vì chỉ thêm
+        toggleWishlist(ProductID, buttonElement) {
+            const isCurrentlyLiked = this.likedProducts[ProductID] || false;
+
+            if (isCurrentlyLiked) {
+                // Nếu đã like thì bỏ like (giảm xuống)
+                this.removeFromWishlist(ProductID, buttonElement);
+            } else {
+                // Nếu chưa like thì thêm like (tăng lên)
+                this.addToWishlist(ProductID, buttonElement);
+            }
+        },
+
+        addToWishlist(ProductID, buttonElement) {
+            // Đánh dấu sản phẩm đã được like
+            this.likedProducts[ProductID] = true;
+
+            // Tăng số lượng like
+            if (!this.likeCounts[ProductID]) {
+                this.likeCounts[ProductID] = 0;
+            }
+            this.likeCounts[ProductID]++;
+
+            // Animation effect khi thêm
+            buttonElement.classList.add('pulse');
+            setTimeout(() => {
+                buttonElement.classList.remove('pulse');
+            }, 600);
+
+            // Cập nhật UI
+            this.updateWishlistUI(ProductID, buttonElement);
+            this.saveLikeCounts();
+
+            // Show notification
+            this.showNotification(`Đã thả tim! ❤️ (${this.likeCounts[ProductID]} lượt thích)`, 'success');
+        },
+
+        // HÀM MỚI: Xóa khỏi wishlist
+        removeFromWishlist(ProductID, buttonElement) {
+            // Bỏ đánh dấu sản phẩm đã like
+            this.likedProducts[ProductID] = false;
+
+            // Giảm số lượng like (không cho xuống dưới 0)
+            if (this.likeCounts[ProductID] && this.likeCounts[ProductID] > 0) {
+                this.likeCounts[ProductID]--;
+            }
+
+            // Animation effect khi xóa
+            buttonElement.classList.add('pulse');
+            setTimeout(() => {
+                buttonElement.classList.remove('pulse');
+            }, 600);
+
+            // Cập nhật UI
+            this.updateWishlistUI(ProductID, buttonElement);
+            this.saveLikeCounts();
+
+            // Show notification
+            this.showNotification(`Đã bỏ tim! 💔 (${this.likeCounts[ProductID]} lượt thích)`, 'info');
+        },
+
+        updateWishlistUI(ProductID, buttonElement) {
+            const countElement = buttonElement.querySelector('.wishlist-count');
+            const currentCount = this.likeCounts[ProductID] || 0;
+            const isLiked = this.likedProducts[ProductID] || false;
+
+            // Cập nhật số lượng hiển thị
+            countElement.textContent = currentCount;
+
+            // Cập nhật trạng thái nút dựa trên việc user đã like hay chưa
+            if (isLiked) {
+                buttonElement.classList.add('active');
+                buttonElement.setAttribute('aria-label', `Đã thích - ${currentCount} lượt thích`);
+            } else {
+                buttonElement.classList.remove('active');
+                buttonElement.setAttribute('aria-label', `Thả tim - ${currentCount} lượt thích`);
+            }
+
+            // Hiển thị số đếm nếu > 0
+            if (currentCount > 0) {
+                countElement.style.display = 'flex';
+            } else {
+                countElement.style.display = 'none';
+            }
+        },
+
+        updateAllWishlistUI() {
+            // Cập nhật tất cả các nút wishlist khi tải trang
+            document.querySelectorAll('[id^="wishlist-count-"]').forEach(countElement => {
+                const ProductID = countElement.id.replace('wishlist-count-', '');
+                const buttonElement = countElement.closest('.wishlist-btn');
+                const currentCount = this.likeCounts[ProductID] || 0;
+                const isLiked = this.likedProducts[ProductID] || false;
+
+                countElement.textContent = currentCount;
+
+                // Cập nhật trạng thái nút
+                if (isLiked) {
+                    buttonElement.classList.add('active');
+                    buttonElement.setAttribute('aria-label', `Đã thích - ${currentCount} lượt thích`);
+                } else {
+                    buttonElement.classList.remove('active');
+                    buttonElement.setAttribute('aria-label', `Thả tim - ${currentCount} lượt thích`);
+                }
+
+                // Hiển thị số đếm
+                if (currentCount > 0) {
+                    countElement.style.display = 'flex';
+                } else {
+                    countElement.style.display = 'none';
+                }
+            });
+        },
+
+        saveLikeCounts() {
+            localStorage.setItem('likeCounts', JSON.stringify(this.likeCounts));
+            localStorage.setItem('likedProducts', JSON.stringify(this.likedProducts)); // Lưu trạng thái like
+        },
+
+        initializeRatings() {
+            document.querySelectorAll('.rating-stars').forEach(container => {
+                const rating = parseFloat(container.dataset.rating);
+                this.renderStars(container, rating);
+            });
+        },
+
+        renderStars(container, rating) {
+            const stars = container.querySelectorAll('.star');
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+
+            stars.forEach((star, index) => {
+                star.classList.remove('filled', 'half-filled');
+
+                if (index < fullStars) {
+                    star.classList.add('filled');
+                } else if (index === fullStars && hasHalfStar) {
+                    star.classList.add('half-filled');
+                }
+            });
+        },
+
+        showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            font-weight: 600;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            // Hide notification
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    };
+
+    // HÀM GLOBAL MỚI: Sử dụng toggle thay vì add
+    function addToWishlist(ProductID, buttonElement) {
+        if (isUserLogged()) {
+            wishlistController.toggleWishlist(ProductID, buttonElement);
+        }
+        else {
+            window.location.href='@Url.Action("DangNhap","User")'
+        }
+
+    }
+    //Kiểm tra phần đăng nhập
+    function isUserLogged() {
+        return window.userIsLoggedIn = @(Context.Session.GetString("DaDangNhap") != null ? "true" : "false");
+    }
+    // Initialize wishlist when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        wishlistController.init();
+    });
+</script>

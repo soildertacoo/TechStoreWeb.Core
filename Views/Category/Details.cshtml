@@ -1,0 +1,40 @@
+﻿@model TechStore.Models.Category
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="width: 80%; margin: auto">
+    <h4>Chi tiết danh mục @Model.NameCate</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IDCate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IDCate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NameCate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NameCate)
+        </dd>
+
+    </dl>
+    <p>
+        @Html.ActionLink("Chỉnh category này", "Edit", "Category", new { id = Model.Id }, htmlAttributes: new { @class = "btn btn-success" }) |
+        @Html.ActionLink("<--- Quay lại trang trước", "Index")
+    </p>
+</div>

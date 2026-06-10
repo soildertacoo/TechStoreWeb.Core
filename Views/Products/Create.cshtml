@@ -1,0 +1,201 @@
+﻿@model TechStore.Models.Products
+
+@{
+    ViewBag.Title = "Thêm sản phẩm mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container my-5" style="max-width: 1000px;">
+    <div class="card shadow border-0 rounded-4 p-4 p-md-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="color: #4f46e5;">Thêm Sản Phẩm Mới</h2>
+            <p class="text-muted">Nhập thông tin chi tiết để đăng bán sản phẩm</p>
+        </div>
+
+        @if (ViewBag.ErrorCreate != null)
+        {
+            <div class="alert alert-danger text-center rounded-3 mb-4 border-0" style="background-color: #fee2e2; color: #991b1b;">
+                <i class="fas fa-exclamation-circle me-1"></i> @ViewBag.ErrorCreate
+            </div>
+        }
+
+        @using (Html.BeginForm("Create", "Products", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+            <div class="row g-5">
+                <div class="col-md-4 col-lg-4">
+                    <div>
+                        <label class="form-label fw-semibold text-secondary mb-3">Ảnh minh họa</label>
+                        
+                        <div id="imagePlaceholder" class="d-flex flex-column align-items-center justify-content-center bg-light rounded-4 border" style="height: 320px; border: 2px dashed #cbd5e1 !important;">
+                            <div id="placebleImage">
+                                <i class="fas fa-cloud-upload-alt text-muted mb-2" style="font-size: 3rem;"></i>
+                                <span class="text-muted">Chưa có ảnh nào</span>
+                            </div>
+                            <img id="imagePreview" class="img-fluid shadow-sm rounded-4 w-100" style="display: none; height: 320px; object-fit: cover;" alt="Preview" />
+                        </div>
+                        <div class="mt-3">
+                            <label for="fileUpload" class="btn btn-outline-primary w-100 rounded-pill py-2 m-0" style="color: #4f46e5; border-color: #4f46e5; cursor: pointer;">
+                                <i class="fas fa-camera me-2"></i> Chọn hình ảnh
+                            </label>
+                            
+                            <input id="fileUpload" type="file" name="ImagePro" class="d-none" accept="image/*" onchange="previewImage(event)" required />
+                            @Html.ValidationMessageFor(model => model.ImagePro, "", new { @class = "text-danger d-block mt-2 text-center" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8 col-lg-8">
+                    
+                    <div class="mb-4 p-3 rounded-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                        <label class="form-label fw-bold" style="color: #4f46e5;">
+                            <i class="fas fa-barcode me-2"></i>Quét mã vạch tự động điền (Barcode/UPC)
+                        </label>
+                        <div class="input-group input-group-lg shadow-sm">
+                            <input type="text" id="barcodeInput" class="form-control rounded-start-pill fs-6" placeholder="Bắn máy quét vào đây hoặc nhập tay..." autofocus>
+                            <button class="btn btn-primary rounded-end-pill px-4" type="button" id="btnFetchBarcode" style="background: #4f46e5; border: none;">
+                                <i class="fas fa-search me-1"></i> Lấy dữ liệu
+                            </button>
+                        </div>
+                        <small class="text-muted mt-2 d-block"><i class="fas fa-lightbulb text-warning me-1"></i>Mẹo: Cắm máy quét mã vạch và quét trực tiếp vào ô trên.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Tên sản phẩm</label>
+                        @Html.EditorFor(model => model.NamePro, new { htmlAttributes = new { @class = "form-control form-control-lg rounded-pill px-4", placeholder = "Ví dụ: iPhone 15 Pro Max" } })
+                        @Html.ValidationMessageFor(model => model.NamePro, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Mô tả sản phẩm</label>
+                        @Html.TextAreaFor(model => model.DecriptionPro, new { @class = "form-control rounded-4 px-4 py-3", rows = "5", placeholder = "Nhập thông số kỹ thuật, đặc điểm nổi bật..." })
+                        @Html.ValidationMessageFor(model => model.DecriptionPro, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-secondary">Phân loại</label>
+                            @Html.DropDownList("Category", null, htmlAttributes: new { @class = "form-select form-select-lg rounded-pill px-4" })
+                            @Html.ValidationMessageFor(model => model.Category, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold text-secondary">Mã giảm giá</label>
+                            @Html.EditorFor(model => model.Discount, new { htmlAttributes = new { @class = "form-control form-control-lg rounded-pill px-4", placeholder = "Không bắt buộc" } })
+                            @Html.ValidationMessageFor(model => model.Discount, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary">Giá thành sản phẩm (VNĐ)</label>
+                        @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control form-control-lg rounded-pill px-4", type="number", min="0" } })
+                        @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
+                    </div>
+
+                    <hr class="my-4 text-muted">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="@Url.Action("Index", "Products")" class="btn btn-light border text-secondary rounded-pill px-4 py-2 fw-semibold">
+                            <i class="fas fa-arrow-left me-2"></i> Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm fw-semibold" style="background: #4f46e5; border: none;">
+                            <i class="fas fa-check me-2"></i> Tạo sản phẩm
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+    <script>
+        // Hàm preview ảnh gốc của bạn (Giữ nguyên 100%)
+        function previewImage(event) {
+            var input = event.target;
+            var reader = new FileReader();
+            
+            reader.onload = function () {
+                var img = document.getElementById('imagePreview');
+                var placeholder = document.getElementById('placebleImage');
+                
+                img.src = reader.result;
+                img.style.display = 'block';
+                
+                if(placeholder) {
+                    placeholder.style.display = 'none';
+                }
+            };
+            
+            if (input.files && input.files[0]) {
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // =====================================================================
+        // SCRIPT XỬ LÝ API QUÉT MÃ VẠCH
+        // =====================================================================
+        
+        // 1. Hàm dùng để gọi API quốc tế (UPCitemdb)
+        async function fetchProductByBarcode(barcode) {
+            if (!barcode) return; // Nếu mã rỗng thì không làm gì cả
+
+            // Tìm nút bấm và đổi chữ thành "Đang tải..." để người dùng biết code đang chạy
+            const btn = document.getElementById('btnFetchBarcode');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang tìm...';
+            btn.disabled = true; // Khóa nút tạm thời tránh spam click
+
+            try {
+                // Gọi API lấy dữ liệu. Dùng await để đợi API phản hồi
+                // Thay vì gọi: fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+                const response = await fetch(`/Products/LookupBarcode?upc=${barcode}`);
+                const data = await response.json();
+
+                // Nếu API trả về dữ liệu thành công (items lớn hơn 0)
+                if (data.code == "OK" && data.items.length > 0) {
+                    const product = data.items[0]; // Lấy sản phẩm đầu tiên tìm được
+
+                    // Điền tự động vào ô Tên Sản Phẩm (Map với ID NamePro do Html.EditorFor tạo ra)
+                    document.getElementById('NamePro').value = product.title || '';
+
+                    // Nối Thương hiệu (Brand) và Mô tả (Description) lại với nhau rồi điền vào ô Mô tả
+                    let formattedDescription = "";
+                    if (product.brand) {
+                        formattedDescription += `Thương hiệu: ${product.brand}\n\n`;
+                    }
+                    if (product.description) {
+                        formattedDescription += product.description;
+                    }
+                    document.getElementById('DecriptionPro').value = formattedDescription;
+                  
+                } else {
+                    alert("Không tìm thấy thông tin sản phẩm này trên hệ thống quốc tế.");
+                }
+            } catch (error) {
+                console.error("Lỗi API:", error);
+                alert("Mã vạch ko chính xác hay là API bị quá tải. Vui lòng thử lại sau.");
+            } finally {
+                // Xử lý xong (dù lỗi hay thành công) thì trả lại trạng thái cũ cho nút bấm
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // 2. Bắt sự kiện khi dùng máy quét vật lý (Máy quét hoạt động giống việc gõ phím + bấm Enter)
+        document.getElementById('barcodeInput').addEventListener('keypress', function (e) {
+            // Khi phát hiện phím Enter được bấm trên ô này
+            if (e.key === 'Enter') {
+                e.preventDefault(); // CỰC KỲ QUAN TRỌNG: Chặn không cho form tự động submit/lưu dữ liệu
+                const barcodeValue = this.value.trim(); // Lấy dãy số vừa quét, xóa khoảng trắng 2 đầu
+                fetchProductByBarcode(barcodeValue);
+            }
+        });
+
+        // 3. Bắt sự kiện nếu người dùng nhập tay mã vạch rồi bấm nút "Lấy dữ liệu" bằng chuột
+        document.getElementById('btnFetchBarcode').addEventListener('click', function () {
+            const barcodeValue = document.getElementById('barcodeInput').value.trim();
+            fetchProductByBarcode(barcodeValue);
+        });
+    </script>

@@ -1,0 +1,459 @@
+﻿@model TechStore.Models.Customer
+
+@{
+    ViewBag.Title = "Edit Customer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string ? errorMessage = TempData["Loi"] as string; 
+    string defaultDOB = (Model != null && Model.DateOfBirth != null) 
+                        ? Convert.ToDateTime(Model.DateOfBirth).ToString("dd-MM-yyyy") 
+                        : "01-01-2000";
+}   
+
+<style>
+    .edit-customer-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin: 0 auto;
+        max-width: 800px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+    }
+
+    .form-section {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        border-left: 5px solid #667eea;
+    }
+
+    .section-title {
+        color: #495057;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-icon {
+        margin-right: 10px;
+        color: #667eea;
+        font-size: 1.3rem;
+    }
+
+    .enhanced-form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .enhanced-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .enhanced-input, .form-control-modern {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .enhanced-input:focus, .form-control-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+
+    .enhanced-input:hover, .form-control-modern:hover {
+        border-color: #ced4da;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+        margin-top: 12px;
+    }
+
+    .submit-container {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 2px solid #e9ecef;
+    }
+
+    .enhanced-submit-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .enhanced-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .enhanced-submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .alert-enhanced {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.2);
+    }
+
+    .text-danger {
+        color: #e74c3c !important;
+        font-size: 0.875rem;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .form-col {
+        flex: 1;
+    }
+
+    @@media (max-width: 768px) {
+        .form-card {
+            margin: 20px;
+            padding: 25px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .enhanced-submit-btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="edit-customer-container">
+    <div class="container">
+        <div class="form-card">
+            <h2 class="page-title">Chỉnh sửa thông tin khách hàng</h2>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-enhanced">
+                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                    @ViewBag.Error
+                </div>
+            }
+
+            @using (Html.BeginForm("Edit_KH", "Customer", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.IDCus)
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user section-icon"></i>
+                        Thông tin cá nhân
+                    </h3>
+                    <div class="enhanced-form-group">
+                        @Html.LabelFor(model => model.NameCus, "Họ và tên", new { @class = "enhanced-label" })
+                        <div style="position: relative;">
+                            @Html.EditorFor(model => model.NameCus, new { htmlAttributes = new { @class = "enhanced-input", @placeholder = "Nhập họ và tên" } })
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.NameCus, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="enhanced-form-group">
+                                @Html.LabelFor(model => model.PhoneCus, "Số điện thoại", new { @class = "enhanced-label" })
+                                <div style="position: relative;">
+                                    @Html.EditorFor(model => model.PhoneCus, new { htmlAttributes = new { @class = "enhanced-input", @placeholder = "Nhập số điện thoại" } })
+                                    <i class="fas fa-phone input-icon"></i>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.PhoneCus, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-col">
+                            <div class="enhanced-form-group">
+                                @Html.LabelFor(model => model.EmailCus, "Email", new { @class = "enhanced-label" })
+                                <div style="position: relative;">
+                                    @Html.EditorFor(model => model.EmailCus, new { htmlAttributes = new { @class = "enhanced-input", @placeholder = "Nhập địa chỉ email" } })
+                                    <i class="fas fa-envelope input-icon"></i>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.EmailCus, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="enhanced-form-group">
+                        @Html.LabelFor(model => model.DateOfBirth, "Ngày sinh", new { @class = "enhanced-label" })
+                        <div style="position: relative;">
+                            <input type="text" id ="DateOfBirth" name="dateOBirth" class="enhanced-input"  value="@defaultDOB" />
+                            <i class="fas fa-calendar input-icon"></i>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+               <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-map-marker-alt section-icon"></i>
+                        Thông tin địa chỉ
+                    </h3>
+                    <div class="enhanced-form-group" style="background: #e9ecef; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #28a745; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <label class="enhanced-label" style="color: #28a745; margin-bottom: 0;">
+                                <i class="fas fa-map-marked-alt"></i> Ghim địa chỉ trên bản đồ
+                            </label>
+                            <small style="color: #6c757d; display: block; margin-top: 5px;">Mở bản đồ, kéo thả ghim đúng vị trí nhà bạn để tự động điền.</small>
+                        </div>
+                        <button type="button" id="btn-open-map" class="enhanced-submit-btn" style="padding: 10px 20px; font-size: 0.9rem; background: linear-gradient(135deg, #28a745, #20c997); box-shadow: none;">
+                            <i class="fas fa-map"></i> Mở Bản Đồ
+                        </button>
+                    </div>
+                    <!-- KẾT THÚC: Nút mở bản đồ -->
+
+                    <!-- BẮT ĐẦU: Modal chứa Google Map (Mặc định ẩn) -->
+                    <div id="map-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; backdrop-filter: blur(5px);">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border-radius: 15px; width: 90%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                            <h4 style="margin-top: 0; color: #2c3e50; font-weight: bold; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+                                <i class="fas fa-map-pin" style="color: #e74c3c;"></i> Di chuyển ghim để chọn vị trí
+                            </h4>
+                            <div id="google-map" style="width: 100%; height: 400px; border-radius: 10px; margin: 15px 0;"></div>
+                            <p style="font-weight: bold; color: #495057;">Địa chỉ đang chọn: <span id="map-selected-address" style="color: #667eea; font-weight: normal;">Đang tải...</span></p>
+                            
+                            <div style="text-align: right; margin-top: 15px;">
+                                <button type="button" id="btn-close-map" style="padding: 10px 20px; border: none; background: #6c757d; color: white; border-radius: 5px; cursor: pointer; margin-right: 10px;">Đóng</button>
+                                <button type="button" id="btn-confirm-map" class="enhanced-submit-btn" style="padding: 10px 20px; font-size: 1rem;">Xác nhận vị trí này</button>
+                            </div>
+                        </div>
+                    </div>
+                    @await Html.PartialAsync(partialViewName: "~/Views/_mapViewPartial.cshtml")
+                    <div class="enhanced-form-group">
+                        @Html.LabelFor(model => model.StreetAddress, "Số nhà, đường phố", new { @class = "enhanced-label" })
+                        <div style="position: relative;">
+                            @Html.EditorFor(model => model.StreetAddress, new { htmlAttributes = new { @class = "enhanced-input", @placeholder = "Nhập số nhà, đường phố" } })
+                            <i class="fas fa-road input-icon"></i>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.StreetAddress, "", new { @class = "text-danger" })
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="enhanced-form-group">
+                                @Html.LabelFor(model => model.City, "Tỉnh/Thành phố", new { @class = "enhanced-label" })
+                                <div style="position: relative;">
+                                    <select id="province" name="City" class="form-control-modern" required>
+                                        @if (!string.IsNullOrEmpty(Model.City))
+                                        {
+                                            <option value="@Model.City" selected>@Model.City</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" selected disabled>-- Chọn Tỉnh/Thành phố --</option>
+                                        }
+                                    </select>
+                                    <i class="fas fa-map input-icon"></i>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.City, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-col">
+                            <div class="enhanced-form-group">
+                                @Html.LabelFor(model => model.Ward, "Phường/Xã/Quận", new { @class = "enhanced-label" })
+                                <div style="position: relative;">
+                                    <select id="ward" name="Ward" class="form-control-modern" required>
+                                        @if (!string.IsNullOrEmpty(Model.Ward))
+                                        {
+                                            <option value="@Model.Ward" selected>@Model.Ward</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" selected disabled>-- Vui lòng chọn Tỉnh/Thành trước --</option>
+                                        }
+                                    </select>
+                                    <i class="fas fa-building input-icon"></i>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.Ward, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @Html.HiddenFor(model => model.PassCus)
+                @Html.HiddenFor(model => model.RegisteredDate)
+                @Html.HiddenFor(model => model.MembershipLevel)
+                @Html.HiddenFor(model => model.IsVIP)
+
+                <div class="submit-container">
+                    <button type="submit" class="enhanced-submit-btn">
+                        <i class="fas fa-save" style="margin-right: 8px;"></i>
+                        Lưu thông tin
+                    </button>
+                </div>
+            } </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            
+            // 1. XỬ LÝ HIỂN THỊ LỖI SWEETALERT2
+            @* let message = '@Html.Raw(errorMessage)';
+            if (message !== '') {
+                Swal.fire({
+                    title: "Thất bại!",
+                    html: message,
+                    icon: "error", 
+                    confirmButtonColor: "#d33"
+                }); 
+            }  *@
+
+            flatpickr("#DateOfBirth", {
+                locale: "vn", // Chuyển lịch sang tiếng Việt (Th2, Th3...)
+                dateFormat: "d-m-Y", // Định dạng hiển thị là Ngày/Tháng/Năm
+                allowInput: true, // Cho phép khách tự gõ tay 
+                minDate: "01-01-1936",
+                maxDate: "31-12-2099",
+            });
+            
+            // 2. KHỞI CHẠY API ĐỊA CHỈ
+            await loadAddressData();
+        });
+
+        async function loadAddressData() {
+            try {
+                const res = await fetch("https://cdn.jsdelivr.net/gh/giaodienblog/cdn@master/provinces-database.json");
+                const data = await res.json();
+                
+                const provinceSelect = document.getElementById('province');
+                const wardSelect = document.getElementById('ward');
+                
+                // Lưu lại Tên tỉnh cũ để đánh dấu Selected nếu trùng khớp
+                const currentCity = '@Html.Raw(Model.City)';
+                
+                // 1. ĐỔ DỮ LIỆU TỈNH/THÀNH PHỐ
+                data.forEach(p => {
+                    const opt = document.createElement("option");
+                    const name = p.Name || p.FullName || p.name;
+                    
+                    // 
+                    opt.value = name; 
+                    opt.textContent = name;
+                    
+                    // Đánh dấu thẻ option cho CSS API xử lý ngầm (để tìm được phường tương ứng)
+                    opt.setAttribute('data-code', p.Code || p.code); 
+                    
+                    // Bỏ qua tạo mới nếu tên này đã có sẵn trong HTML (do C# in ra lúc đầu)
+                    if (name !== currentCity) {
+                        provinceSelect.appendChild(opt);
+                    }
+                });
+
+                // 2. SỰ KIỆN KHI KHÁCH ĐỔI TỈNH/THÀNH PHỐ
+                provinceSelect.addEventListener("change", () => {
+                    // Xóa sạch dữ liệu Phường/Xã cũ trước khi đổ phường mới vào
+                    wardSelect.innerHTML = '<option value="" selected disabled>-- Chọn Phường/Xã/Quận --</option>';
+                    
+                    // Lấy cái data-code của option đang được chọn
+                    const selectedOption = provinceSelect.options[provinceSelect.selectedIndex];
+                    const provinceCode = selectedOption.getAttribute('data-code');
+                    
+                    // Tìm Tỉnh đó trong cục Data JSON
+                    const prov = data.find(p => (p.Code || p.code) == provinceCode);
+                    
+                    if (prov && prov.Wards) {
+                        prov.Wards.forEach(w => {
+                            const o = document.createElement("option");
+                            const wardName = (w.AdministrativeUnitShortName ? w.AdministrativeUnitShortName + " " : "") + (w.Name || w.FullName || w.name);
+                            //Tạo innerHTML 
+                            o.value = wardName;
+                            o.textContent = wardName;
+                            wardSelect.appendChild(o);
+                        });
+                    }
+                });
+
+            } catch (error) {
+                console.error("Lỗi tải dữ liệu địa chỉ:", error);
+                // Nếu rớt mạng không tải được API, khách vẫn có thể tự gõ tay vào select nếu ta đổi nó thành ô Input
+            }
+            
+        }
+    </script>
+
+    
+}

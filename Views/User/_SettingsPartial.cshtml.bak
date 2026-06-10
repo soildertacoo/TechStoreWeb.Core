@@ -1,0 +1,514 @@
+@using System.Security.Claims
+<style>
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .settings-modal { background: white;width: 90%; max-width: 900px; height: 80vh; border-radius: 15px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); display: flex; overflow: hidden; position: relative; animation: slideUp 0.4s ease-out; }
+    .btn-close-modal { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; transition: 0.3s; z-index: 10; }
+    .btn-close-modal:hover { color: #ff6b6b; transform: rotate(90deg); }
+    .settings-sidebar { width: 250px; background: #f8f9fc; padding: 20px 0; border-right: 1px solid #e9ecef; overflow-y: auto; }
+    .tab-btn { display: block; width: 100%; text-align: left; padding: 15px 25px; background: none; border: none; font-size: 1rem; color: #495057; cursor: pointer; transition: 0.3s; font-weight: 500; }
+    .tab-btn:hover { background: #e2e8f0; color: #667eea; }
+    .tab-btn.active { background: #667eea; color: white; border-left: 4px solid #4a5568; }
+    .settings-content { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+    .tab-pane { display: none; animation: fadeIn 0.4s; }
+    .tab-pane.active { display: block; }
+    
+    /* CSS Toggle Switch */
+    .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; -webkit-transition: .4s; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; -webkit-transition: .4s; transition: .4s; }
+    input:checked + .slider.round { background-color: #00dd63; }
+    input:checked + .slider.round:before { -webkit-transform: translateX(26px); -ms-transform: translateX(26px); transform: translateX(26px); }
+     input:checked + .slider.dark.round { background-color: rgb(212, 18, 164); }
+    input:checked + .slider.dark.round:before { -webkit-transform: translateX(26px); -ms-transform: translateX(26px); transform: translateX(26px); }
+    .slider.round { border-radius: 34px; }
+    .slider.round:before { border-radius: 50%; }
+    .slider.dark.round { border-radius: 34px; }
+    .slider.dark.round:before { border-radius: 50%; }
+    /* Flexbox để chia hàng ngang (Chữ trái - Nút phải) */
+    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px 20px; background: #f8f9fa; border-radius: 10px; }
+    .setting-row-box { 
+        display: flex;
+        flex-direction: column; /* Phép màu ở đây: Ép xếp từ trên xuống dưới */
+        gap: 15px; /* Khoảng cách giữa tiêu đề và hàng hình ảnh */
+        margin-top: 20px; padding: 15px 20px;
+    }
+    .setting-info p { margin: 5px 0 0 0; font-size: 0.9rem; color: gray; }
+
+
+    /* --- GIAO DIỆN FORM 2FA --- */
+    .visual-options-wrapper {
+    display: flex;       /* Xếp ngang */
+    gap: 20px;           /* Khoảng cách giữa các hình (thay cho padding table) */
+    flex-wrap: wrap;     /* Tự động rớt dòng nếu màn hình điện thoại quá nhỏ */
+    }
+
+    /* 2. ẨN NÚT RADIO TRÒN MẶC ĐỊNH ĐI */
+    .visual-option-item input[type="radio"] {
+        display: none;
+    }
+
+    /* 3. ĐỊNH DẠNG CÁI THẺ (CARD) CHỨA HÌNH */
+    .visual-option-card {
+        display: block;
+        width: 200px;        /* Độ rộng mỗi lựa chọn */
+        border: 2px solid #e9ecef; /* Viền xám nhạt */
+        border-radius: 12px;
+        padding: 10px;
+        cursor: pointer;     /* Biến con trỏ thành hình bàn tay */
+        transition: all 0.3s ease; /* Hiệu ứng mượt mà khi hover */
+        text-align: center;
+        background: #fff;
+    }
+
+    /* 4. CHỈNH HÌNH ẢNH LUÔN VỪA VẶN, KHÔNG BỊ MÉO */
+    .visual-option-card img {
+        width: 100%;
+        height: 90px;        /* Ép chiều cao cố định */
+        object-fit: cover;   /* Cắt cúp hình tỷ lệ chuẩn như Facebook */
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    /* Chữ bên dưới hình */
+    .visual-option-title {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        display: block;
+    }
+
+    /* 5. HIỆU ỨNG KHI LƯỚT CHUỘT QUA (HOVER) */
+    .visual-option-card:hover {
+        border-color: #adb5bd;
+        transform: translateY(-3px); /* Hơi nảy lên một chút */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    /* 6. HIỆU ỨNG KHI ĐƯỢC CHỌN (PHÉP THUẬT LÀ ĐÂY) */
+    /* Dấu '+' nghĩa là: Nếu cái input đằng trước đang checked, thì cái card đằng sau bị đổi màu */
+    .visual-option-item input[type="radio"]:checked + .visual-option-card {
+        border-color: #667eea; /* Đổi viền thành màu xanh */
+        background-color: #f4f6ff; /* Nền xanh nhạt */
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); /* Viền sáng lan tỏa bao quanh */
+    }
+
+    .visual-option-item input[type="radio"]:checked + .visual-option-card .visual-option-title {
+        color: #667eea; /* Đổi màu chữ luôn cho tone-sur-tone */
+    }
+    .otp-card {
+        text-align: center;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #eaeaea;
+        width: 100%;
+    }
+
+    .otp-qr-section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: inline-block; /* Bọc gọn lại cái mã QR */
+    }
+
+    .otp-qr-img {
+        width: 150px;
+        height: 150px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    /* Phần nhập mã */
+    .otp-input-section {
+        margin-bottom: 25px;
+    }
+
+    .otp-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .input-wrapper {
+        position: relative;
+        width: 200px;
+        margin: 0 auto;
+    }
+
+    .input-wrapper .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+    }
+
+    /* Ô nhập 6 số to và rõ */
+    .otp-input {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        font-size: 1.2rem;
+        letter-spacing: 5px; /* Tách rời các con số ra cho dễ nhìn */
+        text-align: center;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+        transition: 0.3s;
+        box-sizing: border-box;
+    }
+
+    .otp-input:focus {
+        border-color: #5b73e8;
+        box-shadow: 0 0 5px rgba(91, 115, 232, 0.3);
+    }
+
+    /* Cụm nút bấm */
+    .otp-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .btn-otp {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-verify { background: #5b73e8; color: white; }
+    .btn-verify:hover { background: #4a62d8; }
+
+    .btn-back { background: #f1f3f5; color: #555; }
+    .btn-back:hover { background: #e2e6ea; }
+
+    .btn-success { background: #28a745; color: white; }
+</style>
+@{string url = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo";}
+<div id="SettingsModalOverlay" class="modal-overlay">
+    <div class="settings-modal">
+        <button class="btn-close-modal" onclick="closeSettingsModal()">✖</button> <div class="settings-sidebar">
+            <button class="tab-btn active" onclick="openSettingTab('tab-security', this)">🔐 Bảo mật & Đăng nhập</button>
+            <button class="tab-btn" onclick="openSettingTab('tab-privacy', this)">🍪 Quyền riêng tư</button>
+            <button class="tab-btn" onclick="openSettingTab('tab-theme', this)">🎨 Trải nghiệm người dùng</button>
+
+        </div>
+
+        <div class="settings-content">
+            
+            <div id="tab-security" class="tab-pane active">
+                <h3>Bảo mật tài khoản</h3>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Lưu phiên đăng nhập</strong>
+                        <p>Giữ bạn luôn đăng nhập trên thiết bị này.</p>
+                    </div>
+                    
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnckCookie" @(User.HasClaim("TrangThaiCookie", "True") ? "checked" : "") />
+                            <span class="slider round" id="sliderSpan"></span>
+                        </label>
+                    </div>
+                    @await Html.PartialAsync("~/Views/_testToasr.cshtml")
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Bật xác thực hai lớp qua Authencator</strong>
+                        <p>Giúp bạn đăng nhập an toàn hơn</p>
+                    </div>
+                    
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnToggle2FA" @(User.HasClaim("TrangThaiAuth", "True") ? "checked" : "") />
+                            <span class="slider round" id="sliderSpan"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-row" id="form2FA" style="display: @(User.HasClaim("TrangThaiAuth","True") ? "flex" : "none");">
+                    <div class="setting-info">
+                        <strong>Xác thực hai lớp (2FA)</strong>
+                        <p>Dùng app Google Authenticator hoặc Microsoft Authenticator để quét mã và lấy OTP.</p>
+                    </div>
+                        
+                    <div class="setting-action">
+                        <div class="otp-qr-section">
+                            <img id="imgQR" src=" @(User.FindFirstValue("QRImage") ?? " ")" alt="QR Code ứng dụng" class="otp-qr-img" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-privacy" class="tab-pane">
+                <h3>Tùy chỉnh Analytics</h3>
+                
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Cho phép Analytics(Khuyến khích nên mở)</strong>
+                        <p>Giúp chúng tôi cải thiện trải nghiệm web.</p>
+                    </div>
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnckAnalytic" @(User.HasClaim("TrangThaiAnalytic","True") ? "checked" : "")/>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-theme" class="tab-pane">
+                <h3>Giao diện người dùng</h3>
+                 <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Mở dark mode</strong>
+                        <p>Giúp bạn lướt web thoải mái hơn vào ban đêm</p>
+                    </div>
+                    
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnDarkMode"/>
+                            <span class="slider dark round" id="sliderSpan"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-row-box">
+                    <div class="setting-info">
+                    <strong>Tùy chọn thông báo chat</strong>
+                    <p class="text-muted">Chọn kiểu thông báo chat mà bạn thích</p>
+                </div>
+
+                <div class="visual-options-wrapper">
+                    @* Để input radio vào  lable là khi chọn tự động tô màu lên  *@
+                    <label class="visual-option-item" onclick="toggleChat('badge')">
+                        <input type="radio" name="notification_style" value="badge">
+                        <div class="visual-option-card">
+                            <img src="~/Images/badgeNotify.png" alt="Chat Badge">
+                            <span class="visual-option-title">Thông báo chat Badge</span>
+                        </div>
+                    </label>
+
+                    <label class="visual-option-item" onclick="toggleChat('popup')">
+                        <input type="radio" name="notification_style" value="popup">
+                        <div class="visual-option-card">
+                            <img src="~/Images/popupNotify.png" alt="Hiện đại">
+                            <span class="visual-option-title">Thông báo chat popup</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="setting-row-box">
+                    <div class="setting-info">
+                    <strong>Tùy chọn thông báo chat</strong>
+                    <p class="text-muted">Chọn kiểu thông báo chat mà bạn thích</p>
+                </div>
+
+                <div class="visual-options-wrapper">
+                    @* Để input radio vào  lable là khi chọn tự động tô màu lên  *@
+                    <label class="visual-option-item" onclick="toggleChat('badge')">
+                        <input type="radio" name="notification_style" value="badge">
+                        <div class="visual-option-card">
+                            <img src="~/Images/badgeNotify.png" alt="Chat Badge">
+                            <span class="visual-option-title">Thông báo chat Badge</span>
+                        </div>
+                    </label>
+
+                    @* <label class="visual-option-item" onclick="toggleChat('popup')">
+                        <input type="radio" name="notification_style" value="popup">
+                        <div class="visual-option-card">
+                            <img src="~/Images/popupNotify.png" alt="Hiện đại">
+                            <span class="visual-option-title">Thông báo chat popup</span>
+                        </div>
+                    </label> *@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- XỬ LÝ NÚT ANALYTICS ---
+        const btnAnalytic = document.getElementById("btnckAnalytic");
+        // 2. Lắng nghe hành động gạt nút
+        btnAnalytic.addEventListener("change", async function () {
+                try {
+                // Gọi API lên Server
+                let response = await fetch('/User/ToggleAnalytic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isToogled: this.checked })
+                });
+
+                let data = await response.json(); 
+
+                if (data.success) {
+                    if (this.checked) {
+                        console.log("Đã lưu trạng thái thành công");
+                        alert("Đã bật Google Analytic. Cảm ơn bạn vì đã giúp chúng tôi có được nguồn dữ liệu quý giá");
+                    } 
+                    else {
+                        // Tắt thì giấu QR đi
+                        form2FA.style.display = "none";  
+                        alert("Đã tắt Google Analytic.");
+                    }
+                } 
+                else {
+                    // Trường hợp Server C# từ chối (ví dụ: mất session đăng nhập)
+                    alert("Lỗi từ máy chủ, không thể lưu trạng thái!");
+                    this.checked = !this.checked;    // Gạt nút quay về chỗ cũ
+                }
+            } 
+            catch (error) {
+                // Bắt lỗi rớt mạng, sập server...
+                console.error("Lỗi mạng:", error);
+                alert("Lỗi kết nối mạng! Vui lòng kiểm tra lại internet.");
+                
+                // Trả UI về trạng thái an toàn
+                this.checked = !this.checked; 
+                form2FA.style.display = "none"; 
+            }
+        });
+
+        // --- XỬ LÝ NÚT COOKIE ĐĂNG NHẬP, và bật 2FA ---
+        const btnCookie = document.getElementById("btnckCookie");
+        btnCookie.addEventListener("change", async function() {
+            // Tạm thời log ra console để test
+            console.log("Trạng thái lưu phiên hiện tại là:", this.checked);
+            let response = await fetch('/User/ToogleSession', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isToogled: this.checked }) // Gửi true/false
+            });
+
+            if (response.ok && this.checked) {
+                console.log("Đã lưu trạng thái thành công!");
+                alert("Đã bật lưu phiên đăng nhập, lần sau ko cần đăng nhập lại");
+            } else if (response.ok && !this.checked){
+                alert("Đã tắt lưu phiên đăng nhập, tắt trình duyệt để log out");
+            }
+            else {
+                alert("Lỗi mạng, không thể lưu!");
+                this.checked = !this.checked; // Lỗi thì gạt nút quay về chỗ cũ
+            }
+        });
+
+        const btnToggle2FA = document.getElementById("btnToggle2FA"); // id của nút gạt
+        const form2FA = document.getElementById("form2FA");           // id của bảng QR
+        btnToggle2FA.addEventListener("change", async function() {
+            console.log("Trạng thái lưu phiên hiện tại là:", this.checked);
+
+            try {
+                // Gọi API lên Server
+                let response = await fetch('/User/Factor2Setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isToogled: this.checked })
+                });
+
+                let data = await response.json(); 
+
+                if (data.success) {
+                    if (this.checked) {
+                        console.log("Đã lưu trạng thái thành công");
+                        
+                        // 1. Gắn hình và HIỆN FORM LÊN TRƯỚC
+                        const img = document.getElementById("imgQR");
+                        img.src = data.factorModel.qrCodeImage;
+                        form2FA.style.display = "flex"; 
+                        alert("Đã bật đăng nhập 2FA. Vui lòng quét mã QR!");
+                    } 
+                    else {
+                        // Tắt thì giấu QR đi
+                        form2FA.style.display = "none";  
+                        alert("Đã tắt xác thực 2 lớp (2FA).");
+                    }
+                } 
+                else {
+                    // Trường hợp Server C# từ chối (ví dụ: mất session đăng nhập)
+                    alert("Lỗi từ máy chủ, không thể lưu trạng thái!");
+                    this.checked = !this.checked;    // Gạt nút quay về chỗ cũ
+                    form2FA.style.display = "none";  
+                }
+            } 
+            catch (error) {
+                // Bắt lỗi rớt mạng, sập server...
+                console.error("Lỗi mạng:", error);
+                alert("Lỗi kết nối mạng! Vui lòng kiểm tra lại internet.");
+                
+                // Trả UI về trạng thái an toàn
+                this.checked = !this.checked; 
+                form2FA.style.display = "none"; 
+            }
+        });
+
+        //Xử lý nút mở dark mode
+        const btnDark = document.getElementById("btnDarkMode");
+        const isDark = localStorage.getItem("theme");
+        if (currentTheme === "dark") btnDark.checked = true; //Nếu có tối thì mặc định đã tích lên 
+
+        btnDark.addEventListener("click", function() {
+            // Kiểm tra xem body đang có data-theme="dark" chưa
+            if (this.checked) {
+                // Nếu đang sáng -> Chuyển sang tối
+                document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("theme", "dark"); // Lưu lại bộ nhớ
+            } else {
+               // Nếu đang tối -> Chuyển về sáng (xóa data-theme)
+                document.documentElement.removeAttribute("data-theme");
+                localStorage.setItem("theme", "light"); // Lưu lại bộ nhớ
+            }
+        });
+
+        //Hiện thông báo lên
+        let savedStyle = localStorage.getItem("toggleChat") ?? "badge";
+
+        // 2. Nếu trong kho CÓ DỮ LIỆU (khách đã từng chọn trước đây)
+        if (savedStyle) {
+            // Tìm đúng cái thẻ input mang value đó
+            let targetInput = document.querySelector(`input[name="notification_style"][value="${savedStyle}"]`);
+            
+            if (targetInput) {
+                // Tự động gán thuộc tính checked cho nó!
+                targetInput.checked = true; 
+                console.log("Đã khôi phục thiết lập cũ:", savedStyle);
+            }
+        }
+    });
+        
+     // --- CÁC HÀM ĐIỀU KHIỂN GIAO DIỆN MODAL ---
+    function openSettingsModal() {
+        document.getElementById('SettingsModalOverlay').style.display = 'flex'; 
+        document.body.style.overflow = 'hidden'; // Chống cuộn nền
+        
+    }
+    function toggleChat(notifyTypes){
+        //Tự tạo localStorage nếu chưa có
+        localStorage.setItem("toggleChat", notifyTypes);
+        console.log("Đã lưu thiết lập:", notifyTypes); // In ra log xem cho an tâm
+    }
+    function closeSettingsModal() {
+        document.getElementById('SettingsModalOverlay').style.display = 'none';
+        document.body.style.overflow = 'auto'; // Cho cuộn nền lại
+    }
+
+    // Bấm ra ngoài vùng tối (Overlay) thì tự động đóng bảng
+    window.addEventListener('click', function(event) {
+        let modalOverlay = document.getElementById('SettingsModalOverlay');
+        if (event.target === modalOverlay) closeSettingsModal();
+    });
+
+    // Chuyển Tab mượt mà
+    function openSettingTab(tabId, btnElement) {
+        // Giấu hết Tab cũ, xóa màu nút cũ
+        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // Hiện Tab mới, tô màu nút mới
+        document.getElementById(tabId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+</script>

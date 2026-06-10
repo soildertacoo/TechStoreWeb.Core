@@ -1,0 +1,187 @@
+@{
+    ViewBag.Title = "Thêm Đơn vị Vận chuyển mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4" style="max-width: 1000px;">
+    <div class="d-flex align-items-center mb-4">
+        <a href="@Url.Action("shippingManagement", "Admins")" class="btn btn-light text-secondary rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h3 class="mb-0 fw-bold" style="color: #4f46e5;">Thêm Đối Tác Vận Chuyển</h3>
+            <p class="text-muted mb-0">Cấu hình kết nối API và bảng giá giao hàng</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 p-md-5">
+            
+            @using (Html.BeginForm("createProvider", "Admins", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <h6 class="fw-bold text-secondary mb-3 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">1. Thông tin cơ bản</h6>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">Tên Đơn vị Vận chuyển <span class="text-danger">*</span></label>
+                        <input type="text" name="ProviderName" class="form-control form-control-lg rounded-3" placeholder="VD: Giao Hàng Tiết Kiệm..." required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Mã Code <span class="text-danger">*</span></label>
+                        <input type="text" name="ProviderCode" class="form-control form-control-lg rounded-3 text-uppercase" placeholder="VD: GHTK" required>
+                    </div>
+                </div>
+
+                <hr class="text-muted opacity-25 my-4">
+
+                <div class="bg-light p-4 rounded-4 mb-4 border border-dashed">
+                    <label class="form-label fw-bold text-dark d-block mb-3">
+                        <i class="fas fa-money-bill-wave me-2 text-success"></i>Thiết lập Gói cước & Giá vận chuyển ban đầu:
+                    </label>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm rounded-3">
+                                <div class="card-body p-3">
+                                    <div class="form-check custom-checkbox mb-2">
+                                        <input class="form-check-input" type="checkbox" id="checkStandard" name="SupportStandard" value="true">
+                                        <label class="form-check-label fw-semibold text-secondary" for="checkStandard" style="cursor:pointer;">Giao Chậm</label>
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" placeholder="0" oninput="formatCurrency(this, 'hiddenPriceStandard')">
+                                        <input type="hidden" name="PriceStandard" id="hiddenPriceStandard" value="0">
+                                        <span class="input-group-text fw-semibold text-muted bg-white">đ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm rounded-3">
+                                <div class="card-body p-3">
+                                    <div class="form-check custom-checkbox mb-2">
+                                        <input class="form-check-input" type="checkbox" id="checkFast" name="SupportFast" value="true">
+                                        <label class="form-check-label fw-semibold text-primary" for="checkFast" style="cursor:pointer;">Giao Nhanh</label>
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" placeholder="0" oninput="formatCurrency(this, 'hiddenPriceStandard')">
+                                        <input type="hidden" name="PriceFast" id="hiddenPriceStandard" value="0">
+                                        <span class="input-group-text fw-semibold text-muted bg-white">đ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm rounded-3">
+                                <div class="card-body p-3 border-start border-4 border-danger">
+                                    <div class="form-check custom-checkbox mb-2">
+                                        <input class="form-check-input" type="checkbox" id="checkExpress" name="SupportExpress" value="true">
+                                        <label class="form-check-label fw-bold text-danger" for="checkExpress" style="cursor:pointer;">Hỏa Tốc</label>
+                                    </div>
+                                     <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" placeholder="0" oninput="formatCurrency(this, 'hiddenPriceStandard')">
+                                        <input type="hidden" name="PriceExpress" id="hiddenPriceStandard" value="0">
+                                        <span class="input-group-text fw-semibold text-muted bg-white">đ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-3 px-1"><i class="fas fa-info-circle me-1"></i>Đánh dấu check để kích hoạt gói cước tương ứng.</small>
+                </div>
+
+                <hr class="text-muted opacity-25 my-4">
+
+                <h6 class="fw-bold text-secondary mb-3 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">3. Cấu hình Xác thực (Authentication)</h6>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">API Token / Client Secret <span class="text-danger">*</span></label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-key text-warning"></i></span>
+                        <input type="password" name="ApiToken" id="apiTokenInput" class="form-control form-control-lg border-start-0" placeholder="Nhập mã Token được cung cấp bởi đối tác..." required>
+                        <button class="btn btn-outline-secondary bg-white" type="button" onclick="toggleTokenVisibility()">
+                            <i class="fas fa-eye" id="toggleTokenIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="text-muted opacity-25 my-4">
+
+                <h6 class="fw-bold text-secondary mb-3 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">4. Cấu hình Endpoints API</h6>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">API Tạo đơn hàng</label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-light fw-bold text-primary" style="width: 75px;">POST</span>
+                        <input type="url" name="ApiCreateOrder" class="form-control py-2" placeholder="https://api.domain.com/v1/orders/create">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">API Hủy đơn hàng</label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-light fw-bold text-danger" style="width: 75px;">POST</span>
+                        <input type="url" name="ApiCancelOrder" class="form-control py-2" placeholder="https://api.domain.com/v1/orders/cancel">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">API Kiểm tra trạng thái</label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-light fw-bold text-success" style="width: 75px;">GET</span>
+                        <input type="url" name="ApiCheckStatus" class="form-control py-2" placeholder="https://api.domain.com/v1/orders/status">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 mt-5">
+                    <a href="@Url.Action("Index", "Admins")" class="btn btn-light text-secondary border rounded-pill px-5 py-2 fw-semibold">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm fw-semibold" style="background: #4f46e5; border: none;">
+                        <i class="fas fa-plus-circle me-2"></i>Thêm Đơn Vị Này
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+        border-color: #cbd5e1 !important;
+    }
+</style>
+
+
+    <script>
+        // Script bật tắt xem Token
+        function toggleTokenVisibility() {
+            const tokenInput = document.getElementById('apiTokenInput');
+            const toggleIcon = document.getElementById('toggleTokenIcon');
+            
+            if (tokenInput.type === 'password') {
+                tokenInput.type = 'text';
+                toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                tokenInput.type = 'password';
+                toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+        function formatCurrency(inputElement, hiddenInputId) {
+            // 1. Lọc rác: Loại bỏ tất cả chữ cái và dấu chấm cũ, CHỈ giữ lại số
+            let rawValue = inputElement.value.replace(/[^0-9]/g, '');
+            
+            // 2. Đổ số "sạch" (VD: 1000000) vào ô input bị ẩn để chuẩn bị gửi về C#
+            // Nếu người dùng xóa trắng, mặc định gán là 0 để C# không bị lỗi
+            document.getElementById(hiddenInputId).value = rawValue || 0;
+            
+            // 3. Format lại chuỗi số vừa nhập (Thêm dấu chấm cứ mỗi 3 chữ số)
+            if (rawValue) {
+                // Biểu thức Regex này tự động chèn dấu chấm theo chuẩn Việt Nam
+                inputElement.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            } else {
+                inputElement.value = "";
+            }
+        }
+    </script>

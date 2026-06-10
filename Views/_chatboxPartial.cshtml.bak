@@ -1,0 +1,635 @@
+@using TechStoreWeb.Core.Hub;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<style>
+    /* --- NÚT MỞ CHAT (FAB) --- */
+    .chat-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 24px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        z-index: 10000;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .chat-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    /* --- TỔNG THỂ KHUNG CHAT --- */
+    .chat-popup-window {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 350px; /* 🚨 Mặc định chỉ rộng 350px */
+        height: 480px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        z-index: 9999;
+        display: none; 
+        flex-direction: row; 
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        animation: slideUp 0.3s ease-out forwards;
+        
+        /* Chuyển động kéo giãn mượt mà */
+        transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s ease;
+    }
+
+    /* 🚨 TRẠNG THÁI KHI MỞ RỘNG (Viết liền, không có khoảng trắng) */
+    .chat-popup-window.expanded {
+        width: 750px; /* Mở rộng bề ngang để chứa 2 cột */
+        height: 520px;
+    }
+
+    /* --- CỘT TRÁI: DANH SÁCH KHÁCH HÀNG --- */
+    .chat-sidebar {
+        width: 0; /* Mặc định giấu đi (0px) */
+        opacity: 0; /* Tàng hình */
+        background: #ffffff;
+        border-right: none;
+        display: flex;
+        flex-direction: column;
+        z-index: 2;
+        overflow: hidden; 
+        white-space: nowrap; /* Tránh chữ bị rớt dòng khi đang trượt */
+        transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; 
+    }
+
+    /* Khi khung tổng được mở rộng -> Hiện cột trái ra */
+    .chat-popup-window.expanded .chat-sidebar {
+        width: 280px;
+        opacity: 1;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .sidebar-header {
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .chat-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s;
+    }
+    .chat-item:hover { background: #f8fafc; }
+    .chat-item.active {
+        background: #eff6ff;
+        border-left: 4px solid #667eea;
+    }
+
+    .chat-item-avatar {
+        width: 45px;
+        min-width: 45px; /* Giữ avatar không bị méo */
+        height: 45px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-weight: bold;
+        position: relative;
+    }
+    .chat-item-avatar::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+        background-color: #22c55e;
+        border: 2px solid white;
+        border-radius: 50%;
+    }
+
+    .chat-item-info {
+        flex: 1;
+        overflow: hidden;
+    }
+    .chat-item-name {
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .chat-item-preview {
+        font-size: 0.8rem;
+        color: #64748b;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* --- CỘT PHẢI: KHUNG CHAT CHÍNH --- */
+    .chat-main-area {
+        flex: 1; /* Tự động chiếm hết không gian còn lại */
+        display: flex;
+        flex-direction: column;
+        background: #f8fafc;
+        min-width: 350px; /* Đảm bảo khung chat không bị bóp méo khi thu nhỏ */
+    }
+
+    /* Tiêu đề Cột Phải */
+    .chat-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .chat-header-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .status-dot-main {
+        width: 10px;
+        height: 10px;
+        background-color: #22c55e;
+        border: 2px solid white;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 0;
+        right: -2px;
+    }
+    .chat-header button {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .chat-header button:hover { transform: rotate(90deg); }
+    
+    /* Nút 3 gạch riêng không cần xoay tròn */
+    #toggle-sidebar-btn:hover { transform: none; color: #f1f5f9; }
+
+    /* Thân Chat (Nơi chứa tin nhắn) */
+    .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .chat-body::before {
+        content: "";
+        flex: 1 1 auto;
+    }
+    .chat-bubble {
+        padding: 10px 14px;
+        border-radius: 14px;
+        max-width: 80%;
+        word-wrap: break-word;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-bottom: 8px;
+        width: fit-content;
+    }
+
+    /* Vùng nhập liệu */
+    .chat-footer {
+        padding: 12px;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        gap: 8px;
+    }
+    .chat-footer input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #cbd5e1;
+        border-radius: 20px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    .chat-footer input:focus { border-color: #667eea; }
+    .chat-footer button {
+        background: #667eea;
+        color: white;
+        border: none;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* --- HIỆU ỨNG (ANIMATIONS BẢO TOÀN ASP.NET) --- */
+    @@keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes messagePopIn {
+        0% { opacity: 0; transform: translateY(50px) scale(0.9); }
+        50% { opacity: 1; transform: translateY(10px) scale(0.9); }
+        100% { transform: translateY(0) scale(1); }
+    }
+    
+    .animate-pop-in {
+        animation: messagePopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    .unread-badge-fab {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #ef4444; /* Màu đỏ nổi bật */
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: flex; /* Đổi thành 'none' bằng JS khi đọc hết tin */
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        animation: pulse-red 2s infinite;
+    }
+
+    /* Hiệu ứng nhịp tim cho chấm đỏ */
+    @@keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* 2. Badge trong Cột danh sách (Cột trái) */
+    .unread-badge-item {
+        background-color: #ef4444;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: auto; /* Đẩy cục đỏ sát ra mép phải */
+    }
+
+    /* 3. Đổi style chữ khi có tin nhắn chưa đọc */
+    .chat-item.unread {
+        background: #f1f5f9; /* Đổi nền hơi xám nhẹ */
+    }
+    .chat-item.unread .chat-item-name,
+    .chat-item.unread .chat-item-preview {
+        font-weight: 700 !important; /* In đậm tên và tin nhắn lên */
+        color: #0f172a;
+    }
+    .image-avatar{
+        width: 45px;
+        min-width: 45px; /* Giữ avatar không bị méo */
+        height: 45px;
+        object-fit: cover; /* Giúp ảnh lấp đầy khung mà KHÔNG bao giờ bị méo */
+        border-radius: 50%; /* Bo tròn chính cái ảnh */
+    }
+    .gemini-bg {
+        /* Tạo nền gradient mờ (opacity 10%) để không làm chìm chữ đen */
+        background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(234, 67, 53, 0.1), rgba(249, 171, 0, 0.1), rgba(52, 168, 83, 0.1));
+        
+        /* Tạo hiệu ứng viền gradient ở dưới cùng (border-bottom) */
+        border-bottom: 2px solid;
+        border-image-source: linear-gradient(135deg, #4285F4, #EA4335, #F9AB00, #34A853);
+        border-image-slice: 1;
+        
+        /* Nhấn mạnh tên Chatbot bằng dải màu */
+        transition: all 0.3s ease;
+    }
+</style>
+
+<button id="chat-toggle-btn" class="chat-fab" title="Mở bảng điều khiển">
+    <i class="fas fa-comment-dots"></i>
+    <div id="main-unread-badge" class="unread-badge-fab" style="display: none;">0</div>
+</button>
+
+<div id="chat-popup" class="chat-popup-window">
+    
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            Hộp thư đến
+            <i class="fas fa-search" style="color: #94a3b8; cursor: pointer;"></i>
+        </div>
+        <div class="chat-list" id="chat-user-list">
+            <div class="chat-item gemini-bg" onclick="selectUser(this, 'Room_AI_Support')">
+                <div class="chat-item-avatar"><img src="~/Images/gemini_logo.png" class="image-avatar"/></div>
+                <div class="chat-item-info">
+                    <div class="chat-item-name">Chatbot AI</div>
+                    <div class="chat-item-preview">AI chatbot của bạn</div>
+                </div>
+            </div>
+            <div class="chat-item active" onclick="selectUser(this, 'Room36')">
+                <div class="chat-item-avatar" style="background: #fbcfe8; color: #db2777;">T</div>
+                <div class="chat-item-info">
+                    <div class="chat-item-name">Phòng tổ VAR</div>
+                    <div class="chat-item-preview">Shop gửi hàng chưa ạ?</div>
+                </div>
+            </div>
+            <div class="chat-item" onclick="selectUser(this, 'Admin')">
+                <div class="chat-item-avatar">A</div>
+                <div class="chat-item-info">
+                    <div class="chat-item-name">Nguyễn Văn A</div>
+                    <div class="chat-item-preview">Cho mình hỏi giá sản phẩm này...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="chat-main-area">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <button id="toggle-sidebar-btn" title="Mở rộng danh sách" style="background: transparent; border: none; cursor: pointer; color: #ffffff; font-size: 18px; transition: color 0.2s;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div style="position: relative;">
+                    <i class="fas fa-user-circle" style="font-size: 24px;"></i>
+                    <div class="status-dot-main"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <strong id="chat-target-name" style="font-size: 0.95rem;">Chăm sóc khách hàng</strong>
+                    <span id="chat-target-status" style="font-size: 0.75rem; color: #e2e8f0;">Đang hoạt động</span> 
+                </div>
+            </div>
+            <button id="close-chat-btn"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div id="chat-messages" class="chat-body">
+            <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 10px;">
+                Chào mừng bạn đến với TechStore, hãy gõ tin nhắn để được hỗ trợ nhé
+            </div>
+        </div>
+        
+        <div class="chat-footer">
+            <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." autocomplete="off" />
+            <button id="btnSendChat"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    <div>
+        <audio src="~/Audio/notify.mp3" id="notifyEffect"></audio>
+    </div>
+</div>
+<script>
+// 🚨 Đưa các biến dùng chung và hàm onClick ra ngoài phạm vi toàn cục (Global)
+let currentRoom = "Room36";
+let countBadge = 0;
+let typingTimeout = null;
+let snappedProduct = null;
+
+// Khởi tạo SignalR
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/chatHub") 
+    .withAutomaticReconnect() 
+    .build();
+
+// --- HÀM XỬ LÝ SỰ KIỆN CLICK (Phải nằm ngoài DOMContentLoaded) ---
+window.selectUser = function(element, roomName) {
+    // Nếu vô tình bấm lại người đang chat -> Bỏ qua
+    if (roomName === currentRoom) return;
+
+    // 1. Gỡ bôi đậm tab cũ, bôi đậm tab mới
+    document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+
+    // 2. Cập nhật UI Header
+    document.getElementById('chat-target-name').innerText = roomName;
+    const statusLabel = document.getElementById('chat-target-status');
+    statusLabel.innerText = "Đang hoạt động";
+    statusLabel.style.fontStyle = "normal";
+
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.innerHTML = ''; // Dọn tin nhắn cũ
+
+    // 3. Xử lý Ra/Vào phòng
+    if (roomName) {
+        if (roomName === currentRoom) {
+            return;
+        }
+
+        currentRoom = roomName;
+        
+        connection.invoke("JoinRoom", roomName).catch(err => {
+            const errorDiv = document.createElement("div");
+            errorDiv.className = "chat-bubble animate-pop-in";
+            errorDiv.style.cssText = "background: #FF0000; color: white; align-self: flex-end; border-bottom-right-radius: 4px;";
+            errorDiv.innerHTML = "Lỗi mạng, ko vào phòng được!!!";
+            chatMessages.appendChild(errorDiv);
+        });
+    }
+};
+
+// --- HÀM CẬP NHẬT CỘT TRÁI ---
+function updateSidebarPreview(senderName, room, message) {
+    const myUserName = "@(User.Identity?.Name ?? "Khách")";
+    const chatItems = document.querySelectorAll('.chat-item');
+    let targetItem = null;
+    
+    chatItems.forEach(item => {
+        const nameEl = item.querySelector('.chat-item-name');
+        if (nameEl && nameEl.innerText === senderName) targetItem = item;
+    });
+
+    if (targetItem) {
+        const previewEl = targetItem.querySelector('.chat-item-preview');
+        if (previewEl) previewEl.innerText = (senderName === myUserName) ? `Bạn: ${message}` : message;
+
+        // Báo chấm đỏ nếu không phải phòng đang mở
+        if (currentRoom !== room && senderName !== myUserName) {
+            targetItem.classList.add('unread');
+            let badge = targetItem.querySelector('.unread-badge-item');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'unread-badge-item';
+                badge.innerText = "1";
+                targetItem.appendChild(badge);
+            } else {
+                badge.innerText = (parseInt(badge.innerText) || 0) + 1;
+            }
+        }
+        // Đẩy lên đầu danh sách
+        document.getElementById('chat-user-list').prepend(targetItem);
+    }
+}
+
+// --- KHỞI CHẠY KHI TRANG ĐÃ TẢI XONG ---
+document.addEventListener("DOMContentLoaded", function () {
+    const chatFab = document.getElementById("chat-toggle-btn");
+    const chatPopup = document.getElementById("chat-popup");
+    const closeChatBtn = document.getElementById("close-chat-btn");
+    const chatMessages = document.getElementById("chat-messages");
+    const toggleSidebarBtn = document.getElementById("toggle-sidebar-btn");
+    const unreadBadge = document.getElementById("main-unread-badge");
+    const notifySound = document.getElementById("notifyEffect");
+    const chatInput = document.getElementById("chatInput");
+    const btnSendChat = document.getElementById("btnSendChat");
+    const statusTyping = document.getElementById("chat-target-status");
+
+    // Đóng mở Popup & Sidebar
+    toggleSidebarBtn.addEventListener("click", () => chatPopup.classList.toggle("expanded"));
+    
+    closeChatBtn.addEventListener("click", () => chatPopup.style.display = "none");
+
+    chatFab.addEventListener("click", function() {
+        const isChatHidden = window.getComputedStyle(chatPopup).display === "none";
+        if (isChatHidden) {
+            chatPopup.style.display = "flex";
+            setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 10);
+            chatInput.focus(); 
+            
+            // Xóa chấm đỏ ở nút Tròn (FAB)
+            countBadge = 0;
+            unreadBadge.innerText = countBadge;
+            unreadBadge.style.display = "none";
+        } else {
+            chatPopup.style.display = "none";
+        }
+    });
+
+    // Hàm Gửi tin nhắn
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        const myUserName = "@(User.Identity?.Name ?? "Khách")";
+        
+        if (message !== "") {
+            chatInput.value = ""; // Xóa ô nhập ngay lập tức cho mượt
+            connection.invoke("SendMessage", myUserName, currentRoom, message)
+                .then(() => connection.invoke("sendTyping", myUserName, false).catch(e => {}))
+                .catch(err => {
+                    const errorDiv = document.createElement("div");
+                    errorDiv.className = "chat-bubble animate-pop-in";
+                    errorDiv.style.cssText = "background: #ef4444; color: white; align-self: flex-end; border-bottom-right-radius: 4px;";
+                    errorDiv.innerHTML = "Lỗi mạng, ko gửi đi được!!!";
+                    chatMessages.appendChild(errorDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+        }
+    }
+
+    btnSendChat.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+
+    // --- XỬ LÝ SỰ KIỆN SIGNALR ---
+
+    // 1. Nhận tin nhắn
+    connection.on("ReceiveMessage", function (user, room, message) {
+        const myUserName = "@(User.Identity?.Name ?? "Khách")"; 
+        
+        // Cập nhật danh sách trái (Fix lỗi senderName)
+        updateSidebarPreview(user, room, message);
+
+        const isChatHidden = window.getComputedStyle(chatPopup).display === "none";
+
+        // Chỉ in bong bóng nếu đúng phòng, hiện lên tin nhắn trước
+        if (currentRoom === room) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "chat-bubble animate-pop-in";
+            
+            if (user === myUserName) {
+                msgDiv.style.cssText = "background: #667eea; color: white; align-self: flex-end; border-bottom-right-radius: 4px;";
+                msgDiv.innerHTML = message;
+            } else {
+                msgDiv.style.cssText = "background: #fdf2f8; border: 1px solid #fbcfe8; color: #1f2937; align-self: flex-start; border-bottom-left-radius: 4px;";
+                msgDiv.innerHTML = `<strong style="color: #db2777; font-size: 0.85rem; display:block; margin-bottom: 3px;">${user}</strong> ${message}`;
+            }
+            chatMessages.appendChild(msgDiv);
+            
+            if (!isChatHidden) chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        let savedStyle = localStorage.getItem("toggleChat") ?? "badge";
+        switch (savedStyle) {
+            case "popup":
+                pushChatNotification(user, message)
+                break; // Lệnh dừng!
+            default:
+                // Thông báo chấm đỏ & âm thanh
+                if (isChatHidden && user !== myUserName) {
+                    countBadge++;
+                    unreadBadge.innerText = countBadge; 
+                    unreadBadge.style.display = "flex";
+                    if (notifySound) {
+                        notifySound.load();
+                        notifySound.play().catch(e => console.log("Trình duyệt chặn Audio", e));
+                    }
+                }
+                break;
+        }
+
+           
+    });
+
+    // 2. Trạng thái Gõ phím
+    chatInput.addEventListener("input", function (){
+        const myUserName = "@(User.Identity?.Name ?? "Khách")";
+        clearTimeout(typingTimeout); 
+        
+        connection.invoke("sendTyping", myUserName, true).catch(e => {}); 
+        
+        typingTimeout = setTimeout(() => {
+            connection.invoke("sendTyping", myUserName, false).catch(e => {}); 
+        }, 1500);
+    });
+
+    connection.on("NotifyTyping", function(sender, isTyping) {
+        if (isTyping){
+            statusTyping.innerHTML = "Đang gõ ....";
+            statusTyping.style.fontStyle = "italic";
+        } else {
+            statusTyping.innerHTML = "Đang hoạt động";
+            statusTyping.style.fontStyle = "normal";
+        }
+    });
+
+    // 3. Thông báo vào phòng
+    connection.on("EnteredRoom", function(sender) {
+        if (sender) {
+            statusTyping.innerHTML = `${sender} vừa tham gia phòng chat`;
+            statusTyping.style.fontStyle = "italic";
+            statusTyping.style.color = "#22c55e"; 
+
+            setTimeout(() => {
+                statusTyping.innerHTML = "Đang hoạt động";
+                statusTyping.style.fontStyle = "normal";
+                statusTyping.style.color = "#e2e8f0"; 
+            }, 3000); 
+        } 
+    }); 
+
+    // 4. Quản lý trạng thái kết nối
+    connection.onreconnecting(() => console.log("Đang thử kết nối lại..."));
+    connection.onreconnected(() => console.log("Đã kết nối lại thành công!"));
+    
+    connection.start().catch(err => console.error("Lỗi SignalR: ", err));
+});
+</script>

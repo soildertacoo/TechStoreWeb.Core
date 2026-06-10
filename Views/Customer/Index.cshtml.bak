@@ -1,0 +1,295 @@
+﻿@model IEnumerable<TechStore.Models.Customer>
+
+@{
+    ViewBag.Title = "Customer List";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="display-4 font-weight-bold text-primary">
+                <i class="fas fa-users"></i> Danh sách khách hàng
+            </h2>
+            <p class="text-muted">Quản lý thông tin khách hàng của hệ thống</p>
+        </div>
+        <div class="col-md-4 text-right d-flex align-items-center justify-content-end">
+            <div class="input-group">
+                <input type="text" id="customerSearch" class="form-control" placeholder="Tìm kiếm...">
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-user-check"></i> Tổng khách hàng</h5>
+                    <h2 class="display-4">@Model.Count()</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-crown"></i> Khách hàng VIP</h5>
+                    <h2 class="display-4">@Model.Count(c => c.IsVIP ?? false)</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-ban"></i> Khách hàng bị cấm</h5>
+                    <h2 class="display-4">@Model.Count(c => c.IsBanned == true)</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg">
+        <div class="card-header bg-white">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h4 class="mb-0 text-primary"><i class="fas fa-table"></i> Dữ liệu khách hàng</h4>
+                </div>
+                @*<div class="col text-right">
+                        <a href="@Url.Action("Create", "Customer")" class="btn btn-success">
+                            <i class="fas fa-plus-circle"></i> Thêm khách hàng mới
+                        </a>
+                    </div>*@
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0" id="customerTable">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th><i class="fas fa-user mr-1"></i> Tên khách hàng</th>
+                            <th><i class="fas fa-phone mr-1"></i> Số điện thoại</th>
+                            <th><i class="fas fa-envelope mr-1"></i> Emails</th>
+                            <th><i class="fas fa-map-marker-alt mr-1"></i> Địa chỉ</th>
+                            <th class="text-center"><i class="fas fa-crown mr-1"></i> Là thành viên VIP?</th>
+                            <th class="text-center"><i class="fas fa-ban mr-1"></i> Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.IsBanned == true ? "table-danger" : "")">
+                                <td>
+                                    <div class="font-weight-bold">@Html.DisplayFor(modelItem => item.NameCus)</div>
+                                </td>
+                                <td>@Html.DisplayFor(modelItem => item.PhoneCus)</td>
+                                <td>@Html.DisplayFor(modelItem => item.EmailCus)</td>
+                                <td>@Html.DisplayFor(modelItem => item.City)</td>
+                                <td class="text-center">
+                                    @if (item.IsVIP == true)
+                                    {
+                                        <span class="badge badge-warning p-2"><i class="fas fa-crown"></i> VIP</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-light p-2">Thường</span>
+                                    }
+                                </td>
+                                <td>
+                                    @{ 
+                                        if (item.IsBanned == true)
+                                        {
+                                            <p>Bị ban</p>
+                                        }
+                                        else { <p>Chưa bị ban</p>}
+                                    }
+
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                       @* <a href="@Url.Action("Details", "Customer", new { id = item.IDCus })" class="btn btn-info btn-sm" title="Chi tiết">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>*@
+                                        @if (item.IsBanned == true)
+                                        {
+                                            <a href="@Url.Action("UnbanUser", "Customer", new { id = item.IDCus })" class="btn btn-success btn-sm" title="Bỏ cấm">
+                                                <i class="fas fa-unlock"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-warning btn-sm" title="Cấm người dùng"
+                                                    onclick="showBanModal('@item.IDCus', '@item.NameCus')">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        }
+                                        <a href="@Url.Action("Delete", "Customer", new { id = item.IDCus })" class="btn btn-danger btn-sm" title="Xóa">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ban User Modal -->
+<div class="modal fade" id="banUserModal" tabindex="-1" role="dialog" aria-labelledby="banUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="banUserModalLabel"><i class="fas fa-ban"></i> Cấm khách hàng</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="banUserForm" >
+                <div class="modal-body">
+                    <input type="hidden" id="customerId" name="IDCus" />
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Bạn sắp cấm người dùng <strong id="customerName"></strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="banReason"><i class="fas fa-gavel"></i> Lý do cấm:</label>
+                        <select class="form-control" id="banReason" required>
+                            <option value="">-- Chọn lý do --</option>
+                            <option value="Vi phạm điều khoản dịch vụ">Vi phạm điều khoản dịch vụ</option>
+                            <option value="Thông tin giả mạo">Thông tin giả mạo</option>
+                            <option value="Lừa đảo">Lừa đảo</option>
+                        </select>
+                    </div>
+
+                   @* <div class="form-group">
+                        <label for="banDuration"><i class="fas fa-clock"></i> Thời hạn cấm:</label>
+                        <select class="form-control" id="banDuration" name="banDuration" required>
+                            <option value="1">1 ngày</option>
+                            <option value="3">3 ngày</option>
+                            <option value="7">1 tuần</option>
+                            <option value="30">1 tháng</option>
+                            <option value="90">3 tháng</option>
+                            <option value="permanent">Vĩnh viễn</option>
+                        </select>
+                    </div>*@
+                    </div>
+
+                    
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="unshowBanModal()" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger" id="btnBan"><i class="fas fa-ban"></i> Xác nhận cấm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cusID = null;
+    let cusName = null;
+    document.addEventListener('DOMContentLoaded', function () {
+        // Simple search functionality
+        document.getElementById('customerSearch').addEventListener('keyup', function () {
+            var searchValue = this.value.toLowerCase();
+            var table = document.getElementById('customerTable');
+            var rows = table.getElementsByTagName('tr');
+
+            for (var i = 1; i < rows.length; i++) {
+                var found = false;
+                var cells = rows[i].getElementsByTagName('td');
+
+                for (var j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().indexOf(searchValue) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                rows[i].style.display = found ? '' : 'none';
+            }
+        });
+
+        /*// Ban reason "Other" logic
+        document.getElementById('banReason').addEventListener('change', function () {
+            if (this.value === 'Lý do khác') {
+                document.getElementById('otherReasonGroup').style.display = 'block';
+                document.getElementById('otherReason').setAttribute('required', 'required');
+            } else {
+                document.getElementById('otherReasonGroup').style.display = 'none';
+                document.getElementById('otherReason').removeAttribute('required');
+            }
+        });*/
+    });
+    //Chức năng xác nhận ban
+    document.getElementById('btnBan').addEventListener('click', function (e) {
+            const reasonValue = document.getElementById('banReason').value;
+            if (!reasonValue) {
+                alert('Vui lòng chọn lý do để ban khách hàng');
+                return;
+            }
+            else if (confirm('Bạn có chắc chắn muốn ban khách hàng này không với lý do?:' + reasonValue + 'với ID Khách hàng là' + cusID)) {
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
+                this.style.pointerEvents = 'none';
+                $.ajax({
+                    url: '@Url.Action("BanUser", "Customer")',
+                    type: 'POST',
+                    data: JSON.stringify({ customerId: cusID, reason: reasonValue }),
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (data.success) {
+                            if (confirm('Đã ban thành công, nhấn ok để reset trang lại')) {
+                                window.location.href = "@Url.Action("Index", "Customer")";
+                            }
+                            else
+                                return;
+                        }
+                        else {
+                            if (confirm('Ban không thành công, nhấn ok để reload lại trang ')) {
+                                window.location.href = "@Url.Action("Index", "Customer")";
+                            }
+                            else {
+                                this.innerHTML = originalText;
+                                this.style.pointerEvents = 'auto';
+                                return;
+                            }
+                        }                        
+                    },
+                    error: function (xhr, status,error) {
+                        alert('Bị lỗi khi gửi yêu cầu ' + error + ':' + xhr.responseText);
+                        this.innerHTML = originalText;
+                        this.style.pointerEvents = 'auto';
+                    }
+                });
+            }
+            else {
+                this.innerHTML = originalText;
+                this.style.pointerEvents = 'auto';
+            }
+        });
+
+    //Chức năng dismiss cửa sổ
+    function unshowBanModal() {
+        cusID = null;
+        cusName = null;
+        $('#banUserModal').modal('hide');
+    }
+    // Function to show the ban modal
+    function showBanModal(customerId, customerName) {
+        cusID = customerId;
+        cusName = customerName;
+        if (cusID != null && cusName != null) {
+            document.getElementById('customerId').value = cusID;
+            document.getElementById('customerName').textContent = cusName;
+            $('#banUserModal').modal('show');
+        }
+    }
+</script>

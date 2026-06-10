@@ -1,0 +1,116 @@
+﻿/* Navbar improvements */
+.navbar {
+    background-color: #818181;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 15px;
+}
+
+    .navbar .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ffffff;
+        transition: color 0.3s ease-in-out;
+    }
+
+        .navbar .navbar-brand:hover {
+            color: #3498db;
+        }
+
+    .navbar .nav-link {
+        color: #ffffff;
+        padding: 10px;
+        margin-right: 15px;
+        font-size: 1rem;
+        transition: color 0.3s;
+    }
+
+        .navbar .nav-link:hover {
+            color: #3498db;
+            text-decoration: underline;
+        }
+
+.navbar-toggler {
+    border: none;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.7rem;
+    transition: background 0.3s ease-in-out;
+}
+
+    .navbar-toggler:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+@media (max-width: 768px) {
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .navbar .nav-link {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
+
+/* Footer improvements */
+.footer {
+    background-color: #202020;
+    color: #ffffff;
+    padding: 2rem 1rem;
+    position: relative;
+}
+
+    .footer .container-fluid {
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .footer h4 {
+        font-size: 1.2rem;
+        color: #f8f9fa;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .footer p {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        color: #cccccc;
+    }
+
+    .footer a {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s ease-in-out;
+    }
+
+        .footer a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+    .footer .fa {
+        margin: 0 10px;
+        font-size: 1.5rem;
+        transition: transform 0.3s, opacity 0.3s;
+    }
+
+        .footer .fa:hover {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+
+@media (max-width: 768px) {
+    .footer {
+        text-align: center;
+    }
+
+        .footer .container-fluid {
+            padding: 1rem;
+        }
+
+        .footer h4 {
+            margin-top: 1rem;
+        }
+}

@@ -1,0 +1,51 @@
+﻿
+@{
+    ViewBag.Title = "DangNhap";
+    Layout = "~/Views/Shared/_LogSignLayout.cshtml";
+}
+<link rel="stylesheet" href="~/Content/styleLogSign.css" />
+<link rel="stylesheet" href="~/Content/bootstrap.css" />
+<div style="width: 80%; margin: auto; padding: 100px">
+    <div class="container">
+        <h1 style="text-align: center">Đăng nhập tài khoản</h1>
+        @using (Html.BeginForm("DangNhap", "User"))
+        {
+            @Html.ValidationSummary(true);
+            <div style="margin: 20px auto;">
+                @if (ViewBag.ThongBao != null)
+                {
+                    <div class="alert alert-info">@ViewBag.ThongBao</div>
+                }
+                @if (TempData["ThongBaoLoi"] != null)
+                {
+                    <div class="alert alert-info">@ViewBag.ThongBaoLoi</div>
+                }
+                <div class="mt-3 mb-3">
+                    <lable class="form-label"> Tên đăng nhập </lable>
+                    <input type="text" id="username" name="NameCus" required placeholder="Nhập tên bạn vào" />
+                </div>
+                <div class="mt-3 mb-3">
+                    <lable class="form-label"> Mật khẩu  </lable>
+                    <input type="password" id="pasd" name="PassCus" required placeholder="Nhập mật khẩu bạn vào" />
+                </div>
+                <input type="submit" value="Xác nhận" />
+            </div>
+        }
+        @*<div class="mt-4 d-flex justify-content-center">
+            <button type="button" class="btn btn-outline-primary me-2">
+                <i class="fab fa-facebook" style="color: #3b5998;">F</i>Facebook
+            </button>
+            <button type="button" class="btn btn-outline-primary">
+                <i class="fab fa-google" style="color: #dd4b39;">G</i>Google
+            </button>
+        </div>*@
+    </div>
+        </div>
+<div class="container signin">
+    <p>Quên mật khẩu ư?<a href=@Url.Action("ResetPassword","User")>Đổi mật khẩu</a>.</p>
+</div>
+        <div class="container signin">
+            <p>Không có tài khoản ư? Hãy đăng ký tài khoản ngay hôm nay nào <a href=@Url.Action("DangKy","User")>Register</a>.</p>
+        </div>
+        
+

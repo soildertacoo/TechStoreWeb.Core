@@ -1,0 +1,138 @@
+﻿@model IEnumerable<TechStore.Models.OrderDetails>
+
+@{
+    ViewBag.Title = "Order Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Quản lý đơn hàng</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search orders...">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fa fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+               @* <div class="col-md-6 text-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown">
+                            Export
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Export to Excel</a>
+                            <a class="dropdown-item" href="#">Export to PDF</a>
+                        </div>
+                    </div>
+                </div>*@
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover" id="OrderDetailsTable">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ID Đơn hàng</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Giá thành mỗi sản phẩm</th>
+                            <th>Giảm giá</th>
+                            <th>Tổng giá thành</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                @Html.HiddenFor(modelItem => item.ID)
+                                <td>
+                                    <a href="@Url.Action("Details", "OrderPro", new { id = item.IDOrder })" class="text-primary">
+                                        #@Html.DisplayFor(modelItem => item.IDOrder)
+                                    </a>
+                                </td>
+                                <td>@Html.DisplayFor(modelItem => item.Products.NamePro)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                                <td>@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.UnitPrice)</td>
+                                <td>@string.Format(new System.Globalization.CultureInfo("vi-VN"),"{0:C0}",item.Discount)</td>
+                                <td class="font-weight-bold">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.Subtotal)</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                                            Thao tác 
+                                        </button>
+                                        <div class="dropdown-menu">
+@*                                            <div class="dropdown-divider"></div>
+*@                                            <a class="dropdown-item text-danger" href="@Url.Action("Delete", new { id = item.ID })">
+                                                <i class="fa fa-trash"></i> Hủy đơn
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="collapse" id="details-@item.ID">
+                                <td colspan="8">
+                                    <div class="card card-body bg-light">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Products ID:</strong> @item.Products.ProductID</p>
+                                                <p><strong>Delivery Address:</strong> @item.OrderPro.AddressDeliverry</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Note:</strong> @(string.IsNullOrEmpty(item.Note) ? "N/A" : item.Note)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @*<div class="row mt-3">
+                <div class="col-md-6">
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Previous</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-md-6 text-right">
+                    <p class="text-muted">Showing 1-10 of @Model.Count() items</p>
+                </div>
+            </div>*@
+        </div>
+    </div>
+</div>
+
+
+    <script>$(document).ready(function () {
+            $("#searchInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#OrderDetailsTable tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Toggle details row
+            $(".toggle-details").click(function () {
+                var id = $(this).data("id");
+                $("#details-" + id).toggle();
+            });
+        });</script>

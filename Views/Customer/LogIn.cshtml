@@ -1,0 +1,36 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LogSignLayout.cshtml";
+}
+<link rel="stylesheet" href="~/Content/styleLogSign.css" />
+<div style="width: 80%; margin: auto">
+<form action="action_page.php">
+    <div class="container">
+        <h1>Log in</h1>
+        <p>Enter user name and password to log in</p>
+        <hr>
+
+        <label for="username"><b>User name</b></label>
+        <input type="text" placeholder="Enter User name" name="usn" id="usn" required>
+
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
+        
+
+        <button type="submit" class="registerbtn">Log in</button>
+6
+        <label for="RemCheck"><b>Remember me</b></label>
+        <input type="checkbox" id="RemCheck" class="remberCheck" />
+    </div>
+
+    <div class="container signin">
+        <p>don't have an account? <a href="#">Register</a>.</p>
+    </div>
+</form>
+    </div>
+
+
+
+
+

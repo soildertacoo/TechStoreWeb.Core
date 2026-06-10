@@ -1,0 +1,50 @@
+namespace TechStoreWeb.Core.Hub
+{
+    using Microsoft.AspNetCore.SignalR;
+    using TechStoreWeb.Core.AI;
+    // 2. Nâng cấp Hub để chat riêng 1-1
+    public class chatHub : Hub
+    {
+        //Bước cài đặt để mở chatHub
+        
+        public override async Task OnConnectedAsync()
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, "Room36");
+            await base.OnConnectedAsync(); //Tạo phòng lên server
+        }
+        public async Task JoinRoom(string room)
+        {
+            
+            await Groups.AddToGroupAsync(Context.ConnectionId, room);//vai trò vừa tạo mở cổng vừa là vào cổng 
+            string userName = Context.User?.Identity?.Name ?? "Khách";
+            await Clients.Group(room).SendAsync("EnteredRoom", $"{userName} đã tham gia cuộc trò chuyện.");
+        }
+        // Hàm gửi tin nhắn 1-1
+        public async Task SendMessage(string sender, string room,string msg)
+        {
+            //Gửi tin nhắn
+            await Clients.All.SendAsync("ReceiveMessage", sender, room,msg);
+            if (room == "Room_AI_Support")
+            {
+                // Bật hiệu ứng "AI đang gõ phím..."
+                await Clients.Group(room).SendAsync("NotifyTyping", "TechStore AI", true);
+
+                // Gọi API của Gemini/OpenAI (Hàm này bạn sẽ viết riêng)
+                string aiResponse = await geminiGen.genText(msg);
+
+                // Tắt hiệu ứng gõ phím
+                await Clients.Group(room).SendAsync("NotifyTyping", "TechStore AI", false);
+
+                // Bắn câu trả lời của AI xuống khung chat
+                await Clients.Group(room).SendAsync("ReceiveMessage", "TechStore AI", room, aiResponse);
+            }
+        }
+        public async Task sendTyping(string sender, bool isTyping)
+        {
+            //Gửi tin nhắn
+            await Clients.All.SendAsync("NotifyTyping", sender, isTyping); // Thông báo cho bên kia
+        }
+
+        
+    }
+}

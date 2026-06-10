@@ -1,0 +1,32 @@
+﻿@{
+    ViewBag.Title = "OderManagement";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Quản lý Đơn hàng</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Khách hàng</th>
+            <th>Ngày đặt</th>
+            <th>Trạng thái</th>
+            <th>Tổng tiền</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Vòng lặp để hiển thị danh sách đơn hàng -->
+        <tr>
+            <td>1</td>
+            <td>Customer Name</td>
+            <td>2024-11-10</td>
+            <td>Pending</td>
+            <td>$200.00</td>
+            <td>
+                <a href="#" class="btn btn-sm btn-primary">Chi tiết</a>
+                <a href="#" class="btn btn-sm btn-danger">Hủy</a>
+            </td>
+        </tr>
+    </tbody>
+</table>

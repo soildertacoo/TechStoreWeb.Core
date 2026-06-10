@@ -1,0 +1,162 @@
+﻿<style>
+    /* CSS CHO KHỐI POPUP MINI CART */
+    .mini-cart-popup-box {
+        position: absolute; /* Phải nổi lên trên trang web */
+        top: 60px; /* Cách thanh menu một khoảng */
+        right: 20px; /* Nằm góc phải */
+        width: 360px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        border: 1px solid #eaeaea;
+        z-index: 10000;
+        
+        /* Hiệu ứng ẩn/hiện mượt mà thay vì dùng display: none */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(15px);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Class này được add vào bằng JS để mở Popup */
+    .mini-cart-popup-box.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    /* CSS nội bộ cho sản phẩm mini */
+    .mc-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px dashed #eee; }
+    .mc-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+    .mc-name { font-size: 0.9rem; font-weight: 600; color: #333; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+
+<div id="cartContainer" class="mini-cart-popup-box">
+    <div id="mini-cart-content">
+        <div class="text-center py-4 text-muted">Đang tải giỏ hàng...</div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded',  () => {
+        loadMiniCartData();
+        const cartContentDiv = document.getElementById('mini-cart-content');
+        cartContentDiv.addEventListener('click', async function(e) {
+            // Tìm xem thẻ vừa bị click có class 'btn-remove-item' không?
+            const btnRemove = e.target.closest('.btn-remove-item');
+            if (btnRemove) {
+                // Lấy ID sản phẩm
+                const proId = btnRemove.getAttribute('data-id');
+                try {
+                    // 1. Gửi lệnh XÓA lên Server
+                    const response = await fetch('/Cart/RemoveFromCart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({productID: proId})
+                    });
+
+                    if (!response.ok) throw new Error('Lỗi máy chủ');
+                    const data = await response.json();
+                    if (data.success) {
+                        // 2. XÓA THÀNH CÔNG -> VẼ LẠI GIAO DIỆN
+                        loadMiniCartData(); 
+                        // Cập nhật lại số lượng trên cục Badge màu đỏ ngoài Menu
+                        let totalQuantity = 0;
+                        data.cart.forEach(item => totalQuantity += item.number);
+                        //Hiện số lượng giỏ hàng sau khi đã xóa
+                        const badgeElement = document.getElementById('cartQuantity');
+                        if(badgeElement) badgeElement.innerText = totalQuantity;
+                    }
+                    else console.log("Lỗi gì đó ko xóa được")
+                } catch (error) {
+                    console.error("Lỗi khi xóa sản phẩm:", error);
+                    
+                }
+            }
+        });
+    });
+
+    // 1. HÀM LẤY DATA VÀ VẼ MINI CART
+    async function loadMiniCartData() {
+        const cartContentDiv = document.getElementById('mini-cart-content');
+        try {
+            const response = await fetch('/Cart/ShowCart', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Lỗi máy chủ');
+            const data = await response.json();
+
+            // NẾU GIỎ HÀNG TRỐNG
+            if (!data.success || !data.cart || data.cart.length === 0) {
+                cartContentDiv.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px; text-align: center; font-weight: bold; border-radius: 11px 11px 0 0;">Giỏ hàng của bạn</div>
+                    <div class="text-center" style="padding: 40px 20px;">
+                        <i class="fas fa-shopping-basket" style="font-size: 3rem; color: #ddd; margin-bottom: 10px;"></i>
+                        <p class="text-muted mb-0">${data.message || 'Giỏ hàng đang trống.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // NẾU CÓ HÀNG: Vẽ giao diện List (Không dùng Table)
+            let html = `
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px; text-align: center; font-weight: bold; border-radius: 11px 11px 0 0;">
+                    Giỏ hàng của bạn
+                </div>
+                <div style="max-height: 320px; overflow-y: auto;">
+            `;
+
+            data.cart.forEach(item => {
+                const formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price);
+                
+                // Thiết kế Layout ngang cực gọn cho Popup
+                html += `
+                    <div class="mc-item" onclick="window.location.href='/Cart/RebackDetails/${item.productID}">
+                        <img src="/Images/${item.imagePro}" class="mc-img" alt="${item.namePro}" />
+                        <div style="flex: 1;">
+                            <h6 class="mc-name">${item.namePro}</h6>
+                            <div style="color: #e74c3c; font-weight: bold; font-size: 0.95rem;">${formattedPrice}</div>
+                            <div style="font-size: 0.85rem; color: #777;">Số lượng: <b>${item.number}</b></div>
+                        </div>
+                        <button class="text-danger btn-remove-item" data-id="${item.productID}" style="padding: 5px; text-decoration: none;" title="Xóa">&#10005;</button>
+                    </div>
+                `;
+            });
+
+            const formattedTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.total);
+
+            // Footer của Popup
+            html += `
+                </div>
+                <div style="padding: 15px; background: #f8f9fa; border-top: 1px solid #eee; border-radius: 0 0 11px 11px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 15px;">
+                        <span>Tổng tiền:</span>
+                        <span style="color: #e74c3c; font-size: 1.1rem;">${formattedTotal}</span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/Cart/CartDetails" class="btn btn-light btn-sm w-100 fw-bold border">Xem chi tiết</a>
+                        <a href="/Cart/PaymentCart" class="btn btn-primary btn-sm w-100 fw-bold" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">Thanh toán</a>
+                    </div>
+                </div>
+            `;
+
+            cartContentDiv.innerHTML = html;
+
+        } catch (error) {
+            console.error("Lỗi tải mini cart:", error);
+            cartContentDiv.innerHTML = `<div class="p-3 text-danger text-center">Không tải được giỏ hàng.</div>`;
+        }
+    }
+
+    // 2. HÀM MỞ/ĐÓNG POPUP MƯỢT MÀ
+    function openClosePopup(event) {
+        // Ngăn chặn nổi bọt sự kiện nếu bạn bấm vào thẻ <a>
+        if (event) event.preventDefault(); 
+        
+        const cartContainer = document.getElementById("cartContainer");
+        // Dùng toggle class thay vì gán cứng style.display
+        cartContainer.classList.toggle("show"); 
+    }
+</script>

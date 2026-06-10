@@ -1,0 +1,497 @@
+﻿@using DocumentFormat.OpenXml.Office.CustomUI
+@using Google.Apis.Util
+@model IEnumerable<TechStore.Models.OrderPro>
+
+@{
+    ViewBag.Title = "Quản Lý Đơn Hàng";
+
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* Tổng thể & Card */
+    body { background-color: #f4f7fc; }
+    .card-custom { border: none; border-radius: 12px; }
+    .card-header-custom { background-color: #ffffff; border-bottom: 1px solid #edf2f9; border-radius: 12px 12px 0 0 !important; }
+    
+    /* Thanh tìm kiếm */
+    .search-wrapper { position: relative; width: 300px; }
+    .search-wrapper .form-control { border-radius: 20px; padding-left: 35px; border-color: #dce1e7; box-shadow: none; }
+    .search-wrapper .form-control:focus { border-color: #4e73df; }
+    .search-wrapper .fa-search { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #a1aab2; z-index: 10; }
+
+    /* Bảng dữ liệu */
+    .table-custom th { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; color: #8492a6; border-top: none; background-color: #f8f9fa; font-weight: 600; padding: 15px 12px; }
+    .table-custom td { vertical-align: middle; color: #3c4858; border-color: #edf2f9; padding: 15px 12px; }
+    .table-hover tbody tr:hover { background-color: #f8fafc; transition: all 0.2s; }
+    
+    /* Cột Mã Đơn */
+    .tracking-id { font-family: 'Courier New', Courier, monospace; font-weight: 700; letter-spacing: 0.5px; color: #4e73df; text-decoration: none !important; }
+    .tracking-id:hover { color: #224abe; }
+
+    /* Dropdown Thao Tác */
+    .btn-action { border-radius: 20px; font-size: 0.85rem; font-weight: 500; background-color: #fff; border: 1px solid #dce1e7; color: #3c4858; transition: 0.2s; }
+    .btn-action:hover { background-color: #f4f7fc; border-color: #b0bacc; }
+    .dropdown-menu-custom { border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-radius: 10px; }
+    .dropdown-item { font-size: 0.9rem; padding: 8px 20px; color: #3c4858; }
+    .dropdown-item:hover { background-color: #f4f7fc; color: #4e73df; }
+
+    /* Bảng chi tiết đơn hàng (Mở rộng) */
+    .details-card { border: 1px solid #edf2f9; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+    .details-title { font-size: 0.85rem; text-transform: uppercase; color: #8492a6; margin-bottom: 10px; font-weight: 600; }
+    .details-text { font-size: 0.9rem; margin-bottom: 6px; color: #3c4858; }
+     /* Bo góc và đổ bóng cho Modal */
+    .excel-modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden; /* Để góc bo header không bị trồi ra ngoài */
+    }
+
+    /* Tông màu xanh lá chuẩn Excel */
+    .excel-modal-header {
+        background: linear-gradient(135deg, #1d6f42 0%, #21a366 100%);
+        color: white;
+    }
+
+    /* Tối ưu ô input */
+    .excel-filter-input {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .excel-filter-input:focus {
+        border-color: #21a366;
+        box-shadow: 0 0 0 0.2rem rgba(33, 163, 102, 0.25);
+        outline: none;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="card card-custom shadow-sm mb-4">
+        <div class="card-header card-header-custom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 font-weight-bold text-dark" style="font-size: 1.25rem;">
+                <i class="fa fa-shopping-bag text-primary mr-2"></i>Quản Lý Đơn Hàng
+            </h5>
+            <div>
+                <button class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm" data-toggle="modal" data-target="#filterModal">
+                    <i class="fa fa-filter mr-1"></i> Lọc dữ liệu
+                </button>
+                 <button class="btn btn-success btn-sm px-3 rounded-pill shadow-sm" data-toggle="modal" data-target="#excelModal">
+                    <i class="fa fa-filter mr-1"></i> Xuất excel
+                </button>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show rounded-pill px-4" role="alert">
+                    <i class="fa fa-exclamation-triangle mr-2"></i> @ViewBag.Error
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+
+            <div class="mb-4 search-wrapper">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm nhanh đơn hàng...">
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom" id="orderTable">
+                    <thead>
+                        <tr>
+                            <th>Mã Đơn</th>
+                            <th>Khách Hàng</th>
+                            <th>Ngày Đặt</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-center">Thanh Toán</th>
+                            <th class="text-right">Tổng Tiền</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr data-status="@item.Status"
+                                data-payment="@item.PaymentStatus"
+                                data-date="@(item.DateOrder != null ? Convert.ToDateTime(item.DateOrder).ToString("yyyy-MM-dd") : "")">
+
+                                <td>
+                                    <a href="#" class="order-details-link tracking-id" data-id="@item.ID">
+                                        @(string.IsNullOrEmpty(item.TrackingNumber) ? "DH" + item.ID : item.TrackingNumber)
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="font-weight-bold">@item.Customer.NameCus</div>
+                                </td>
+                                <td><span class="text-muted">@item.DateOrder</span></td>
+                                <td class="text-center">
+                                    @{
+                                        string statusClass = "secondary";
+                                        if (item.Status == "Đã giao") { statusClass = "success"; }
+                                        else if (item.Status == "Đang giao") { statusClass = "primary"; }
+                                        else if (item.Status == "Đang xử lý") { statusClass = "info"; }
+                                        else if (item.Status == "Đã hủy") { statusClass = "danger"; }
+                                    }
+                                    <span class="badge badge-pill badge-@statusClass px-3 py-2 shadow-sm">@item.Status</span>
+                                </td>
+                                <td class="text-center">
+                                    @{
+                                        string paymentClass = item.PaymentStatus == "Đã thanh toán" ? "success" : "warning text-dark";
+                                    }
+                                    <span class="badge badge-pill badge-@paymentClass px-3 py-2 border">@item.PaymentStatus</span>
+                                </td>
+                                <td class="font-weight-bold text-right text-dark">
+                                    @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.TotalAmount)
+                                </td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-action px-3" type="button" id="dropdownMenu-@item.ID" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Thao tác <i class="fa fa-angle-down ml-1"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-custom" aria-labelledby="dropdownMenu-@item.ID">
+                                            <a class="dropdown-item" href="@Url.Action("Details", new { id = item.ID })">
+                                                <i class="fa fa-eye text-primary mr-2" style="width: 16px;"></i> Xem chi tiết
+                                            </a>
+                                            <a class="dropdown-item" href="@Url.Action("Edit", new { id = item.ID })">
+                                                <i class="fa fa-edit text-warning mr-2" style="width: 16px;"></i> Chỉnh sửa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr class="order-details-row" id="details-@item.ID" style="display: none;">
+                                <td colspan="7" class="p-3 border-bottom-0">
+                                    <div class="card card-body bg-light details-card mb-0">
+                                        <div class="row">
+                                            <div class="col-md-6 border-right">
+                                                <h6 class="details-title"><i class="fa fa-truck mr-1"></i> Giao Hàng</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p class="text-muted mb-0 small">Địa chỉ:</p>
+                                                        <p class="details-text font-weight-bold">@item.AddressDeliverry</p>
+                                                        
+                                                        <p class="text-muted mb-0 small mt-2">Mã vận đơn:</p>
+                                                        <p class="details-text">@(string.IsNullOrEmpty(item.TrackingNumber) ? "Chưa có" : item.TrackingNumber)</p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p class="text-muted mb-0 small">Dự kiến giao:</p>
+                                                        <p class="details-text text-primary font-weight-bold">
+                                                            @(item.DeliveryDate.HasValue ? item.DeliveryDate.Value.ToString("dd/MM/yyyy") : "Chưa xác định")
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 pl-4">
+                                                <h6 class="details-title"><i class="fa fa-credit-card mr-1"></i> Thanh Toán</h6>
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-7">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="text-muted small">Phương thức:</span>
+                                                            <span class="details-text">@item.PaymentMethod</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="text-muted small">Phí vận chuyển:</span>
+                                                            <span class="details-text">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.ShippingCost)</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between border-top pt-1 mt-1">
+                                                            <span class="text-dark font-weight-bold small">Tổng cộng:</span>
+                                                            <span class="text-danger font-weight-bold">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.TotalAmount)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-5 text-right">
+                                                        <a href="@Url.Action("Details", new { id = item.ID })" class="btn btn-outline-primary btn-sm rounded-pill">
+                                                            Xem đầy đủ <i class="fa fa-arrow-right ml-1"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header bg-primary text-white" style="border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title"><i class="fa fa-filter mr-2"></i> Lọc Đơn Hàng</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="filterForm">
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted small text-uppercase">Trạng Thái Đơn Hàng</label>
+                        <select class="form-control" id="statusFilter" style="border-radius: 8px;">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Đang xử lý">Đang xử lý</option>
+                            <option value="Đang giao">Đang giao</option>
+                            <option value="Đã giao">Đã giao</option>
+                            <option value="Hủy đơn">Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted small text-uppercase">Trạng Thái Thanh Toán</label>
+                        <select class="form-control" id="paymentStatusFilter" style="border-radius: 8px;">
+                            <option value="">Tất cả</option>
+                            <option value="Đã thanh toán">Đã thanh toán</option>
+                            <option value="Chưa thanh toán">Chưa thanh toán</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold text-muted small text-uppercase">Từ Ngày</label>
+                            <input type="date" class="form-control" id="fromDate" style="border-radius: 8px;">
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold text-muted small text-uppercase">Đến Ngày</label>
+                            <input type="date" class="form-control" id="toDate" style="border-radius: 8px;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light border-0" style="border-radius: 0 0 12px 12px;">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" id="applyFilters">Áp Dụng Lọc</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="excelModal" tabindex="-1" role="dialog" aria-labelledby="excelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content excel-modal-content">
+            
+            <div class="modal-header excel-modal-header">
+                <h5 class="modal-title" id="excelModalLabel">
+                    <i class="fa fa-file-excel-o mr-2"></i> Lọc dữ liệu xuất Excel
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity: 0.8; text-shadow: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form id="filterExcelForm">
+                   <div class="form-group mb-3">
+                        <label class="filter-label"><i class="fa fa-users mr-1"></i> Tên khách hàng</label>
+                        <select class="form-control excel-filter-input" id="nameExcelFilter">
+                            <option value="">-- Tất cả mọi người --</option>
+                            
+                            @* Tuyệt chiêu: Dùng LINQ để bóc tách riêng tên khách hàng, 
+                            loại bỏ tên rỗng, và quan trọng nhất là dùng .Distinct() để LỌC TRÙNG 
+                            *@
+                            @{
+                                var uniqueCustomerNames = Model
+                                    .Select(x => x.Customer?.NameCus)
+                                    .Where(name => !string.IsNullOrEmpty(name))
+                                    .Distinct();
+                            }
+
+                            @foreach (var name in uniqueCustomerNames)
+                            {
+                                // Viết HTML tự nhiên trộn với C# bằng dấu @
+                                <option value="@name">@name</option>
+                            }
+                            
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="filter-label"><i class="fa fa-cubes mr-1"></i> Trạng Thái Đơn Hàng</label>
+                        <select class="form-control excel-filter-input" id="statusExcelFilter">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="Đang xử lý">Đang xử lý</option>
+                            <option value="Đang giao">Đang giao</option>
+                            <option value="Đã giao">Đã giao</option>
+                            <option value="Hủy đơn">Hủy đơn</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="filter-label"><i class="fa fa-credit-card mr-1"></i> Trạng Thái Thanh Toán</label>
+                        <select class="form-control excel-filter-input" id="paymentExcelFilter">
+                            <option value="">-- Tất cả --</option>
+                            <option value="Đã thanh toán">Đã thanh toán</option>
+                            <option value="Chưa thanh toán">Chưa thanh toán</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-0">
+                            <label class="filter-label"><i class="fa fa-calendar-check-o mr-1"></i> Từ Ngày</label>
+                            <input type="date" class="form-control excel-filter-input" id="fromDate" >
+                        </div>
+                        <div class="col-md-6 form-group mb-0">
+                            <label class="filter-label"><i class="fa fa-calendar-times-o mr-1"></i> Đến Ngày</label>
+                            <input type="date" class="form-control excel-filter-input" id="toDate">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer bg-light border-top-0 pt-2 pb-3 px-4">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="resetXLSXFilters">
+                    <i class="fa fa-refresh mr-1"></i> Đặt lại
+                </button>
+                <button type="button" class="btn rounded-pill px-4 shadow-sm" id="applyXLSXFilters" style="background-color: #21a366; color: white;">
+                    <i class="fa fa-download mr-1"></i> Xuất Excel
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 1. Toggle order details
+            $(".order-details-link").click(function (e) {
+                e.preventDefault();
+                var id = $(this).data("id");
+                $("#details-" + id).toggle();
+            });
+
+            // 2. Search functionality
+            $("#searchInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#orderTable tbody tr:not(.order-details-row)").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                    // Hide the details row when filtering
+                    var id = $(this).find("a.order-details-link").data("id");
+                    if (id) {
+                        $("#details-" + id).hide();
+                    }
+                });
+            });
+
+            // 3. Apply filters (Hoạt động mượt mà)
+            $("#applyFilters").click(function () {
+                var status = $("#statusFilter").val();
+                var paymentStatus = $("#paymentStatusFilter").val();
+                var fromDate = $("#fromDate").val();
+                var toDate = $("#toDate").val();
+
+                $("#orderTable tbody tr:not(.order-details-row)").each(function () {
+                    var showRow = true;
+
+                    // Lấy dữ liệu ngầm đã được truyền vào HTML
+                    var rowStatus = $(this).attr("data-status");
+                    var rowPayment = $(this).attr("data-payment");
+                    var rowDate = $(this).attr("data-date");
+
+                    // So sánh trạng thái đơn hàng
+                    if (status && rowStatus !== status) {
+                        showRow = false;
+                    }
+
+                    // So sánh thanh toán
+                    if (paymentStatus && rowPayment !== paymentStatus) {
+                        showRow = false;
+                    }
+
+                    // So sánh ngày tháng
+                    if (rowDate) {
+                        if (fromDate && rowDate < fromDate) showRow = false;
+                        if (toDate && rowDate > toDate) showRow = false;
+                    } else if (fromDate || toDate) {
+                        showRow = false; // Đơn không có ngày mà lại đi lọc ngày -> Ẩn
+                    }
+
+                    // Ẩn/Hiện dòng dữ liệu chính
+                    $(this).toggle(showRow);
+
+                    // Ẩn luôn dòng chi tiết phụ trợ ở bên dưới nếu dòng chính bị ẩn
+                    if (!showRow) {
+                        $(this).next(".order-details-row").hide();
+                    }
+                });
+
+                $('#filterModal').modal('hide');
+            });
+            //Apply filter vào excel 
+            // Nút "Đặt lại" - Xóa trắng form lọc
+            var btnReset = document.getElementById("resetXLSXFilters");
+            if (btnReset) {
+                btnReset.addEventListener("click", function () {
+                    document.getElementById("filterExcelForm").reset();
+                });
+            }
+
+            // Logic chặn chọn Từ ngày > Đến ngày
+            // Nút "Xuất Excel" (Bạn dùng lại logic lọc bảng ở câu trên hoặc gọi API xuất file tại đây)
+            var btnApply = document.getElementById("applyXLSXFilters");
+            if (btnApply) {
+                btnApply.addEventListener("click", async function () {
+                    
+                    console.log("Đang xử lý xuất Excel...");
+                    var fromDateInput = document.getElementById("fromDate").value;
+                    var toDateInput = document.getElementById("toDate").value;
+                    var status = document.getElementById("statusExcelFilter").value;
+                    var paymentStatus = document.getElementById("paymentExcelFilter").value;
+                    var nameCus = document.getElementById("nameExcelFilter").value;
+                    // ... (Logic của bạn) ...
+                    const formData = new FormData();
+                    formData.append("nameCus",nameCus)
+                    formData.append("fromDateInput",fromDateInput);
+                    formData.append("toDateInput",toDateInput);
+                    formData.append("status",status);
+                    formData.append("paymentStatus",paymentStatus)
+                     try {
+                        // Dùng await để đảm bảo save file excel trơn tru ko bị 
+                        const response = await fetch('/OrderPro/exportExcel', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        if (!response.ok) throw new Error("Mã lỗi máy chủ: " + response.status);
+                        //Xử lý lấy tên file download đã đặt trong backend
+                        const contentDisposition = response.headers.get('Content-Disposition');
+                        const filename = contentDisposition?.split('filename=')[1].split(';')[0]?.replace(/['"]/g, '') || ""; 
+                        const data = await response.blob(); //Khi return File 
+                        //Tải về file từ trình duyệt
+                        if (data) {
+                            var a = document.createElement('a');
+                            // Tải file về 
+                            a.href = window.URL.createObjectURL(data);
+                            a.download = filename ?? "BaoCaoDonHangExcel_Homnay.xlsx";
+                            a.click();a.remove();
+                            window.URL.revokeObjectURL(data);
+                        }
+                        else 
+                            throw new Error("Lỗi khi tải file về");
+                    } catch (error) {
+                        alert('Bị lỗi khi gửi yêu cầu: ' + error.message);
+                    }
+                    // Đóng modal
+                    $('#excelModal').modal('hide'); 
+                });
+            }
+        });
+        function getFileNameDownload(){
+
+        }
+    </script>
+}

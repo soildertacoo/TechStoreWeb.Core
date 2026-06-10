@@ -1,0 +1,519 @@
+﻿using Newtonsoft.Json;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using TechStore.Models;
+using System;
+using System.Collections.Generic;
+using TechStoreWeb.Core.Helpers;
+using Microsoft.EntityFrameworkCore.Storage.Json;
+using System.Data.Common;
+
+namespace TechStore.Controllers
+{
+    public class AdminsController : Controller
+    {
+        // GET: Admins
+        private readonly DBTechStoreEntities dBO;
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
+
+        // 2. Tạo hàm khởi tạo (Constructor) và yêu cầu hệ thống "tiêm" DbContext vào
+        public AdminsController(DBTechStoreEntities dbContext, ApplicationDbContext appContext, 
+        IWebHostEnvironment env)
+        {
+            dBO = dbContext;
+            _context = appContext;
+            _env = env;
+        }        
+        public ActionResult Index()
+        {
+            if (HttpContext.Session.GetString("admin")== null)
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            string? admin = HttpContext.Session.GetString("admin");//Hiện tên admin
+            ViewBag.Admin = admin;
+            return View();
+        }
+        [HttpGet]
+        public ActionResult shippingManagement()
+        {
+            var provider = dBO.ShippingProvider.ToList();
+            if (provider == null) return NotFound();
+            return View(provider);
+        }
+        [HttpGet]
+        public ActionResult createProvider()
+        {
+            return View("~/Views/Admins/Shipping/createProvider.cshtml");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        // Tham số nhận vào chính là Model ShippingProvider
+        public ActionResult createProvider(ShippingProvider provider)
+        {
+            try
+            {
+                // 1. Kiểm tra xem các trường bắt buộc (Required) đã có đủ chưa
+                if (ModelState.IsValid)
+                {
+                    // 2. Kiểm tra xem Mã Code (Khóa chính) đã bị trùng trong CSDL chưa
+                    // Lưu ý: Đổi chữ 'dbO' thành tên biến DbContext thực tế của bạn
+                    var checkExist = dBO.ShippingProvider.FirstOrDefault(p => p.ProviderCode == provider.ProviderCode);
+                    
+                    if (checkExist != null)
+                    {
+                        // Nếu trùng mã, báo lỗi và trả lại y nguyên trang Create kèm dữ liệu cũ đang nhập dở
+                        ViewBag.ErrorCreate = "Mã Đơn vị vận chuyển này đã tồn tại trong hệ thống!";
+                        return View("~/Views/Admins/Shipping/createProvider.cshtml", provider);
+                    }
+
+                    // 3. Setup một vài giá trị mặc định (Ví dụ: Vừa tạo xong thì cho trạng thái Kích hoạt luôn)
+                    provider.IsActive = true; 
+
+                    // 4. Thêm đối tượng vào Bảng và Lưu lại
+                    dBO.ShippingProvider.Add(provider);
+                    dBO.SaveChanges();
+
+                    // 5. 🌟 Áp dụng bài học lúc nãy: Lưu XONG thì dùng RedirectToAction 
+                    // để bắt hệ thống chạy lại hàm hiển thị danh sách (giả sử là shippingManagement)
+                    return RedirectToAction("shippingManagement", "Admins"); 
+                }
+                
+                // Nếu Validation thất bại (Ví dụ: nhập chữ vào ô số), trả lại trang Create
+                return View("~/Views/Admins/Shipping/createProvider.cshtml", provider);
+            }
+            catch (Exception ex)
+            {
+                // Bắt lỗi hệ thống (như sập Database, sai chuỗi kết nối...)
+                ViewBag.ErrorCreate = "Lỗi hệ thống khi lưu CSDL: " + ex.Message;
+                return View("~/Views/Admins/Shipping/createProvider.cshtml", provider);
+            }
+        }
+        [HttpGet]
+        public ActionResult editProvider(string code)
+        {
+            var thisProvider = dBO.ShippingProvider.FirstOrDefault(provider => provider.ProviderCode == code);
+            if (thisProvider == null) return RedirectToAction("shippingManagement","Admins");
+            return View("~/Views/Admins/Shipping/editProvider.cshtml",thisProvider);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult editProvider(ShippingProvider provider)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    // Tìm dòng dữ liệu cũ trong Database dựa theo Mã Code
+                    var existingProvider = dBO.ShippingProvider.FirstOrDefault(p => p.ProviderCode == provider.ProviderCode);
+                    
+                    if (existingProvider == null)
+                    {
+                        throw new Exception("Ko có dữ liệu");
+                    }
+
+                    // Ghi đè các thông tin mới từ form lên dữ liệu cũ
+                    existingProvider.ProviderName = provider.ProviderName;
+                    existingProvider.ApiToken = provider.ApiToken;
+                    existingProvider.ApiCreateOrder = provider.ApiCreateOrder;
+                    existingProvider.ApiCancelOrder = provider.ApiCancelOrder;
+                    existingProvider.ApiCheckStatus = provider.ApiCheckStatus;
+                    
+                    existingProvider.SupportStandard = provider.SupportStandard;
+                    existingProvider.SupportFast = provider.SupportFast;
+                    existingProvider.SupportExpress = provider.SupportExpress;
+                    
+                    existingProvider.PriceStandard = provider.PriceStandard;
+                    existingProvider.PriceFast = provider.PriceFast;
+                    existingProvider.PriceExpress = provider.PriceExpress;
+
+                    // Lưu thay đổi vào CSDL
+                    dBO.SaveChanges();
+
+                    // Sửa xong thì quay lại trang danh sách
+                    return RedirectToAction("shippingManagement", "Admins");
+                }
+
+                return View("~/Views/Admins/Shipping/editProvider.cshtml", provider);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorEdit = "Lỗi hệ thống khi cập nhật: " + ex.Message;
+                return View("~/Views/Admins/Shipping/editProvider.cshtml", provider);
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> providerDeleteData ([FromBody]JSONProvider data)
+        {
+            try
+            {
+                var thisProvider = dBO.ShippingProvider.FirstOrDefault(id => id.ProviderCode == data.ProviderCode);
+                if (thisProvider == null) throw new Exception ("Lỗi khi xử lý dữ liệu");
+                //Xóa mã đơn
+                dBO.ShippingProvider.Remove(thisProvider);
+                await dBO.SaveChangesAsync();
+                //Reload du lieu
+                var provider = dBO.ShippingProvider.ToList();
+                return Json(new {success = true, providerData = provider ,message = "Xoa thanh cong"});
+
+            }
+            catch (Exception e)
+            {
+                return Json(new {success = false, message = "Co loi khi xoa du lieu" + e});
+            }
+        }
+        
+        public ActionResult Statistics()
+        {
+            // Doanh thu theo ngày
+            var revenueOverTime = dBO.OrderDetails
+                .Join(dBO.OrderPro,
+                    od => od.IDOrder,
+                    o => o.ID,
+                    (od, o) => new { od.Subtotal, o.DateOrder })
+                // Đẩy điều kiện lọc rỗng lên đây
+                .Where(x => x.DateOrder != null)
+                // GroupBy thẳng dưới database
+                .GroupBy(x => x.DateOrder.Value.Date) 
+                .Select(g => new 
+                {
+                    Date = g.Key,
+                    Total = g.Sum(x => x.Subtotal)
+                })
+                .ToList(); // Chỉ gọi ToList ở BƯỚC CUỐI CÙNG
+
+            ViewBag.Labels = revenueOverTime.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
+            ViewBag.DataRevenue = revenueOverTime.Select(d => d.Total).ToList();
+
+            // Đánh giá
+            var reviewData = dBO.Reviews
+                .GroupBy(r => r.ProductID)
+                .Select(g => new
+                {
+                    ProductsName = dBO.Products
+                        .Where(p => p.ProductID == g.Key)
+                        .Select(p => p.NamePro)
+                        .FirstOrDefault(),
+                    ReviewCount = g.Count(),
+                    ReviewAverage = g.Average(r => r.Rating > 5 ? 5 : r.Rating)
+                })
+                .Where(x => x.ProductsName != null)
+                .ToList();
+
+            ViewBag.ReviewLabels = reviewData.Select(r => r.ProductsName).ToList();
+            ViewBag.ReviewData = reviewData.Select(r => r.ReviewCount).ToList();
+            ViewBag.AverageRating = reviewData.Select(r => r.ReviewAverage).ToList();
+
+            // Bán chạy
+            var bestSelling = dBO.OrderDetails
+                .GroupBy(od => od.IDProduct)
+                .Select(g => new {
+                    ProductsName = dBO.Products
+                        .Where(p => p.ProductID == g.Key)
+                        .Select(p => p.NamePro)
+                        .FirstOrDefault(),
+                    QuantitySold = g.Sum(x => x.Quantity)
+                })
+                .OrderByDescending(g => g.QuantitySold)
+                .Take(5)
+                .ToList();
+
+            ViewBag.BestSellingLabels = bestSelling.Select(x => x.ProductsName).ToList();
+            ViewBag.BestSellingData = bestSelling.Select(x => x.QuantitySold).ToList();
+
+            return View();
+        }
+
+
+        [HttpGet]
+        public ActionResult Login()
+        {
+            return View();
+        }
+        [HttpPost, ActionName("Login")]
+        public ActionResult LoginConfirm(AdminUsers admin)
+        {
+            var user = ValidateUser(admin.NameUser, admin.PasswordUser);
+            // Add your authentication logic here
+            if (user != null)
+            {
+
+                // Redirect to a different page on successful login
+                ViewBag.ThongBao = "Chúc mừng đăng nhập thành công ";
+                HttpContext.Session.SetString("admin", admin.NameUser);
+                return RedirectToAction("Statistics", "Admins");
+            }
+            else
+            {
+                ViewBag.ThongBao = "Không đăng nhập thành công ";
+                return View();
+            }
+        }
+        private AdminUsers? ValidateUser(string username, string password)
+        {
+            return dBO.AdminUsers.FirstOrDefault(s => s.NameUser == username && s.PasswordUser == password);
+        }
+        public ActionResult ProductsManament()
+        {
+
+            return View();
+        }
+
+        public ActionResult CateManament()
+        {
+            return View();
+        }
+
+        public ActionResult OderManagement()
+        {
+            return View();
+        }
+
+        // Support Request Management Actions
+        public ActionResult SupportRequestManagement(string filter = "all", string search = "")
+        {
+            if (HttpContext == null)
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+
+            var requests = dBO.SupportRequests.AsQueryable();
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                 requests = requests.Where(r => r.IdRequest.Contains(search) ||
+                                             r.CustomerName.Contains(search) ||
+                                             r.Email.Contains(search) ||
+                                             r.OrderNumber.Contains(search));
+            }
+
+            // Apply status filter
+            switch (filter.ToLower())
+            {
+                case "refund":
+                    requests = requests.Where(r => r.RequestType == "Refund");
+                    break;
+                case "warranty":
+                    requests = requests.Where(r => r.RequestType == "Warranty");
+                    break;
+                case "recent":
+                    DateTime sevenDay_ago = DateTime.Now.AddDays(-7);
+                    requests = requests.Where(r => r.RequestDate >= sevenDay_ago);
+                    break;
+                default:
+                    // Show all
+                    break;
+            }
+
+            var supportRequests = requests.OrderByDescending(r => r.RequestDate).ToList();
+            
+            ViewBag.Filter = filter;
+            ViewBag.Search = search;
+            ViewBag.TotalRequests = dBO.SupportRequests.Count();
+            ViewBag.RefundRequests = dBO.SupportRequests.Count(r => r.RequestType == "Refund");
+            ViewBag.WarrantyRequests = dBO.SupportRequests.Count(r => r.RequestType == "Warranty");
+            //Thêm biến datetime 
+            DateTime sevenDaysAgo = DateTime.Now.AddDays(-7);
+            var recentRequests = dBO.SupportRequests
+                .Where(r => r.RequestDate >= sevenDaysAgo)
+                .ToList();
+            ViewBag.RecentRequests = recentRequests.Count() ;
+
+            return View(supportRequests);
+        }
+
+        public ActionResult SupportRequestDetails(string id)
+        {
+            if (HttpContext.Session.GetString("admin") == null)
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                return RedirectToAction("SupportRequestManagement");
+            }
+
+            var request = dBO.SupportRequests.FirstOrDefault(r => r.IdRequest == id);
+            if (request == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy yêu cầu hỗ trợ.";
+                return RedirectToAction("SupportRequestManagement");
+            }
+
+            return View(request);
+        }
+        public class JSONOrder
+        {
+            public string? requestId {get;set;}
+            public string? action {get;set;}
+            public string? reason {get;set;}
+
+
+        }
+        [HttpPost]
+        public ActionResult ProcessSupportRequest([FromForm] JSONOrder data)
+        {
+            if (HttpContext.Session.GetString("admin") == null)
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            try
+            {
+                //Lấy request được chọn
+                var request = dBO.SupportRequests.FirstOrDefault(r => r.IdRequest == data.requestId);
+                if (request == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy yêu cầu." });
+                }
+
+                string? adminName = HttpContext.Session.GetString("admin");
+                string statusMessage = "";
+                string Status = "";
+                if (data.action == "approve")
+                {
+                    statusMessage = $"Yêu cầu đã được phê duyệt bởi {adminName} vào {DateTime.Now:dd/MM/yyyy HH:mm}";
+                    Status = "Accepted";
+                    if (!string.IsNullOrEmpty(data.reason))
+                    {
+                        statusMessage += $". Ghi chú: {data.reason}";
+                    }
+                }
+                else if (data.action == "reject")
+                { 
+                    Status = "Rejected";
+                    statusMessage = $"Yêu cầu đã bị từ chối bởi {adminName} vào {DateTime.Now:dd/MM/yyyy HH:mm}";
+                    if (!string.IsNullOrEmpty(data.reason))
+                    {
+                        statusMessage += $". Lý do: {data.reason}";
+                    }
+                }
+
+                // Update the request description to include status
+                request.Status = Status;
+                request.Description = statusMessage ;
+                dBO.Entry(request).State = Microsoft.EntityFrameworkCore.EntityState.Modified;                 
+                dBO.SaveChanges();
+
+                return Json(new { 
+                    success = true, 
+                    message = data.action == "approve" ? "Đã phê duyệt yêu cầu thành công!" : "Đã từ chối yêu cầu thành công!",
+                    action = data.action,
+                    processedAt = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                    processedBy = adminName
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeleteSupportRequest(string requestId)
+        {
+            if (HttpContext.Session.GetString("admin") == null)
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            try
+            {
+                var request = dBO.SupportRequests.FirstOrDefault(r => r.IdRequest == requestId);
+                if (request == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy yêu cầu." });
+                }
+
+                dBO.SupportRequests.Remove(request);
+                dBO.SaveChanges();
+
+                return Json(new { success = true, message = "Đã xóa yêu cầu thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+        // =======================================================
+        // API: XÓA CUỘC TRÒ CHUYỆN CHAT VỚI KHÁCH HÀNG
+        // =======================================================
+        [HttpPost]
+        public ActionResult DeleteChatRoom(string roomName)
+        {
+            if (HttpContext.Session.GetString("admin") == null)
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập!" });
+            }
+
+            try
+            {
+                // Tìm toàn bộ tin nhắn của phòng chat này
+                var messages = _context.ChatMessage.Where(m => m.RoomId == roomName).ToList();
+                if (messages.Any())
+                {
+                    _context.ChatMessage.RemoveRange(messages);
+                    _context.SaveChanges();
+                }
+
+                return Json(new { success = true, message = "Đã xóa cuộc trò chuyện!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+
+
+        }
+        // =======================================================
+        // API: TẢI DANH SÁCH PHÒNG CHAT & KIỂM TRA TIN NHẮN OFFLINE
+        // =======================================================
+        [HttpGet]
+        public ActionResult GetChatRoomsSummary()
+        {
+            if (HttpContext.Session.GetString("admin") == null)
+            {
+                return Json(new { success = false });
+            }
+
+            try
+            {
+                var rooms = _context.ChatMessage.Select(m => m.RoomId).Distinct().ToList();
+                var result = new List<object>();
+
+                foreach (var room in rooms)
+                {
+                    // Lấy tin nhắn mới nhất của phòng này
+                    var lastMsg = _context.ChatMessage
+                        .Where(m => m.RoomId == room)
+                        .OrderByDescending(m => m.SentAt)
+                        .FirstOrDefault();
+
+                    // LOGIC: Nếu tin nhắn cuối cùng là của Khách (IsFromSupport = false) -> Admin chưa trả lời -> Là tin nhắn MỚI (Unread)
+                    bool isUnread = lastMsg != null && lastMsg.IsFromSupport == false;
+
+                    // Lấy Avatar
+                    var customer = dBO.Customers.FirstOrDefault(c => c.NameCus == room);
+                    string avatar = customer != null && !string.IsNullOrEmpty(customer.ImagePro) ? customer.ImagePro : "";
+
+                    result.Add(new { 
+                        room = room, 
+                        lastMessage = lastMsg != null ? lastMsg.Content : "Nhấn để xem tin nhắn",
+                        isUnread = isUnread,
+                        avatar = avatar
+                    });
+                }
+
+                return Json(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+    }
+    
+}

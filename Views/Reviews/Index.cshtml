@@ -1,0 +1,147 @@
+﻿@model IEnumerable<TechStore.Models.ReviewViewModel>
+
+@{
+    ViewBag.Title = "Review List";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h2 class="display-4 font-weight-bold text-primary">
+                <i class="fas fa-star-half-alt"></i> Danh sách đánh giá
+            </h2>
+            <hr class="w-25 mx-auto" />
+        </div>
+    </div>
+    <div class="card shadow-lg">
+        <div class="card-body p-0">
+            <table class="table table-hover table-bordered mb-0">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID Sản phẩm</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Số sao</th>
+                        <th>Nội dung</th>
+                        <th>Ngày review</th>
+                        <th>Bởi khách hàng</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge badge-info">@item.ProductID</span>
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.ProductsName)</td>
+                            <td>
+                                <span class="text-warning">
+                                    @for (int i = 0; i < item.Rating; i++)
+                                    {
+                                        <i class="fas fa-star"></i>
+                                    }
+                                    @for (decimal i = item.Rating; i < 5; i++)
+                                    {
+                                        <i class="far fa-star"></i>
+                                    }
+                                </span>
+                                <span class="ml-1 badge badge-light">@item.Rating/5</span>
+                            </td>
+                            <td>
+                                <span class="d-inline-block text-truncate" style="max-width: 200px;" title="@item.ReviewContent">
+                                    @item.ReviewContent
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-secondary">
+                                    @item.ReviewDate
+                                </span>
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.CustomerName)</td>
+                            @{
+                                //Nếu là true hiện đã ẩn và ngược lại
+                                if (item.IsHidden)
+                                {
+                                    <td>Đã ẩn</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <span class="btn btn-success btn-sm ml-1" data-review="@item.ReviewID">Hiện review</span>
+                                        </div>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>Đang hiện</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            @Html.ActionLink("Ẩn review", "Delete", new { id = item.ReviewID }, new { @class = "btn btn-danger btn-sm", title = "Delete this review" })
+                                        </div>
+                                    </td>
+                                }
+                            }
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add loading animation for cancel buttons
+        const cancelBtns = document.querySelectorAll('.btn.btn-success.btn-sm');
+        cancelBtns.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const review = this.dataset.review;
+                if (confirm('Bạn có chắc chắn hiện review này không?: ')) {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
+                    this.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        fetch('@Url.Action("ShowReview", "Reviews")', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ id: review })
+                        }).then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (confirm('Đã hiện thành công, nhấn ok để reset trang lại để hoàn tấc')) {
+                                    window.location.href = "@Url.Action("Index", "Reviews")";
+                                }
+                                else
+                                    return;
+                            }
+                            else {
+                                if (confirm('Hiện review không thành công, nhấn ok để reload lại trang')) {
+                                      window.location.href = "@Url.Action("Index", "Reviews")";
+                                }
+                                else {
+                                    this.innerHTML = originalText;
+                                    this.style.pointerEvents = 'auto';
+                                    return;
+
+                                }
+                            }
+                        }
+                        );
+                    }, 100);
+                }
+                else {
+                    this.innerHTML = originalText;
+                    this.style.pointerEvents = 'auto';
+                }
+            });
+        });
+
+    });
+</script>
+
+

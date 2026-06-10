@@ -1,0 +1,909 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Audio\\notify.mp3",
+      "PackagePath": "staticwebassets\\Audio\\notify.mp3"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\Site.css",
+      "PackagePath": "staticwebassets\\Content\\Site.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\StyleCart.css",
+      "PackagePath": "staticwebassets\\Content\\StyleCart.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\StyleSlide.css",
+      "PackagePath": "staticwebassets\\Content\\StyleSlide.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.rtl.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.rtl.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.rtl.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-grid.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-grid.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.rtl.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.rtl.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.rtl.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-reboot.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-reboot.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.rtl.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.rtl.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.rtl.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap-utilities.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap-utilities.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.rtl.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.rtl.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.rtl.min.css",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\bootstrap.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\Content\\bootstrap.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\styleLogSign.css",
+      "PackagePath": "staticwebassets\\Content\\styleLogSign.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Content\\stylepro.css",
+      "PackagePath": "staticwebassets\\Content\\stylepro.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\Barack_Obama.jpg",
+      "PackagePath": "staticwebassets\\Images\\Barack_Obama.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\C.jpg",
+      "PackagePath": "staticwebassets\\Images\\C.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\Donald_Trump.jpg",
+      "PackagePath": "staticwebassets\\Images\\Donald_Trump.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\Laptop.jpg",
+      "PackagePath": "staticwebassets\\Images\\Laptop.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC1.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC10.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC10.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC2.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC2.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC3.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC3.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC4.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC4.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC5.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC5.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC6.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC6.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC7.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC7.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC8.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC8.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\PC9.jpg",
+      "PackagePath": "staticwebassets\\Images\\PC9.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\asus-vivobook-go-15-e1504fa-r5-nj776w-thumb-600x600.jpg",
+      "PackagePath": "staticwebassets\\Images\\asus-vivobook-go-15-e1504fa-r5-nj776w-thumb-600x600.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\avatar-blank.jpg",
+      "PackagePath": "staticwebassets\\Images\\avatar-blank.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\banner1.jpg",
+      "PackagePath": "staticwebassets\\Images\\banner1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\banner2.jpg",
+      "PackagePath": "staticwebassets\\Images\\banner2.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\banner3.jpg",
+      "PackagePath": "staticwebassets\\Images\\banner3.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\cart.png",
+      "PackagePath": "staticwebassets\\Images\\cart.png"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\cusac.jpg",
+      "PackagePath": "staticwebassets\\Images\\cusac.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai1.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai10.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai10.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai2.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai2.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai3.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai3.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai4.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai4.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai5.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai5.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai6.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai6.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai7.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai7.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai8.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai8.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\dienthoai9.jpg",
+      "PackagePath": "staticwebassets\\Images\\dienthoai9.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\gemini_logo.png",
+      "PackagePath": "staticwebassets\\Images\\gemini_logo.png"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\image1.jpg",
+      "PackagePath": "staticwebassets\\Images\\image1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad1.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad10.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad10.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad2.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad2.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad3.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad3.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad4.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad4.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad5.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad5.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad6.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad6.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad7.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad7.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad8.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad8.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\ipad9.jpg",
+      "PackagePath": "staticwebassets\\Images\\ipad9.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt1.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt10.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt10.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt2.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt2.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt3.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt3.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt4.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt4.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt5.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt5.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt6.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt6.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt7.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt7.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt8.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt8.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\lt9.jpg",
+      "PackagePath": "staticwebassets\\Images\\lt9.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien1.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien10.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien10.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien11.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien11.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien12.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien12.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien13.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien13.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien14.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien14.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien15.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien15.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien16.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien16.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien17.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien17.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien18.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien18.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien19.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien19.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien2.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien2.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien20.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien20.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien3.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien3.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien4.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien4.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien5.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien5.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien6.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien6.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien7.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien7.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien8.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien8.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\phukien9.jpg",
+      "PackagePath": "staticwebassets\\Images\\phukien9.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\profile02.png",
+      "PackagePath": "staticwebassets\\Images\\profile02.png"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\sharp.jpg",
+      "PackagePath": "staticwebassets\\Images\\sharp.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe1.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe1.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe10.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe10.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe11.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe11.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe12.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe12.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe13.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe13.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe14.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe14.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe15.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe15.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe16.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe16.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe17.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe17.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe18.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe18.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe19.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe19.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe2.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe2.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe20.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe20.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe3.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe3.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe4.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe4.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe5.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe5.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe6.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe6.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe7.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe7.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe8.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe8.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\tainghe9.jpg",
+      "PackagePath": "staticwebassets\\Images\\tainghe9.jpg"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Images\\trumpphone.png",
+      "PackagePath": "staticwebassets\\Images\\trumpphone.png"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.bundle.js",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.bundle.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.bundle.js.map",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.bundle.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.bundle.min.js",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.bundle.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.bundle.min.js.map",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.bundle.min.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.esm.js",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.esm.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.esm.js.map",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.esm.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.esm.min.js",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.esm.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.esm.min.js.map",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.esm.min.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.js",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.js.map",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.min.js",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\bootstrap.min.js.map",
+      "PackagePath": "staticwebassets\\Scripts\\bootstrap.min.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.0.intellisense.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.0.intellisense.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.1.intellisense.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.1.intellisense.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.1.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.1.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.1.min.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.1.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.1.min.map",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.1.min.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.1.slim.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.1.slim.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.1.slim.min.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.1.slim.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery-3.7.1.slim.min.map",
+      "PackagePath": "staticwebassets\\Scripts\\jquery-3.7.1.slim.min.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery.validate-vsdoc.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery.validate-vsdoc.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery.validate.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery.validate.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery.validate.min.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery.validate.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery.validate.unobtrusive.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery.validate.unobtrusive.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\jquery.validate.unobtrusive.min.js",
+      "PackagePath": "staticwebassets\\Scripts\\jquery.validate.unobtrusive.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\modernizr-2.8.3.js",
+      "PackagePath": "staticwebassets\\Scripts\\modernizr-2.8.3.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\Scripts\\sideBarScript.js",
+      "PackagePath": "staticwebassets\\Scripts\\sideBarScript.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\js\\signalr\\dist\\browser\\signalr.js",
+      "PackagePath": "staticwebassets\\js\\signalr\\dist\\browser\\signalr.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\js\\site.js",
+      "PackagePath": "staticwebassets\\js\\site.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "PackagePath": "staticwebassets\\lib\\bootstrap"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\LICENSE.md"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.js"
+    },
+    {
+      "Id": "D:\\DoAn_CNPM_Nhom6\\TechStoreWeb.Core\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.TechStoreWeb.Core.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.TechStoreWeb.Core.props",
+      "PackagePath": "build\\TechStoreWeb.Core.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.TechStoreWeb.Core.props",
+      "PackagePath": "buildMultiTargeting\\TechStoreWeb.Core.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.TechStoreWeb.Core.props",
+      "PackagePath": "buildTransitive\\TechStoreWeb.Core.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

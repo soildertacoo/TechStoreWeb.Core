@@ -1,0 +1,289 @@
+@model IEnumerable<TechStore.Models.ShippingProvider>
+@{
+    ViewBag.Title = "Quản lý Đơn vị Vận chuyển";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-0 fw-bold" style="color: #4f46e5;"><i class="fas fa-truck-fast me-2"></i>Đối Tác Vận Chuyển</h3>
+            <p class="text-muted mb-0">Quản lý cấu hình API và Token của các đơn vị giao hàng</p>
+        </div>
+        
+        <a href="@Url.Action("createProvider", "Admins")" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm" style="background: #4f46e5; border: none;">
+            <i class="fas fa-plus me-2"></i>Thêm ĐVVC mới
+        </a>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 py-3 text-secondary">Tên ĐVVC</th>
+                            <th class="py-3 text-secondary">Mã Code</th>
+                            <th class="py-3 text-secondary">Trạng thái API</th>
+                            <th class="py-3 text-secondary">Hoạt động</th>
+                            <th class="px-4 py-3 text-end text-secondary">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            @* <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center fw-bold me-3" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                                @(string.IsNullOrEmpty(item.ProviderName) ? "S" : item.ProviderName.Substring(0, 1).ToUpper())
+                                            </div> *@
+                                            <span class="fw-bold text-dark">@Html.DisplayFor(modelItem => item.ProviderName)</span>
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="py-3 fw-semibold text-secondary">
+                                        <span class="bg-light px-2 py-1 rounded">@Html.DisplayFor(modelItem => item.ProviderCode)</span>
+                                    </td>
+                                    
+                                    <td class="py-3 status-api" apiItem ="@(!string.IsNullOrEmpty(item.ApiToken) ? item.ApiToken : "")">
+                                        @if (!string.IsNullOrEmpty(item.ApiToken))
+                                        {
+                                           <span class="text-success fw-semibold"><i class="fas fa-circle me-1" style="font-size: 10px;"></i> Đã kết nối</span>
+                                        }
+                                        else
+                                        {
+                                             <span class="text-secondary fw-semibold"><i class="fas fa-circle text-muted me-1" style="font-size: 10px;"></i>Mất kết nối</span>
+                                        }
+                                    </td>
+                                    
+                                    <td class="py-3">
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="text-success fw-semibold"><i class="fas fa-circle me-1" style="font-size: 10px;"></i> Đang bật</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary fw-semibold"><i class="fas fa-circle text-muted me-1" style="font-size: 10px;"></i> Đã tắt</span>
+                                        }
+                                    </td>
+                                    
+                                    <td class="px-4 py-3 text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="@Url.Action("editProvider", "Admins", new { code = item.ProviderCode })" class="btn btn-sm btn-light text-primary border rounded-3 px-3">
+                                                <i class="fas fa-edit me-1"></i> Cấu hình
+                                            </a>
+                                            
+                                            <button type="submit" id="btnDelete"class="btn btn-sm btn-light text-danger border rounded-3 px-3" providerCode ="@item.ProviderCode">
+                                                    <i class="fas fa-trash-alt"></i>Xóa DVVC
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <i class="fas fa-box-open text-muted mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                                    <p class="text-secondary mb-0">Chưa có Đơn vị Vận chuyển nào được cấu hình.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    // Lấy TOÀN BỘ các ô trạng thái trong bảng
+    const allStatusElements = document.querySelectorAll('.status-api');
+
+    // Nếu bảng trống (chưa có ĐVVC nào), thì không cần chạy nhịp tim cho tốn tài nguyên
+    if (allStatusElements.length === 0) return;
+
+    // Thiết lập nhịp tim kiểm tra API mỗi 2 phút (120000ms)
+    setInterval(() => {
+        console.log("Dang chay interval anh em a");
+        // Vòng lặp: Bắt mạch cho từng ĐVVC một
+        allStatusElements.forEach(async (apiStatus) => {
+            const apiToken = apiStatus.getAttribute('apiItem');
+            let statusHtml = ``;
+
+            try {
+                if (!apiToken) {
+                    throw new Error("Không tìm thấy Token ĐVVC.");
+                }
+
+                const response = await fetch("https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province", { 
+                    method: 'GET',
+                    headers:{ 
+                        'Content-Type': 'application/json',
+                        'Token': apiToken
+                    }
+                });
+
+                if (response.status === 200) {
+                    statusHtml = `<span class="text-success fw-semibold"><i class="fas fa-circle me-1" style="font-size: 10px;"></i> Đã kết nối</span>`;
+                } else {
+                    throw new Error(`Lỗi API trả về: ${response.status}`);
+                }
+                
+            } catch (err) {
+                console.log(`Lỗi Ping API (Token: ${apiToken}): `, err.message);
+                statusHtml = `<span class="text-secondary fw-semibold"><i class="fas fa-circle text-muted me-1" style="font-size: 10px;"></i>Mất kết nối</span>`;
+                
+            } finally {
+                apiStatus.innerHTML = statusHtml;
+            }
+        }); // Kết thúc forEach
+        
+        }, 120000);
+    });
+     // 1. Dùng Event Delegation: Bắt sự kiện click trên toàn trang
+    document.addEventListener('click', async function (e) {
+        // Tìm xem người dùng có click vào cái nút chứa class .btn-delete không 
+        // (Dùng closest để bắt trọn click lỡ người dùng bấm trúng cái icon thùng rác bên trong nút)
+        const btnDelete = e.target.closest('#btnDelete');
+        // Nếu không click vào nút xóa thì bỏ qua
+        if (!btnDelete) return; 
+
+        e.preventDefault(); // Chặn hành vi submit mặc định
+
+        // Thêm xác nhận trước khi xóa cho an toàn
+        if(!confirm("Bạn có chắc chắn muốn xóa ĐVVC này?")) return;
+
+        const providerCode = btnDelete.getAttribute('providerCode');
+        
+        try {
+            const response = await fetch("/Admins/providerDeleteData", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ providerCode: providerCode })
+            });
+
+            if (response.ok) {
+                // SỬA LỖI: Cần thêm chữ await trước response.json()
+                const data = await response.json(); 
+                
+                if (data.success) {
+                    alert("Đã xóa thành công!");
+                    reloadData(data.providerData);
+                } else {
+                    alert(data.message); 
+                }
+            } else {
+                alert("Lỗi phản hồi từ máy chủ!");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi mạng không thể kết nối!");
+        }
+       // Thiết lập nhịp tim kiểm tra API mỗi 2 phút (120000ms)
+        setInterval(async () => {
+            // Lấy token mỗi lần lặp phòng trường hợp Admin vừa sửa Token mới trên giao diện
+            const apiToken = apiStatus.getAttribute('apiItem');
+            let statusHtml = ``;
+
+            try {
+                if (!apiToken) {
+                    throw new Error("Không tìm thấy Token ĐVVC.");
+                }
+
+                const response = await fetch("https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province", { 
+                    method: 'GET',
+                    headers:{ 
+                        'Content-Type': 'application/json',
+                        'Token': apiToken
+                    }
+                });
+
+                // Dùng response.status để lấy mã HTTP trả về từ máy chủ
+                if (response.status === 200) {
+                    statusHtml = `<span class="text-success fw-semibold"><i class="fas fa-circle me-1" style="font-size: 10px;"></i> Đã kết nối</span>`;
+                } else {
+                    throw new Error(`Lỗi API trả về: ${response.status}`);
+                }
+                
+            } catch (err) {
+                // In log ra Console để dev dễ debug, nhưng trên UI vẫn báo "Mất kết nối" cho User
+                console.log("Lỗi Ping API: ", err.message);
+                statusHtml = `<span class="text-secondary fw-semibold"><i class="fas fa-circle text-muted me-1" style="font-size: 10px;"></i>Mất kết nối</span>`;
+                
+            } finally {
+               
+                apiStatus.innerHTML = statusHtml;
+            }
+        }, 120000);
+    });
+
+    // 2. Hàm vẽ lại bảng (Chỉ cập nhật phần thân TBODY cho nhẹ web, không vẽ lại cả bảng)
+    function reloadData(listProvider) {
+        // Tìm thẳng vào phần <tbody> của bảng
+        const tbody = document.querySelector('.table tbody'); // <table> ---> <tbody/>  </table>
+        tbody.innerHTML = ``; // Xóa trắng dữ liệu cũ
+        
+        if (!listProvider || listProvider.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <i class="fas fa-box-open text-muted mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p class="text-secondary mb-0">Chưa có Đơn vị Vận chuyển nào được cấu hình.</p>
+                    </td>
+                </tr>`;
+            return;
+        }
+        
+        let html = "";
+        listProvider.forEach(provider => {
+            // Xử lý logic hiển thị, chú ý chữ cái đầu tiên trong biến auto về chữ thường TokenMU --> tokenMU, underfined là lỗi chữ hoa thường
+            const apiStatusHtml = provider.apiToken 
+                ? `<span class="text-success fw-semibold"><i class="fas fa-circle me-1" style="font-size: 10px;"></i> Đã kết nối</span>`
+                : `<span class="text-secondary fw-semibold"><i class="fas fa-circle text-muted me-1" style="font-size: 10px;"></i>Mất kết nối</span>`;
+                
+            const activeStatusHtml = provider.isActive 
+                ? `<span class="text-success fw-semibold"><i class="fas fa-circle me-1" style="font-size: 10px;"></i> Đang bật</span>`
+                : `<span class="text-secondary fw-semibold"><i class="fas fa-circle text-muted me-1" style="font-size: 10px;"></i> Đã tắt</span>`;
+
+            html += `
+                <tr>
+                    <td class="px-4 py-3">
+                        <div class="d-flex align-items-center">
+                            <span class="fw-bold text-dark">${provider.providerName}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 fw-semibold text-secondary">
+                        <span class="bg-light px-2 py-1 rounded">${provider.providerCode}</span>
+                    </td>
+                    <td class="py-3">${apiStatusHtml}</td>
+                    <td class="py-3">${activeStatusHtml}</td>
+                    <td class="px-4 py-3 text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="/Admins/editProvider?code=${provider.ProviderCode}" class="btn btn-sm btn-light text-primary border rounded-3 px-3">
+                                <i class="fas fa-edit me-1"></i> Cấu hình
+                            </a>
+                            <button type="button" class="btn btn-sm btn-light text-danger border rounded-3 px-3 btn-delete" providerCode="${provider.ProviderCode}">
+                                <i class="fas fa-trash-alt"></i> Xóa ĐVVC
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html; // Đắp HTML mới vào
+    }
+</script>

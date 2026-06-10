@@ -1,0 +1,32 @@
+﻿@{
+    ViewBag.Title = "ProductsManagement";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Quản lý Sản phẩm</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Tên sản phẩm</th>
+            <th>Danh mục</th>
+            <th>Giá</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Vòng lặp để hiển thị danh sách sản phẩm -->
+        <tr>
+            <td>1</td>
+            <td>Products Name</td>
+            <td>Category Name</td>
+            <td>$100.00</td>
+            <td>2024-11-10</td>
+            <td>
+                <a href="#" class="btn btn-sm btn-primary">Chỉnh sửa</a>
+                <a href="#" class="btn btn-sm btn-danger">Xóa</a>
+            </td>
+        </tr>
+    </tbody>
+</table>

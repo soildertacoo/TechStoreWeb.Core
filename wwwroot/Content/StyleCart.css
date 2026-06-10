@@ -1,0 +1,129 @@
+﻿/* Table styling */
+.table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+    .table th, .table td {
+        padding: 16px 20px;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .table thead {
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        color: #ffffff;
+        text-transform: uppercase;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .table tbody tr:hover {
+        background-color: #e3f2fd;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+/* Buttons styling */
+.btn {
+    font-size: 0.9rem;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-outline-success {
+    color: #28a745;
+    border: 2px solid #28a745;
+    background: transparent;
+}
+
+    .btn-outline-success:hover {
+        background-color: #28a745;
+        color: #ffffff;
+        box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);
+    }
+
+/* Icons */
+.fas {
+    margin-right: 8px;
+    font-size: 1.2rem;
+    color: #007bff;
+    transition: transform 0.3s ease-in-out;
+}
+
+    .fas:hover {
+        transform: scale(1.2);
+    }
+
+/* Quantity control styling */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.quantity-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    line-height: 34px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    background-color: #f8f9fa;
+    border: 2px solid #007bff;
+    color: #007bff;
+    transition: all 0.3s ease-in-out;
+}
+
+    .quantity-btn:hover {
+        background-color: #007bff;
+        color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+    }
+
+.quantity-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 0 12px;
+    min-width: 50px;
+    text-align: center;
+    color: #343a40;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+
+    .quantity-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+        line-height: 28px;
+    }
+
+    .quantity-display {
+        font-size: 1rem;
+    }
+}

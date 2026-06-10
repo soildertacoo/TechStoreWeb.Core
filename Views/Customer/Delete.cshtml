@@ -1,0 +1,65 @@
+﻿@model TechStore.Models.Customer
+
+@{
+    ViewBag.Title = "Delete Customer";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">Xóa thông tin khách hàng</h2>
+    <h3 class="text-center text-danger">Bạn có chắc chắn muốn xóa thông tin này không?</h3>
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Customer Details</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NameCus)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.NameCus)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PhoneCus)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.PhoneCus)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.EmailCus)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.EmailCus)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PassCus)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.PassCus)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.StreetAddress)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.StreetAddress)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Ward)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Ward)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.District)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.District)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.City)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.City)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DateOfBirth)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.DateOfBirth)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.RegisteredDate)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.RegisteredDate)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.IsVIP)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.IsVIP)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.MembershipLevel)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.MembershipLevel)</dd>
+            </dl>
+        </div>
+        <div class="card-footer text-center">
+            @using (Html.BeginForm("Delete", "Customer", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.IDCus)
+                <button type="submit" class="btn btn-danger">Xóa</button>
+                @Html.ActionLink("Trở về danh sách", "Index", null, new { @class = "btn btn-secondary ml-2" })
+            }
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,47 @@
+﻿@model TechStore.Models.OrderDetails
+
+@{
+    ViewBag.Title = "Delete Order Detail";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">Xóa chi tiết đơn hàng</h2>
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ID)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ID)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Products.NamePro)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Products.NamePro)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.OrderPro.ID)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.OrderPro.ID)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Quantity)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Quantity)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.UnitPrice)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.UnitPrice)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Discount)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Discount)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Subtotal)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Subtotal)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Note)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Note)</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="text-center mt-3">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <input type="submit" value="Xóa" class="btn btn-danger" />
+        }
+        @Html.ActionLink("Quay lại trang trước", "Index", null, new { @class = "btn btn-secondary" })
+    </div>
+</div>

@@ -1,0 +1,166 @@
+﻿@model TechStore.Models.HoaDonModel
+
+@{
+    Layout = null; // In hóa đơn thường không dùng layout
+    var culture = new System.Globalization.CultureInfo("vi-VN");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Hóa đơn đơn hàng #@Model.TrackingNumber</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            color: #222;
+        }
+
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            background: #fff;
+        }
+
+        h2, h4 {
+            margin-bottom: 0;
+        }
+
+        .info-table td {
+            padding: 4px 8px;
+        }
+
+        .Products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .Products-table th, .Products-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            .Products-table th {
+                background: #f5f5f5;
+            }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background: #f9f9f9;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: right;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .logo {
+            max-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <table style="width:100%;">
+            <tr>
+                <td>
+                    <h2>HÓA ĐƠN BÁN HÀNG</h2>
+                    <h4>Mã đơn: #@Model.TrackingNumber</h4>
+                </td>
+                <td class="text-right">
+                    <img src="~/Content/logo.png" class="logo" alt="Logo" />
+                </td>
+            </tr>
+        </table>
+        <hr />
+
+        <table class="info-table" style="width:100%; margin-bottom: 20px;">
+            <tr>
+                <td><strong>Khách hàng:</strong></td>
+                <td>@Model.CustomerName</td>
+                <td><strong>Ngày đặt:</strong></td>
+                <td>@(Model.DateOrder?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+            </tr>
+            <tr>
+                <td><strong>Địa chỉ giao hàng:</strong></td>
+                <td>@Model.AddressDeliverry</td>
+                <td><strong>Ngày giao:</strong></td>
+                <td>@(Model.DeliveryDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+            </tr>
+            <tr>
+                <td><strong>Trạng thái:</strong></td>
+                <td>@Model.Status</td>
+                <td><strong>Phương thức thanh toán:</strong></td>
+                <td>@Model.PaymentMethod</td>
+            </tr>
+            <tr>
+                <td><strong>Trạng thái thanh toán:</strong></td>
+                <td>@Model.PaymentStatus</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <table class="Products-table">
+            <thead>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th>Sản phẩm</th>
+                    <th class="text-center">Hình ảnh</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-right">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Products.Count; i++)
+                {
+                    var p = Model.Products[i];
+                    <tr>
+                        <td class="text-center">@(i + 1)</td>
+                        <td>@p.ProductsName</td>
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(p.ImagePro))
+                            {
+                                <img src="~/Images/@p.ImagePro" style="max-width:50px; max-height:50px;" />
+                            }
+                        </td>
+                        <td class="text-right">@string.Format(culture, "{0:C0}", p.UnitPrice)</td>
+                        <td class="text-center">@p.Quantity</td>
+                        <td class="text-right">@string.Format(culture, "{0:C0}", p.UnitPrice * p.Quantity)</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-right">Phí vận chuyển:</td>
+                    <td class="text-right">@string.Format(culture, "{0:C0}", Model.ShippingCost ?? 0)</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="5" class="text-right">Tổng cộng:</td>
+                    <td class="text-right">@string.Format(culture, "{0:C0}", Model.TotalAmount ?? 0)</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="footer">
+            <p>Cảm ơn quý khách đã mua hàng tại TechStore!</p>
+            <p>Ngày in hóa đơn: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+    </div>
+</body>
+</html>

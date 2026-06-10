@@ -1,0 +1,32 @@
+﻿<style>
+    .cart-trigger { cursor: pointer; text-decoration: none; user-select: none; }
+    .cart-icon-wrapper { display: flex; align-items: center; justify-content: center; }
+    .cart-img { width: 40px; height: auto; transition: transform 0.2s; }
+    .cart-trigger:hover .cart-img { transform: scale(1.1); } /* Hiệu ứng phình to nhẹ khi rê chuột */
+    .cart-qty-badge {
+        margin-left: 8px; color: #fff; background-color: #e74c3c;
+        font-weight: bold; font-size: 14px; padding: 2px 8px; border-radius: 20px;
+    }
+</style>
+
+<a onclick="openClosePopup(event)" class="cart-trigger" title="Giỏ hàng của bạn">
+    <div class="cart-icon-wrapper">
+        <img src="~/Images/cart.png" alt="Giỏ hàng" class="cart-img">
+        <span id="cartQuantity" class="cart-qty-badge">0</span>
+    </div>
+</a>
+
+<script>
+    // Hàm tải số lượng giỏ hàng bằng JS thuần (Fetch)
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('@Url.Action("GetCartQuantity", "Cart")');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('cartQuantity').innerText = data.quantity || 0;
+            }
+        } catch (error) {
+            console.error("Lỗi đếm số lượng:", error);
+        }
+    });
+</script>

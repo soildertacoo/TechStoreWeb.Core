@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\TechStoreWeb.Core.props" />
+</Project>

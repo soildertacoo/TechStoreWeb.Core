@@ -1,0 +1,302 @@
+﻿@model IEnumerable<TechStore.Models.Products>
+@{
+    ViewBag.Title = "Kết quả tìm kiếm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --text-dark: #2d3748;
+        --text-muted: #718096;
+        --bg-light: #f8fafc;
+        --bg-white: #ffffff;
+        --border-light: #e2e8f0;
+        --shadow-hover: 0 20px 60px rgba(0,0,0,0.15);
+        --border-radius: 16px;
+    }
+
+    .homepage-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* ÉP CỨNG 4 CỘT: Dù có 1 hay 10 sản phẩm cũng không bị giãn to */
+    .Products-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 30px;
+        margin-bottom: 50px;
+    }
+
+    .Products-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        border: 1px solid var(--border-light);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .Products-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--shadow-hover);
+        border-color: transparent;
+    }
+
+    .Products-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+        background: var(--bg-light);
+    }
+
+    /* TRẢ LẠI COVER: Ảnh tràn viền chuẩn xịn như Index */
+    .Products-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; 
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .Products-card:hover .Products-image {
+        transform: scale(1.1);
+    }
+
+    .Products-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        z-index: 2;
+    }
+
+    .Products-card:hover .Products-overlay { opacity: 1; }
+
+    .view-details {
+        color: white; font-weight: 700; font-size: 1.1rem;
+        text-transform: uppercase; letter-spacing: 1px;
+        display: flex; align-items: center; gap: 10px;
+        transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .Products-card:hover .view-details { transform: translateY(0); }
+
+    .discount-badge {
+        position: absolute; top: 15px; left: 15px;
+        background: var(--secondary-gradient); color: white;
+        padding: 8px 12px; border-radius: 8px;
+        font-size: 0.85rem; font-weight: 700; z-index: 5;
+        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+    }
+
+    /* NÚT TIM Y HỆT INDEX */
+    .wishlist-btn {
+        position: absolute; bottom: 15px; right: 15px;
+        background: rgba(255, 255, 255, 0.95); border: none;
+        width: 50px; height: 50px; border-radius: 50%;
+        cursor: pointer; z-index: 6; display: flex; align-items: center; justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(15px); border: 2px solid rgba(255,255,255,0.8);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+    }
+    .wishlist-btn:hover { background: #fff; transform: scale(1.15); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+    .wishlist-btn.active { background: var(--secondary-gradient); border-color: rgba(245, 87, 108, 0.5); transform: scale(1.1); }
+    .wishlist-icon { font-size: 22px; transition: all 0.3s ease; color: #ff6b9d; }
+    .wishlist-btn.active .wishlist-icon { color: white; animation: heartBeat 0.6s ease-in-out; }
+    .wishlist-count {
+        position: absolute; top: -10px; right: -10px; background: var(--accent-gradient); color: white;
+        font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 15px;
+        min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+        border: 2px solid white;
+    }
+
+    .Products-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+    .Products-name {
+        font-size: 1.15rem; font-weight: 700; color: var(--text-dark);
+        margin-bottom: 15px; line-height: 1.4; height: 3.2em;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    .price-container { margin-top: auto; display: flex; align-items: center; gap: 12px; }
+    .Products-price { margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
+    .price-current {
+        font-size: 1.35rem; font-weight: 800; background: var(--primary-gradient);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .price-original { font-size: 1rem; color: var(--text-muted); text-decoration: line-through; font-weight: 500; }
+
+    .Products-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .star { font-size: 14px; color: #ddd; }
+    .star.filled { color: #ffd700; }
+    .rating-value { font-size: 0.875rem; color: var(--text-muted); font-weight: 600; }
+    .rating-count { font-size: 0.8rem; color: var(--text-muted); }
+
+    .alert-enhanced {
+        background: #fef2f2; color: #b91c1c; padding: 15px 20px; border-radius: 10px;
+        margin: 0 auto 25px; border: 1px solid #fecaca; max-width: 600px; text-align: center;
+    }
+
+    /* RESPONSIVE HẠ CỘT XUỐNG DẦN */
+    @@media (max-width: 1024px) { .Products-grid { grid-template-columns: repeat(3, 1fr); } }
+    @@media (max-width: 768px) { .Products-grid { grid-template-columns: repeat(2, 1fr); } }
+    @@media (max-width: 480px) { .Products-grid { grid-template-columns: 1fr; } }
+    
+    @@keyframes heartBeat {
+        0%, 100% { transform: scale(1); } 25% { transform: scale(1.2); }
+        50% { transform: scale(1.1); } 75% { transform: scale(1.15); }
+    }
+    @@keyframes wishlistPulse {
+        0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); }
+    }
+    .wishlist-btn.pulse { animation: wishlistPulse 0.6s ease-in-out; }
+</style>
+
+<main class="homepage-container" style="padding-top: 120px;">
+    <h2 class="section-title text-center mb-5" style="font-size: 2.2rem;">KẾT QUẢ TÌM KIẾM</h2>
+    
+    @if (ViewBag.Loi != null)
+    {
+        <div class="alert alert-enhanced">
+            <i class="fas fa-info-circle"></i> @ViewBag.Loi
+        </div>
+    }
+    else
+    {
+        <div class="Products-grid">
+            @foreach (var item in Model)
+            {
+                <article class="Products-card" onclick="window.location.href='@Url.Action("Details", "CustomerPro", new { id = item.ProductID })'">
+                    
+                    <div class="Products-image-wrapper">
+                        @if (item.Discount > 0)
+                        {
+                            <div class="discount-badge">-@item.Discount% OFF</div>
+                        }
+
+                        <img src="~/Images/@item.ImagePro" alt="@item.NamePro" class="Products-image" loading="lazy" />
+                             
+                        <div class="Products-overlay">
+                            <span class="view-details"><i class="fas fa-eye"></i> Xem chi tiết</span>
+                        </div>
+
+                        <button class="wishlist-btn" onclick="event.stopPropagation(); wishlistController.toggleWishlist(@item.ProductID, this)" aria-label="Thả tim">
+                            <i class="wishlist-icon fas fa-heart"></i>
+                            <span class="wishlist-count" id="wishlist-count-@item.ProductID">0</span>
+                        </button>
+                    </div>
+
+                    <div class="Products-info">
+                        <h3 class="Products-name">@item.NamePro</h3>
+
+                        <div class="Products-rating">
+                            <div class="rating-stars">
+                                <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+                            </div>
+                            <span class="rating-value">5.0</span>
+                            <span class="rating-count">(127 đánh giá)</span>
+                        </div>
+
+                        <div class="price-container">
+                            @if (item.Discount > 0)
+                            {
+                                var originalPrice = item.Price / (1 - (decimal)item.Discount / 100);
+                                <p class="Products-price">
+                                    <span class="price-current">@((decimal)item.Price).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</span>
+                                    <span class="price-original">@((decimal)originalPrice).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</span>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="Products-price">
+                                    <span class="price-current">@(decimal.TryParse(item.Price.ToString(), out decimal price) ? price.ToString("N0") : item.Price) ₫</span>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</main>
+
+<script>
+    const wishlistController = {
+        likeCounts: JSON.parse(localStorage.getItem('likeCounts') || '{}'),
+        likedProducts: JSON.parse(localStorage.getItem('likedProducts') || '{}'),
+
+        init() { this.updateAllWishlistUI(); },
+
+        toggleWishlist(ProductID, buttonElement) {
+            if (this.likedProducts[ProductID]) this.removeFromWishlist(ProductID, buttonElement);
+            else this.addToWishlist(ProductID, buttonElement);
+        },
+
+        addToWishlist(ProductID, buttonElement) {
+            this.likedProducts[ProductID] = true;
+            this.likeCounts[ProductID] = (this.likeCounts[ProductID] || 0) + 1;
+            this.triggerPulse(buttonElement);
+            this.updateWishlistUI(ProductID, buttonElement);
+            this.saveAndNotify(`Đã thả tim! ❤️ (${this.likeCounts[ProductID]} lượt thích)`, 'success');
+        },
+
+        removeFromWishlist(ProductID, buttonElement) {
+            this.likedProducts[ProductID] = false;
+            if (this.likeCounts[ProductID] > 0) this.likeCounts[ProductID]--;
+            this.triggerPulse(buttonElement);
+            this.updateWishlistUI(ProductID, buttonElement);
+            this.saveAndNotify(`Đã bỏ tim! 💔 (${this.likeCounts[ProductID]} lượt thích)`, 'error');
+        },
+
+        triggerPulse(buttonElement) {
+            buttonElement.classList.add('pulse');
+            setTimeout(() => buttonElement.classList.remove('pulse'), 600);
+        },
+
+        updateWishlistUI(ProductID, buttonElement) {
+            const countElement = buttonElement.querySelector('.wishlist-count');
+            const count = this.likeCounts[ProductID] || 0;
+            countElement.textContent = count;
+            
+            buttonElement.classList.toggle('active', this.likedProducts[ProductID]);
+            countElement.style.display = count > 0 ? 'flex' : 'none';
+        },
+
+        updateAllWishlistUI() {
+            document.querySelectorAll('[id^="wishlist-count-"]').forEach(countEl => {
+                const id = countEl.id.replace('wishlist-count-', '');
+                this.updateWishlistUI(id, countEl.closest('.wishlist-btn'));
+            });
+        },
+
+        saveAndNotify(message, type) {
+            localStorage.setItem('likeCounts', JSON.stringify(this.likeCounts));
+            localStorage.setItem('likedProducts', JSON.stringify(this.likedProducts));
+            this.showNotification(message, type);
+        },
+
+        showNotification(message, type) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `position: fixed; top: 100px; right: 20px; background: ${type === 'success' ? '#10b981' : '#ef4444'}; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 9999; font-weight: 600; transform: translateX(100%); transition: transform 0.3s;`;
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            requestAnimationFrame(() => notif.style.transform = 'translateX(0)');
+            setTimeout(() => {
+                notif.style.transform = 'translateX(100%)';
+                setTimeout(() => document.body.removeChild(notif), 300);
+            }, 3000);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => wishlistController.init());
+</script>

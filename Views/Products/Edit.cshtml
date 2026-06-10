@@ -1,0 +1,427 @@
+﻿@model TechStore.Models.Products
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<style>
+    /* Tổng quan */
+    .edit-Products-container {
+        background-color: #f1f5f9; /* Màu nền xám xanh nhạt hiện đại */
+        min-height: 100vh;
+        padding: 40px 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Thẻ Card chính */
+    .Products-edit-card {
+        border: none;
+        border-radius: 24px; /* Bo góc to hơn */
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05); /* Bóng đổ mượt và sâu */
+        background: #ffffff;
+        overflow: hidden;
+    }
+
+    /* Header */
+    .card-header-custom {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); /* Màu Indigo chuẩn trend */
+        color: white;
+        padding: 30px 25px;
+        text-align: center;
+        border: none;
+    }
+
+    .card-header-custom h2 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.75rem;
+        letter-spacing: -0.5px;
+    }
+
+    /* Khu vực Ảnh */
+    .image-preview-section {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        position: sticky; /* Giữ ảnh luôn hiển thị khi cuộn form */
+        top: 20px;
+    }
+
+    .image-preview-section h5 {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+
+    .image-preview-wrapper {
+        position: relative;
+        display: inline-block;
+        border-radius: 12px;
+        padding: 8px;
+        background: white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    #imagePreview {
+        width: 100%;
+        max-height: 250px;
+        object-fit: cover; /* Đảm bảo ảnh không bị méo */
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    /* Form Inputs */
+    .form-group-modern {
+        margin-bottom: 24px;
+    }
+
+    .form-label-modern {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        display: block;
+    }
+
+    .form-label-modern i {
+        color: #8b5cf6; /* Nhấn nhá icon màu tím nhạt */
+    }
+
+    .input-icon {
+        position: relative;
+    }
+
+    .input-icon i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        z-index: 2;
+        transition: color 0.3s ease;
+    }
+
+    .form-control-modern {
+        background-color: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 15px 14px 45px; /* Chừa chỗ cho icon */
+        font-size: 0.95rem;
+        color: #1e293b;
+        transition: all 0.3s ease;
+        box-shadow: none;
+    }
+
+    /* Dành riêng cho Textarea không có icon thì bỏ padding trái */
+    textarea.form-control-modern {
+        padding-left: 15px; 
+    }
+
+    /* Hiệu ứng khi đang nhập liệu */
+    .form-control-modern:focus {
+        background-color: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        outline: none;
+    }
+
+    .form-control-modern:focus + i, 
+    .input-icon:focus-within i {
+        color: #6366f1; /* Đổi màu icon khi focus */
+    }
+
+    /* Nút Upload Ảnh Đổi Mới */
+    .file-input-wrapper {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+
+    .file-input-custom {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        z-index: 3;
+    }
+
+    .file-input-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        background: #f1f5f9;
+        color: #6366f1;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .file-input-wrapper:hover .file-input-label {
+        background: #e0e7ff;
+        border-color: #8b5cf6;
+        color: #4f46e5;
+    }
+
+    /* Nút Hành Động */
+    .form-actions-modern {
+        margin-top: 40px;
+        padding-top: 25px;
+        text-align: right; /* Căn phải nhìn chuyên nghiệp hơn */
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-modern {
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .btn-save {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-save:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+        color: white;
+    }
+
+    .btn-back {
+        background: white;
+        color: #64748b;
+        border: 1.5px solid #cbd5e1;
+        margin-right: 15px;
+    }
+
+    .btn-back:hover {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #94a3b8;
+    }
+
+    .error-message {
+        background: #fef2f2;
+        color: #991b1b;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #fecaca;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="edit-Products-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card Products-edit-card">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-edit me-2"></i>Chỉnh sửa sản phẩm</h2>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        @if (ViewBag.Loi != null)
+                        {
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+                                <span>@ViewBag.Loi</span>
+                            </div>
+                        }
+
+                        <div class="row g-5"> <div class="col-lg-4">
+                                <div class="image-preview-section">
+                                    <h5>Hình ảnh hiện tại</h5>
+                                    <div class="image-preview-wrapper">
+                                        <img id="imagePreview" src="~/Images/@(string.IsNullOrEmpty(Model.ImagePro) ? "no-image.jpg" : Model.ImagePro)" alt="Product Image" />
+                                    </div>
+                                    <small class="text-muted d-block mt-3">Định dạng: JPG, PNG. Tối đa: 5MB</small>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-8">
+                                @using (Html.BeginForm("Edit", "Products", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    @Html.HiddenFor(model => model.ProductID)
+
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            <i class="fas fa-tag me-2"></i>Tên sản phẩm
+                                        </label>
+                                        <div class="input-icon">
+                                            <i class="fas fa-cube"></i>
+                                            @Html.EditorFor(model => model.NamePro, new { htmlAttributes = new { @class = "form-control form-control-modern", @placeholder = "Nhập tên sản phẩm..." } })
+                                        </div>
+                                        @Html.ValidationMessageFor(model => model.NamePro, "", new { @class = "text-danger small mt-1" })
+                                    </div>
+
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            <i class="fas fa-align-left me-2"></i>Mô tả sản phẩm
+                                        </label>
+                                        @Html.TextAreaFor(model => model.DecriptionPro, new { @class = "form-control form-control-modern", rows = 5, @placeholder = "Nhập mô tả chi tiết sản phẩm..." })
+                                        @Html.ValidationMessageFor(model => model.DecriptionPro, "", new { @class = "text-danger small mt-1" })
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label class="form-label-modern">
+                                                    <i class="fas fa-dollar-sign me-2"></i>Giá thành sản phẩm
+                                                </label>
+                                                <div class="input-icon">
+                                                    <i class="fas fa-money-bill-wave"></i>
+                                                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control form-control-modern", @placeholder = "0", @type = "number", @step = "0.01" } })
+                                                </div>
+                                                @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger small mt-1" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label class="form-label-modern">
+                                                    <i class="fas fa-percentage me-2"></i>Mã giảm giá (%)
+                                                </label>
+                                                <div class="input-icon">
+                                                    <i class="fas fa-percent"></i>
+                                                    @Html.EditorFor(model => model.Discount, new { htmlAttributes = new { @class = "form-control form-control-modern", @placeholder = "0", @type = "number", @min = "0", @max = "100" } })
+                                                </div>
+                                                @Html.ValidationMessageFor(model => model.Discount, "", new { @class = "text-danger small mt-1" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            <i class="fas fa-list me-2"></i>Thuộc phân loại
+                                        </label>
+                                        @Html.DropDownList("Category", (SelectList)ViewBag.CategoryName, "-- Chọn danh mục --", htmlAttributes: new { @class = "form-select form-control-modern" })
+                                        @Html.ValidationMessageFor(model => model.Category, "", new { @class = "text-danger small mt-1" })
+                                    </div>
+
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            <i class="fas fa-image me-2"></i>Thay đổi hình ảnh mới
+                                        </label>
+                                        <div class="file-input-wrapper">
+                                            <input type="file" name="ImagePro" accept="image/*" class="file-input-custom" onchange="previewImage(event)" />
+                                            <div class="file-input-label">
+                                                <i class="fas fa-cloud-upload-alt fs-5 me-2"></i> Nhấn hoặc kéo thả ảnh vào đây để tải lên
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions-modern">
+                                        @Html.ActionLink("Hủy thao tác", "Index", "", htmlAttributes: new { @class = "btn btn-modern btn-back" })
+                                        <button type="submit" class="btn btn-modern btn-save">
+                                            <i class="fas fa-save me-2"></i> Lưu thay đổi
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        var input = event.target;
+        var reader = new FileReader();
+        
+        reader.onload = function() {
+            var dataURL = reader.result;
+            var output = document.getElementById('imagePreview');
+            output.src = dataURL;
+            
+            // Thêm hiệu ứng nháy mờ nhẹ để user biết ảnh đã được đổi
+            output.style.opacity = '0.5';
+            setTimeout(function() {
+                output.style.opacity = '1';
+                output.style.transition = 'opacity 0.3s ease-in-out';
+            }, 50);
+        };
+        
+        if (input.files && input.files[0]) {
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    function previewImage(event) {
+        var input = event.target;
+        var reader = new FileReader();
+
+        if (input.files != null && input.files[0]) {
+            // Validate file size (5MB max)
+            if (input.files[0].size > 5 * 1024 * 1024) {
+                alert('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 5MB.');
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            if (!input.files[0].type.match('image.*')) {
+                alert('Vui lòng chọn file hình ảnh.');
+                input.value = '';
+                return;
+            }
+
+            reader.readAsDataURL(input.files[0]); //chuyen nguyen hinh thanh url, bat buoc
+
+            // Update file input label
+            var fileName = input.files[0].name;
+            var label = input.nextElementSibling;
+            label.innerHTML = '<i class="fas fa-check"></i>' + fileName;
+            label.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+        }
+
+        reader.onload = function () {
+            var img = document.getElementById('imagePreview');
+            img.src = reader.result;
+            img.style.display = 'block';
+
+            // Add fade in animation
+            img.style.opacity = '0';
+            setTimeout(function () {
+                img.style.transition = 'opacity 0.5s ease';
+                img.style.opacity = '1';
+            }, 100);
+        };
+    }
+
+    // Add form validation feedback
+    document.addEventListener('DOMContentLoaded', function () {
+        var inputs = document.querySelectorAll('.form-control-modern');
+        inputs.forEach(function (input) {
+            input.addEventListener('blur', function () {
+                if (this.value.trim() !== '') {
+                    this.style.borderColor = '#28a745';
+                } else {
+                    this.style.borderColor = '#e9ecef';
+                }
+            });
+        });
+    });
+</script>

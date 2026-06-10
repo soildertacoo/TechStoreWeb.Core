@@ -1,0 +1,342 @@
+﻿@model TechStore.Models.SupportRequest
+@{
+    ViewBag.Title = "Kết quả yêu cầu hỗ trợ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // 1. Phân tích thông báo từ TempData hoặc ViewBag
+    var notifyData = TempData["notify_sendRequest"] ?? ViewBag.Notify;
+    bool isSuccess = true;
+    string notifyMessage = "Yêu cầu của bạn đã được tiếp nhận!";
+
+    if (notifyData != null)
+    {
+        var parts = notifyData.ToString().Split('|');
+        if (parts.Length > 1)
+        {
+            isSuccess = parts[0].Trim().ToLower() == "success";
+            notifyMessage = parts[1];
+        }
+        else
+        {
+            notifyMessage = notifyData.ToString();
+        }
+    }
+
+    // 2. Xử lý tách chuỗi Description (vì bạn đã ghép "Trạng thái|Nội dung" ở Controller)
+    string cleanDescription = Model.Description;
+    if (!string.IsNullOrEmpty(cleanDescription) && cleanDescription.Contains("|"))
+    {
+        cleanDescription = cleanDescription.Split('|')[1].Trim();
+    }
+}
+
+<style>
+    /* VARIABLES */
+    :root {
+        --success-main: #10b981;
+        --success-light: #d1fae5;
+        --success-dark: #059669;
+        
+        --error-main: #ef4444;
+        --error-light: #fee2e2;
+        --error-dark: #b91c1c;
+
+        --text-dark: #1f2937;
+        --text-muted: #6b7280;
+        --bg-body: #f3f4f6;
+    }
+
+    /* Đặt màu nền thay đổi tùy trạng thái */
+    .result-container {
+        min-height: 100vh;
+        padding: 50px 15px;
+        background-color: var(--bg-body);
+        display: flex;
+        align-items: center;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    .result-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        max-width: 650px;
+        margin: 0 auto;
+        overflow: hidden;
+        animation: slideUpFade 0.6s ease-out;
+    }
+
+    /* HEADER PHẦN TRÊN CỦA CARD */
+    .card-header-status {
+        padding: 50px 30px 40px;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+    
+    .status-success { background: linear-gradient(135deg, var(--success-main), var(--success-dark)); }
+    .status-error { background: linear-gradient(135deg, var(--error-main), var(--error-dark)); }
+
+    /* ICON TRẠNG THÁI (LÀM TO, NỔI BẬT) */
+    .icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        backdrop-filter: blur(5px);
+    }
+    .icon-wrapper i {
+        font-size: 3.5rem;
+        color: white;
+    }
+
+    .status-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .status-msg {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    /* THIẾT KẾ DẠNG BIÊN LAI (TICKET) */
+    .ticket-body {
+        padding: 40px;
+        background: white;
+        position: relative;
+    }
+
+    /* Vết cắt lẹm 2 bên giống cuống vé */
+    .ticket-body::before, .ticket-body::after {
+        content: '';
+        position: absolute;
+        top: -15px;
+        width: 30px;
+        height: 30px;
+        background-color: var(--bg-body);
+        border-radius: 50%;
+    }
+    .ticket-body::before { left: -15px; }
+    .ticket-body::after { right: -15px; }
+
+    /* Đường kẻ nét đứt ngang */
+    .ticket-divider {
+        position: absolute;
+        top: 0;
+        left: 20px;
+        right: 20px;
+        border-top: 2px dashed #e5e7eb;
+    }
+
+    /* CHI TIẾT THÔNG TIN */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        font-size: 1.05rem;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .info-value.highlight {
+        color: var(--primary);
+    }
+
+    /* KHUNG NỘI DUNG MÔ TẢ LỖI */
+    .issue-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 35px;
+    }
+    .issue-box h6 {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    .issue-box p {
+        margin: 0;
+        color: var(--text-dark);
+        font-style: italic;
+        line-height: 1.6;
+    }
+
+    /* NÚT BẤM */
+    .action-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn-main {
+        padding: 14px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+        border: none;
+        width: 100%;
+    }
+
+    .btn-outline {
+        background: white;
+        border: 2px solid #e5e7eb;
+        color: var(--text-dark);
+    }
+    .btn-outline:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        color: var(--text-dark);
+    }
+
+    /* Set màu nút theo trạng thái */
+    .btn-success-theme {
+        background: var(--success-main);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-success-theme:hover { background: var(--success-dark); color: white; transform: translateY(-2px);}
+
+    .btn-error-theme {
+        background: var(--error-main);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .btn-error-theme:hover { background: var(--error-dark); color: white; transform: translateY(-2px);}
+
+
+    @@keyframes slideUpFade {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@media (max-width: 600px) {
+        .info-grid { grid-template-columns: 1fr; gap: 15px; }
+        .action-group { flex-direction: column; }
+        .ticket-body { padding: 30px 20px; }
+    }
+</style>
+
+<div class="result-container">
+    <div class="container">
+        <div class="result-card">
+            
+            <div class="card-header-status @(isSuccess ? "status-success" : "status-error")">
+                <div class="icon-wrapper">
+                    @if (isSuccess)
+                    {
+                        <i class="fas fa-check"></i>
+                    }
+                    else
+                    {
+                        <i class="fas fa-times"></i>
+                    }
+                </div>
+                
+                <h1 class="status-title">
+                    @(isSuccess ? "Gửi thành công!" : "Gửi thất bại!")
+                </h1>
+                
+                <p class="status-msg">@notifyMessage</p>
+            </div>
+
+            <div class="ticket-body">
+                <div class="ticket-divider"></div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Mã phiếu hỗ trợ</span>
+                        <span class="info-value">@Model.IdRequest</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Mã đơn hàng gốc</span>
+                        <span class="info-value text-primary">#@Model.OrderNumber</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Khách hàng</span>
+                        <span class="info-value">@Model.CustomerName</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Loại yêu cầu</span>
+                        <span class="info-value">
+                            @if (Model.RequestType == "Refund") { <span class="badge bg-success" style="font-size:0.9rem">Hoàn tiền</span> }
+                            else if (Model.RequestType == "Warranty") { <span class="badge bg-warning text-dark" style="font-size:0.9rem">Bảo hành</span> }
+                            else { @Model.RequestType }
+                        </span>
+                    </div>
+
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <span class="info-label">Sản phẩm cần hỗ trợ</span>
+                        <span class="info-value">@Model.ProductsName</span>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(cleanDescription))
+                {
+                    <div class="issue-box">
+                        <h6><i class="fas fa-quote-left me-2"></i>Nội dung mô tả của bạn</h6>
+                        <p>"@cleanDescription"</p>
+                    </div>
+                }
+
+                <div class="action-group">
+                    <a href="@Url.Action("Index", "Home")" class="btn-main btn-outline">
+                        <i class="fas fa-home"></i> Về trang chủ
+                    </a>
+                    
+                    @if (isSuccess)
+                    {
+                        <a href="@Url.Action("Index", "Order")" class="btn-main btn-success-theme">
+                            <i class="fas fa-box"></i> Theo dõi đơn hàng
+                        </a>
+                    }
+                    else
+                    {
+                        // Nút Gửi lại sẽ quay về trang nhập form hỗ trợ
+                        <a href="@Url.Action("IndexSupport", "Contact", new { idOrder = Model.OrderNumber })" class="btn-main btn-error-theme">
+                            <i class="fas fa-redo"></i> Thử gửi lại
+                        </a>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

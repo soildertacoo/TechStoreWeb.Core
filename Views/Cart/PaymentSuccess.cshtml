@@ -1,0 +1,230 @@
+﻿@model dynamic
+@{
+    ViewBag.Title = "Kết quả thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // 1. Hứng dữ liệu từ cục "Anonymous Object" ở Controller trả về
+    string rspCode = "";
+    string message = "";
+    
+    try {
+        // Lấy RspCode và Message. Nếu không có thì lấy thẳng từ URL (vnp_ResponseCode) Request Query 
+        rspCode = Model?.RspCode ?? Context.Request.Query["vnp_ResponseCode"].ToString();
+        message = Model?.Message ?? "Không có thông báo cụ thể nào";
+    } 
+    catch {
+        // Đề phòng lỗi đọc model, tự động vét data từ URL
+        rspCode = Context.Request.Query["vnp_ResponseCode"].ToString();
+        message = "Trạng thái giao dịch: " + rspCode;
+    }
+
+    // 2. Xác định trạng thái Thành Công hay Thất Bại
+    bool isSuccess = (rspCode == "00");
+}
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    /* ================= GIAO DIỆN MẶC ĐỊNH (THÀNH CÔNG) ================= */
+    .success-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .success-wrapper {
+        max-width: 600px;
+        width: 90%;
+        text-align: center;
+        position: relative;
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        padding: 60px 40px;
+        position: relative;
+        overflow: hidden;
+        transform: scale(0.9);
+        animation: successAppear 0.8s ease-out forwards;
+    }
+
+    @@keyframes successAppear {
+        0% { transform: scale(0.7) translateY(50px); opacity: 0; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .success-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+        background: linear-gradient(90deg, #4ecdc4, #667eea, #764ba2, #f093fb);
+        animation: rainbow 3s linear infinite;
+    }
+
+    @@keyframes rainbow {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+
+    .success-icon {
+        width: 120px; height: 120px; border-radius: 50%;
+        background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        margin: 0 auto 30px; display: flex; align-items: center; justify-content: center;
+        position: relative; animation: pulse 2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(78, 205, 196, 0); }
+    }
+
+    .success-icon::before {
+        content: '✓'; font-size: 60px; color: white; font-weight: bold;
+        animation: checkmark 1s ease-in-out 0.3s both;
+    }
+
+    @@keyframes checkmark {
+        0% { transform: scale(0) rotate(45deg); opacity: 0; }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .success-title {
+        font-size: 2.5rem; font-weight: 700; color: #2d3748; margin-bottom: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text; animation: slideInUp 0.8s ease-out 0.5s both;
+    }
+
+    /* ================= GIAO DIỆN LỖI (MÀU ĐỎ/HỒNG) ================= */
+    .error-container {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    }
+
+    .error-card::before {
+        background: linear-gradient(90deg, #ff4b2b, #ff416c);
+    }
+
+    .error-icon {
+        background: linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%);
+        animation: pulse-error 2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse-error {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 65, 108, 0); }
+    }
+
+    .error-icon::before { content: '✕'; }
+
+    .error-title {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .back-button-error {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%) !important;
+    }
+
+    /* ================= CÁC THÀNH PHẦN KHÁC ================= */
+    @@keyframes slideInUp {
+        0% { transform: translateY(30px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
+
+    .success-message {
+        font-size: 1.2rem; color: #718096; margin-bottom: 40px; line-height: 1.6;
+        animation: slideInUp 0.8s ease-out 0.7s both;
+    }
+
+    .success-details {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        border-radius: 20px; padding: 25px; margin-bottom: 40px;
+        animation: slideInUp 0.8s ease-out 0.9s both;
+    }
+
+    .success-details h4 { color: #2d3748; margin-bottom: 15px; font-size: 1.1rem; font-weight: 600; }
+    .success-details p { color: #4a5568; margin: 8px 0; font-size: 0.95rem; }
+    .success-details .highlight { color: #667eea; font-weight: 600; }
+
+    .back-button {
+        display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white; padding: 18px 40px; border-radius: 50px; text-decoration: none;
+        font-size: 1.1rem; font-weight: 600; transition: all 0.3s ease; position: relative;
+        overflow: hidden; text-transform: uppercase; letter-spacing: 1px;
+        animation: slideInUp 0.8s ease-out 1.1s both;
+    }
+
+    .back-button::before {
+        content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .back-button:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); color: white; text-decoration: none; }
+    .back-button:hover::before { left: 100%; }
+
+    .floating-elements { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+    .floating-element { position: absolute; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; animation: float 6s ease-in-out infinite; }
+    .confetti { position: absolute; width: 10px; height: 10px; background: #f093fb; animation: confetti 3s ease-in-out infinite; }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+        50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+    }
+    @@keyframes confetti {
+        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+</style>
+
+<div class="success-container @(isSuccess ? "" : "error-container")">
+    <div class="floating-elements">
+        <div class="floating-element" style="top: 20%; left: 10%;"></div>
+        <div class="floating-element" style="top: 60%; left: 85%;"></div>
+        <div class="floating-element" style="top: 40%; left: 70%;"></div>
+
+        @if (isSuccess)
+        {
+            <div class="confetti" style="left: 10%; background: #667eea; animation-delay: 0s;"></div>
+            <div class="confetti" style="left: 30%; background: #4ecdc4; animation-delay: 0.5s;"></div>
+            <div class="confetti" style="left: 50%; background: #f093fb; animation-delay: 1s;"></div>
+            <div class="confetti" style="left: 70%; background: #764ba2; animation-delay: 1.5s;"></div>
+            <div class="confetti" style="left: 90%; background: #44a08d; animation-delay: 2s;"></div>
+        }
+    </div>
+
+    <div class="success-wrapper">
+        <div class="success-card @(isSuccess ? "" : "error-card")">
+            
+            <div class="success-icon @(isSuccess ? "" : "error-icon")"></div>
+
+            <h2 class="success-title @(isSuccess ? "" : "error-title")">
+                @(isSuccess ? "Thanh toán thành công!" : "Giao dịch thất bại!")
+            </h2>
+
+            <p class="success-message">
+                @(isSuccess ? "Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi. Đơn hàng của bạn đã được xử lý thành công." : message)
+            </p>
+
+            <div class="success-details">
+                <h4>Chi tiết hệ thống:</h4>
+                <p><span class="highlight">Mã phản hồi:</span> @rspCode</p>
+                <p><span class="highlight">Trạng thái:</span> @(isSuccess ? "Đã ghi nhận" : "Bị hủy / Lỗi")</p>
+                <p><span class="highlight">Thời gian:</span> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+
+            @Html.ActionLink("Quay lại trang chính", "Index", "Home", null, new { @class = "back-button " + (isSuccess ? "" : "back-button-error") })
+        </div>
+    </div>
+</div>

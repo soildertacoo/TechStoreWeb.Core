@@ -1,0 +1,379 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<style>
+    .admin-chat-fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; font-size: 24px; border: none; box-shadow: 0 4px 15px rgba(30, 41, 59, 0.4); cursor: pointer; z-index: 10000; transition: transform 0.3s ease; display: flex; align-items: center; justify-content: center; }
+    .admin-chat-fab:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(30, 41, 59, 0.6); }
+
+    .admin-chat-popup-window { position: fixed; bottom: 90px; right: 20px; width: 350px; height: 520px; background: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 9999; display: none; flex-direction: row; overflow: hidden; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+    .admin-chat-popup-window.expanded { width: 750px; }
+
+    .admin-chat-sidebar { width: 0; opacity: 0; background: #ffffff; display: flex; flex-direction: column; z-index: 2; overflow: hidden; white-space: nowrap; transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; }
+    .admin-chat-popup-window.expanded .admin-chat-sidebar { width: 280px; opacity: 1; border-right: 1px solid #e2e8f0; }
+    
+    .admin-sidebar-header { padding: 15px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #1e293b; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+    .admin-chat-list { flex: 1; overflow-y: auto; }
+    .admin-chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+    .admin-chat-item:hover { background: #f8fafc; }
+    .admin-chat-item.active { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    
+    .admin-chat-item-avatar { width: 45px; min-width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: bold; overflow: hidden; }
+    .admin-chat-item-info { flex: 1; overflow: hidden; }
+    .admin-chat-item-name { font-weight: 600; color: #334155; font-size: 0.95rem; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; }
+    .admin-chat-item-preview { font-size: 0.8rem; color: #64748b; overflow: hidden; text-overflow: ellipsis; }
+
+    .admin-chat-main-area { flex: 1; display: flex; flex-direction: column; background: #f8fafc; min-width: 350px; }
+    .admin-chat-header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+    .admin-chat-header-info { display: flex; align-items: center; gap: 10px; }
+    .admin-chat-header button { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; transition: transform 0.2s; }
+    #close-admin-chat-btn:hover { transform: rotate(90deg); color: #ef4444; }
+    #admin-toggle-sidebar-btn:hover { transform: scale(1.1); color: #94a3b8; }
+    #admin-delete-chat-btn { margin-right: 15px; font-size: 18px; color: #f87171; display: none; }
+    #admin-delete-chat-btn:hover { color: #ef4444; transform: scale(1.1); }
+
+    .admin-chat-body { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+    .admin-chat-body::before { content: ""; flex: 1 1 auto; }
+
+    .msg-wrapper { display: flex; flex-direction: column; width: 100%; margin-bottom: 8px; }
+    .msg-wrapper.mine { align-items: flex-end; }
+    .msg-wrapper.theirs { align-items: flex-start; }
+    .chat-bubble { padding: 10px 14px; border-radius: 14px; max-width: 80%; word-wrap: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: inline-block; }
+    .chat-bubble.mine { background: #3b82f6; color: white; border-bottom-right-radius: 4px; }
+    .chat-bubble.theirs { background: #ffffff; border: 1px solid #e2e8f0; color: #1f2937; border-bottom-left-radius: 4px; }
+    .sender-name { color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 3px; font-weight: bold; }
+
+    .admin-chat-footer { padding: 12px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; }
+    .admin-chat-footer input { flex: 1; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 20px; outline: none; }
+    .admin-chat-footer input:focus { border-color: #3b82f6; }
+    .admin-chat-footer button { background: #3b82f6; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .animate-pop-in { animation: messagePopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    @@keyframes messagePopIn { 0% { opacity: 0; transform: translateY(50px) scale(0.9); } 50% { opacity: 1; transform: translateY(10px) scale(0.9); } 100% { transform: translateY(0) scale(1); } }
+
+    .admin-unread-badge-fab { position: absolute; top: -5px; right: -5px; background-color: #ef4444; color: white; font-size: 12px; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: pulse-red 2s infinite; }
+    @@keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    
+    .admin-unread-badge-item { background-color: #ef4444; color: white; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 10px; margin-left: auto; display: none;}
+    .admin-chat-item.unread { background: #f1f5f9; }
+    .admin-chat-item.unread .admin-chat-item-name, .admin-chat-item.unread .admin-chat-item-preview { font-weight: 700 !important; color: #0f172a; }
+</style>
+
+<button id="admin-chat-toggle-btn" class="admin-chat-fab" title="Hộp thư Khách hàng">
+    <i class="fas fa-headset"></i>
+    <div id="main-admin-unread-badge" class="admin-unread-badge-fab" style="display: none;">0</div>
+</button>
+
+<div id="admin-chat-popup" class="admin-chat-popup-window expanded">
+    
+    <div class="admin-chat-sidebar">
+        <div class="admin-sidebar-header">
+            <span><i class="fas fa-inbox text-primary"></i> Khách hàng</span>
+        </div>
+        <div class="admin-chat-list" id="admin-customer-list">
+            <div style="text-align: center; color: #94a3b8; margin-top: 20px;">Đang tải dữ liệu...</div>
+        </div>
+    </div>
+
+    <div class="admin-chat-main-area">
+        <div class="admin-chat-header">
+            <div class="admin-chat-header-info">
+                <button id="admin-toggle-sidebar-btn" title="Mở danh sách khách hàng"><i class="fas fa-bars"></i></button>
+                <div style="display: flex; flex-direction: column; line-height: 1.2; margin-left: 5px;">
+                    <strong id="current-chat-title" style="font-size: 0.95rem;">Chọn khách hàng...</strong>
+                    <span id="admin-typing-status" style="font-size: 0.75rem; color: #10b981; min-height: 12px;"></span>
+                </div>
+            </div>
+            <div>
+                <button id="admin-delete-chat-btn" title="Xóa cuộc trò chuyện"><i class="fas fa-trash-alt"></i></button>
+                <button id="close-admin-chat-btn"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div id="admin-chat-messages" class="admin-chat-body">
+            <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; margin-top: auto; margin-bottom: 10px;">
+                <i class="fas fa-paper-plane" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 10px;"></i>
+                Chọn khách hàng bên trái để hỗ trợ
+            </div>
+        </div>
+
+        <div class="admin-chat-footer">
+            <input type="text" id="adminChatInput" placeholder="Nhập tin nhắn..." autocomplete="off" disabled />
+            <button id="adminSendBtn" disabled><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    <audio src="~/Audio/notify.mp3" id="adminNotifyEffect"></audio>
+</div>
+
+<script>
+    const myAdminName = "Admin"; 
+    let currentCustomerRoom = ""; 
+    let adminTypingTimeout = null;
+
+    const adminChatConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").withAutomaticReconnect().build();
+
+    const adminChatPopup = document.getElementById("admin-chat-popup");
+    const adminChatToggleBtn = document.getElementById("admin-chat-toggle-btn");
+    const closeAdminChatBtn = document.getElementById("close-admin-chat-btn");
+    const toggleSidebarBtn = document.getElementById("admin-toggle-sidebar-btn");
+    const deleteChatBtn = document.getElementById("admin-delete-chat-btn");
+    const mainAdminBadge = document.getElementById("main-admin-unread-badge");
+    const adminChatMessages = document.getElementById("admin-chat-messages");
+    const adminChatInput = document.getElementById("adminChatInput");
+    const adminSendBtn = document.getElementById("adminSendBtn");
+    const adminTypingStatus = document.getElementById("admin-typing-status");
+    const notifySound = document.getElementById("adminNotifyEffect");
+    const listContainer = document.getElementById("admin-customer-list");
+
+    // ==========================================
+    // TỔNG ĐÀI ĐẾM THÔNG BÁO BONG BÓNG (Hàm mới)
+    // ==========================================
+    function updateMainBadge() {
+        // Đếm xem có bao nhiêu khách hàng đang có chấm đỏ (unread)
+        const unreadCount = document.querySelectorAll('#admin-customer-list .admin-chat-item.unread').length;
+        
+        // Kiểm tra xem khung chat lớn đang đóng hay mở
+        const isPopupClosed = adminChatPopup.style.display === "none" || adminChatPopup.style.display === "";
+
+        if (unreadCount > 0 && isPopupClosed) {
+            mainAdminBadge.innerText = unreadCount;
+            mainAdminBadge.style.display = "flex";
+        } else {
+            mainAdminBadge.style.display = "none";
+        }
+    }
+
+    // 1. TẢI DANH SÁCH BÊN TRÁI TỪ API (HỖ TRỢ OFFLINE NHẬN TIN MỚI)
+    function loadChatRooms() {
+        fetch('/Admins/GetChatRoomsSummary')
+        .then(res => res.json())
+        .then(res => {
+            if(res.success) {
+                listContainer.innerHTML = '';
+
+                // Sắp xếp ưu tiên khách có tin nhắn mới lên đầu
+                res.data.sort((a, b) => (b.isUnread === a.isUnread) ? 0 : b.isUnread ? 1 : -1);
+
+                res.data.forEach(item => {
+                    let avatarHtml = '<i class="fas fa-user text-primary"></i>';
+                    if(item.avatar !== "") { avatarHtml = `<img src="/Images/${item.avatar}" style="width:100%; height:100%; object-fit:cover;" />`; }
+
+                    const badgeStyle = item.isUnread ? 'display:block;' : 'display:none;';
+                    const unreadClass = item.isUnread ? 'unread' : '';
+
+                    let div = document.createElement('div');
+                    div.className = `admin-chat-item ${unreadClass}`;
+                    div.setAttribute('data-room', item.room);
+                    div.onclick = function() { selectCustomerRoom(this, item.room); };
+                    div.innerHTML = `
+                        <div class="admin-chat-item-avatar">${avatarHtml}</div>
+                        <div class="admin-chat-item-info">
+                            <div class="admin-chat-item-name">${item.room}</div>
+                            <div class="admin-chat-item-preview">${item.lastMessage}</div>
+                        </div>
+                        <div class="admin-unread-badge-item" style="${badgeStyle}">Mới</div>
+                    `;
+                    listContainer.appendChild(div);
+                });
+
+                if(res.data.length === 0) listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #94a3b8;">Chưa có dữ liệu chat.</div>';
+
+                restoreAdminChatState(); // Phục hồi trạng thái cũ
+                updateMainBadge();       // Cập nhật số đỏ lên Nút Bong Bóng
+            }
+        });
+    }
+
+    // 2. PHỤC HỒI TRẠNG THÁI TỪ LOCAL STORAGE (TẮT WEB VÀO LẠI VẪN Y CŨ)
+    function restoreAdminChatState() {
+        const savedRoom = localStorage.getItem('adminActiveChatRoom');
+        const isPopupOpen = localStorage.getItem('adminChatPopupOpen');
+        const isSidebarExpanded = localStorage.getItem('adminSidebarExpanded');
+
+        if (isPopupOpen === 'true') {
+            adminChatPopup.style.display = "flex";
+            if (isSidebarExpanded !== 'false') adminChatPopup.classList.add("expanded");
+            else adminChatPopup.classList.remove("expanded");
+        } else {
+            adminChatPopup.style.display = "none";
+        }
+
+        if (savedRoom) {
+            const itemToClick = document.querySelector(`.admin-chat-item[data-room="${savedRoom}"]`);
+            if (itemToClick) {
+                adminChatMessages.style.scrollBehavior = "auto";
+                itemToClick.click();
+            }
+        }
+    }
+
+    toggleSidebarBtn.addEventListener("click", () => { 
+        adminChatPopup.classList.toggle("expanded"); 
+        localStorage.setItem('adminSidebarExpanded', adminChatPopup.classList.contains('expanded'));
+    });
+
+    // BẬT/TẮT POPUP
+    adminChatToggleBtn.addEventListener("click", () => {
+        if (adminChatPopup.style.display === "none" || adminChatPopup.style.display === "") {
+            adminChatPopup.style.display = "flex";
+            adminChatPopup.classList.add("expanded");
+            localStorage.setItem('adminChatPopupOpen', 'true');
+            localStorage.setItem('adminSidebarExpanded', 'true');
+            
+            updateMainBadge(); // Ẩn badge đỏ ở bong bóng vì đã mở bảng chat
+            
+            if (currentCustomerRoom !== "") { adminChatInput.focus(); setTimeout(() => { adminChatMessages.scrollTop = adminChatMessages.scrollHeight; }, 10); }
+        } else {
+            adminChatPopup.style.display = "none";
+            localStorage.setItem('adminChatPopupOpen', 'false');
+            updateMainBadge(); // Hiện lại badge đỏ nếu có khách chưa rep
+        }
+    });
+
+    closeAdminChatBtn.addEventListener("click", () => { 
+        adminChatPopup.style.display = "none"; 
+        localStorage.setItem('adminChatPopupOpen', 'false');
+        updateMainBadge(); // Hiện lại badge đỏ nếu có khách chưa rep
+    });
+
+    // 3. XÓA CUỘC TRÒ CHUYỆN (GỌI API)
+    deleteChatBtn.addEventListener("click", () => {
+        if(currentCustomerRoom === "") return;
+        if(confirm(`Xóa vĩnh viễn đoạn chat với [ ${currentCustomerRoom} ]?`)) {
+            fetch(`/Admins/DeleteChatRoom?roomName=${encodeURIComponent(currentCustomerRoom)}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    const item = document.querySelector(`.admin-chat-item[data-room="${currentCustomerRoom}"]`);
+                    if(item) item.remove();
+                    adminChatMessages.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 0.85rem; margin-top: auto; margin-bottom: 10px;">Đã xóa đoạn chat.</div>';
+                    document.getElementById('current-chat-title').innerText = "Chọn khách hàng...";
+                    currentCustomerRoom = "";
+                    localStorage.removeItem('adminActiveChatRoom');
+                    adminChatInput.disabled = true; adminSendBtn.disabled = true; deleteChatBtn.style.display = "none";
+                    updateMainBadge(); // Cập nhật lại số đếm sau khi xóa
+                }
+            });
+        }
+    });
+
+    // 4. CHỌN PHÒNG CHAT
+    window.selectCustomerRoom = function (element, roomName) {
+        if (roomName === currentCustomerRoom) return;
+
+        document.querySelectorAll('.admin-chat-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        element.classList.remove('unread'); // Đã xem tin nhắn
+
+        let badge = element.querySelector('.admin-unread-badge-item');
+        if (badge) { badge.innerText = "0"; badge.style.display = "none"; }
+
+        document.getElementById('current-chat-title').innerText = roomName;
+        currentCustomerRoom = roomName;
+        localStorage.setItem('adminActiveChatRoom', roomName);
+        
+        adminChatInput.disabled = false; adminSendBtn.disabled = false; deleteChatBtn.style.display = "inline-block";
+        adminChatMessages.innerHTML = '<div style="text-align:center; color:#94a3b8; margin-top:20px;">Đang tải lịch sử...</div>';
+        
+        adminChatConnection.invoke("JoinRoom", currentCustomerRoom).catch(console.error);
+        if(window.innerWidth < 800) { adminChatPopup.classList.remove("expanded"); }
+
+        updateMainBadge(); // Cập nhật lại số đếm vì đã đọc xong 1 người
+    }
+
+    // 5. CẬP NHẬT GIAO DIỆN KHI CÓ TIN NHẮN REAL-TIME TỚI
+    function updateAdminSidebarPreview(senderName, room, message) {
+        let items = listContainer.querySelectorAll('.admin-chat-item');
+        let targetItem = null;
+        items.forEach(item => { if (item.getAttribute('data-room') === room) targetItem = item; });
+
+        if (targetItem) {
+            const previewEl = targetItem.querySelector('.admin-chat-item-preview');
+            if (previewEl) previewEl.innerText = (senderName === myAdminName) ? `Bạn: ${message}` : message;
+
+            if (currentCustomerRoom !== room && senderName !== myAdminName) {
+                targetItem.classList.add('unread');
+                let badge = targetItem.querySelector('.admin-unread-badge-item');
+                if (badge) { badge.innerText = "Mới"; badge.style.display = "block"; }
+            }
+            listContainer.prepend(targetItem); 
+            updateMainBadge(); // Có tin mới -> Cập nhật số đỏ
+        } else {
+            loadChatRooms(); // Khách mới tinh -> Tải lại danh sách
+        }
+    }
+
+    adminChatConnection.on("LoadHistory", function (historyList) {
+        adminChatMessages.innerHTML = ''; 
+        if (historyList.length === 0) { adminChatMessages.innerHTML = '<div style="text-align: center; color: #94a3b8;">Khách chưa nhắn tin.</div>'; return; }
+        historyList.forEach(item => {
+            const isMine = item.isFromSupport === true;
+            appendAdminMsg(isMine ? "Admin" : currentCustomerRoom, item.content, isMine);
+        });
+    });
+
+    adminChatConnection.on("ReceiveMessage", function (user, room, message) {
+        updateAdminSidebarPreview(user, room, message);
+        const isPopupClosed = adminChatPopup.style.display === "none" || adminChatPopup.style.display === "";
+
+        const welcomeMsg = adminChatMessages.querySelector('div[style*="text-align: center"]');
+        if(welcomeMsg && welcomeMsg.innerText.includes("Chọn khách hàng")) welcomeMsg.remove();
+
+        if (currentCustomerRoom === room) {
+            appendAdminMsg(user, message, user === myAdminName);
+            if (!isPopupClosed) adminChatMessages.scrollTop = adminChatMessages.scrollHeight;
+        }
+
+        if (user !== myAdminName) {
+            if (notifySound) { notifySound.load(); notifySound.play().catch(e => console.log(e)); }
+            if (typeof pushChatNotification === 'function' && isPopupClosed) {
+                pushChatNotification(user, message);
+            }
+        }
+    });
+
+    function appendAdminMsg(sender, text, isMine) {
+        const wrapperDiv = document.createElement("div");
+        wrapperDiv.className = `msg-wrapper ${isMine ? 'mine' : 'theirs'} animate-pop-in`;
+        const bubbleDiv = document.createElement("div");
+        bubbleDiv.className = `chat-bubble ${isMine ? 'mine' : 'theirs'}`;
+        bubbleDiv.innerHTML = isMine ? text : `<span class="sender-name">${sender}</span>${text}`;
+        wrapperDiv.appendChild(bubbleDiv);
+        adminChatMessages.appendChild(wrapperDiv);
+        adminChatMessages.style.scrollBehavior = "smooth";
+        adminChatMessages.scrollTop = adminChatMessages.scrollHeight;
+    }
+
+    function sendAdminMessage() {
+        const msg = adminChatInput.value.trim();
+        if (msg !== "" && currentCustomerRoom !== "") {
+            adminChatInput.value = "";
+            adminChatConnection.invoke("SendMessage", myAdminName, currentCustomerRoom, msg).catch(console.error);
+            
+            const activeItem = document.querySelector(`.admin-chat-item[data-room="${currentCustomerRoom}"]`);
+            if(activeItem) {
+                activeItem.classList.remove("unread");
+                const badge = activeItem.querySelector('.admin-unread-badge-item');
+                if(badge) badge.style.display = "none";
+                updateMainBadge(); // Admin rep lại thì đếm lại số thông báo
+            }
+        }
+    }
+
+    adminSendBtn.addEventListener("click", sendAdminMessage);
+    adminChatInput.addEventListener("keypress", e => { if (e.key === "Enter") sendAdminMessage(); });
+
+    adminChatInput.addEventListener("input", function () {
+        clearTimeout(adminTypingTimeout);
+        adminChatConnection.invoke("sendTyping", myAdminName, true).catch(e => { });
+        adminTypingTimeout = setTimeout(() => { adminChatConnection.invoke("sendTyping", myAdminName, false).catch(e => { }); }, 1500);
+    });
+
+    adminChatConnection.on("NotifyTyping", function (sender, isTyping) {
+        if (isTyping && sender !== myAdminName) { adminTypingStatus.innerHTML = `${sender} đang gõ...`; } 
+        else if (!isTyping) { adminTypingStatus.innerHTML = ""; }
+    });
+
+    // KÍCH HOẠT HỆ THỐNG
+    adminChatConnection.start().then(() => {
+        loadChatRooms();
+    }).catch(console.error);
+</script>

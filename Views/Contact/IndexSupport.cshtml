@@ -1,0 +1,489 @@
+﻿@model TechStore.Models.SupportRequest
+@{
+    ViewBag.Title = "Hỗ trợ về đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var ProductsNames = ViewData["ProductsNames"] as List<string>;
+}
+
+<style>
+    :root {
+        --primary: #4f46e5;
+        --primary-soft: #e0e7ff;
+        --secondary: #10b981;
+        --warning: #f59e0b;
+        --bg-body: #f3f4f6;
+        --bg-rejected: #ff0000;
+        --card-bg: #ffffff;
+        --text-main: #1f2937;
+        --text-light: #6b7280;
+        --border-color: #e5e7eb;
+    }
+
+    body {
+        background-color: var(--bg-body);
+    }
+
+    .support-wrapper {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    /* --- STEP INDICATOR (TRẠNG THÁI TRÊN CÙNG) --- */
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card-bg);
+        padding: 25px 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 80px;
+        right: 80px;
+        height: 3px;
+        background: var(--border-color);
+        z-index: 1;
+        transform: translateY(-50%);
+    }
+
+    .step {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--card-bg);
+        padding: 0 15px;
+    }
+
+    .step-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .step.active .step-icon {
+        background: var(--primary);
+        box-shadow: 0 0 0 5px var(--primary-soft);
+    }
+
+    .step.completed .step-icon {
+        background: var(--secondary);
+    }
+    .step.rejected .step-icon{
+        background: var(--bg-rejected);
+    }
+
+    .step-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-light);
+    }
+    .btn-submit-main:disabled{
+        background-color: #6c757d;
+        opacity: 0.65;             
+        @* Khi di chuột vào là thành dấu cấm *@
+        cursor: not-allowed;
+    }
+
+    .step.active .step-label { color: var(--primary); }
+    .step.completed .step-label { color: var(--secondary); }
+
+    /* --- TABS BỐ CỤC MỚI --- */
+    .custom-tabs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .custom-tabs .nav-link {
+        background: white;
+        color: var(--text-light);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .custom-tabs .nav-link:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .custom-tabs .nav-link.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 8px 15px rgba(79, 70, 229, 0.25);
+    }
+
+    /* --- BỐ CỤC SPLIT (TRÁI/PHẢI) --- */
+    .form-section {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .summary-section {
+        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+        border-radius: 16px;
+        padding: 30px;
+        color: white;
+        box-shadow: 0 10px 25px rgba(49, 46, 129, 0.4);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Chi tiết bên trái */
+    .form-label {
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .custom-input {
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: var(--text-main);
+        width: 100%;
+        transition: border 0.2s;
+    }
+    .custom-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+    }
+
+    /* Chi tiết bên phải (Nổi bật) */
+    .order-highlight {
+        text-align: center;
+        padding-bottom: 25px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 25px;
+    }
+    .order-highlight h5 { color: #818cf8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;}
+    .order-highlight .order-id { font-size: 1.8rem; font-weight: 800; letter-spacing: 2px; margin: 10px 0; }
+    
+    .product-select-wrapper label { color: #a5b4fc; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; display: block;}
+    .product-select-wrapper select {
+        width: 100%;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid #4f46e5;
+        background: rgba(255,255,255,0.1);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .product-select-wrapper select option { color: black; } /* Style cho dropdown list */
+
+    .btn-submit-main {
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 16px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        width: 100%;
+        margin-top: auto; /* Đẩy nút xuống dưới cùng của cột */
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    .btn-submit-main:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+    /* Reponsive */
+    @@media (max-width: 991px) {
+        .step-indicator::before { display: none; }
+        .step-label { display: none; }
+        .summary-section { margin-top: 20px; }
+    }
+</style>
+
+<div class="support-wrapper">
+    
+        @{
+        // 1. Khởi tạo mặc định (Trạng thái khi vừa mở trang tạo phiếu - Status = null)
+        string step2Class = "active";
+        string step3Class = "";
+        string step4Class = "";
+        string disabledBtn = "";
+
+        // 2. Tính toán Logic theo Status
+        if(Model.Status != null){
+            step2Class = "completed";
+            step3Class = "active";
+            disabledBtn = "disabled";
+        }
+        if (Model.Status?.Trim() == "Accepted" || Model.Status?.Trim() == "Completed") 
+        {
+            step2Class = "completed";
+            step3Class = "completed";
+            step4Class = "completed";
+        }
+        else if (Model.Status?.Trim() == "Rejected") {
+            step2Class = "completed";
+            step3Class = "completed";
+            step4Class = "rejected";
+        }
+    }
+
+    <div class="step-indicator">
+        
+        <div class="step completed">
+            <div class="step-icon"><i class="fas fa-check"></i></div>
+            <span class="step-label">Đã nhận hàng</span>
+        </div>
+        
+        <div class="step @step2Class">
+            <div class="step-icon">
+                @* Html.Raw chèn câu lệnh html bẳng c # *@
+                @(step2Class == "completed" ? Html.Raw("<i class=\"fas fa-check\"></i>") : Html.Raw("2"))
+            </div>
+            <span class="step-label">Tạo phiếu hỗ trợ</span>
+        </div>
+        
+        <div class="step @step3Class">
+            <div class="step-icon">
+                @(step3Class == "completed" ? Html.Raw("<i class=\"fas fa-check\"></i>") : Html.Raw("3"))
+            </div>
+            <span class="step-label">Chờ xét duyệt</span>
+        </div>
+        
+        <div class="step @step4Class">
+            <div class="step-icon">
+               @(step4Class == "completed" ? Html.Raw("<i class=\"fas fa-check\"></i>") : 
+                    step4Class == "rejected" ? Html.Raw("<i class=\"fas fa-times\"></i>") : 
+                    Html.Raw("4"))
+            </div>
+            <span class="step-label">
+                @(step4Class == "completed" ? Html.Raw("Đã xử lý xong") : 
+                    step4Class == "rejected" ? Html.Raw("Đã bị từ chối") : 
+                    Html.Raw("Hoàn tất"))
+            </span>
+        </div>
+        
+    </div>
+
+    @if (ViewBag.Notify != null)
+    {
+        var notifyParts = ViewBag.Notify.ToString().Split('|');
+        var notifyType = notifyParts.Length > 1 ? notifyParts[0].Trim() : "info";
+        var notifyMessage = notifyParts.Length > 1 ? notifyParts[1] : ViewBag.Notify.ToString();
+        <div class="alert alert-@((notifyType == "success") ? "success" : "danger") shadow-sm mb-4" style="border-radius: 12px;">
+            <i class="fas fa-info-circle me-2"></i> @notifyMessage
+        </div>
+    }
+
+    <ul class="nav nav-pills custom-tabs" id="supportTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="refund-tab" data-toggle="tab" href="#refund" role="tab">
+                <i class="fas fa-undo-alt me-2"></i>Yêu cầu hoàn tiền
+            </a>
+        </li>
+        @* <li class="nav-item">
+            <a class="nav-link" id="warranty-tab" data-toggle="tab" href="#warranty" role="tab">
+                <i class="fas fa-shield-alt me-2"></i>Bảo hành sản phẩm
+            </a>
+        </li> *@
+    </ul>
+
+    <div class="tab-content" id="supportTabContent">
+        
+        <div class="tab-pane fade show active" id="refund" role="tabpanel">
+            @using (Html.BeginForm("SendSupport", "Contact", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdRequest)
+                @Html.Hidden("RequestType", "Refund") //Hidden ko For là set dữ liệu từ view vào              
+                @Html.HiddenFor(m => m.CustomerName)
+                @Html.HiddenFor(m => m.Email)
+                @Html.HiddenFor(m => m.PhoneNumber)
+                @Html.HiddenFor(m => m.OrderNumber)
+                @Html.HiddenFor(m => m.PurchaseDate) //HiddenFor là lấy dữ liệu từ controller
+
+                <div class="row g-4 align-items-stretch">
+                    <div class="col-lg-7 col-xl-8">
+                        <div class="form-section">
+                            <h4 class="mb-4 fw-bold"><i class="fas fa-file-signature text-primary me-2"></i>Thông tin liên hệ & Lý do</h4>
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên</label>
+                                    <div class="custom-input">@Html.DisplayFor(model => model.CustomerName)</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <div class="custom-input">@Html.DisplayFor(model => model.PhoneNumber)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Email nhận thông báo</label>
+                                <div class="custom-input">@Html.DisplayFor(model => model.Email)</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Chi tiết lý do hoàn tiền <span class="text-danger">*</span></label>
+                                @Html.TextAreaFor(m => m.Description, new { @class = "custom-input", rows = "5", placeholder = "Vui lòng mô tả chi tiết tình trạng sản phẩm bạn nhận được...", required = "required" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5 col-xl-4">
+                        <div class="summary-section">
+                            <div class="order-highlight">
+                                <h5><i class="fas fa-receipt me-2"></i>Mã đơn hàng</h5>
+                                <div class="order-id">#@Html.DisplayFor(model => model.OrderNumber)</div>
+                                <span style="color: #a5b4fc; font-size: 0.85rem;">
+                                    <i class="far fa-calendar-check me-1"></i> Đặt ngày: @Html.DisplayFor(model => model.PurchaseDate)
+                                </span>
+                            </div>
+
+                            <div class="product-select-wrapper mb-4">
+                                <label><i class="fas fa-box-open me-2"></i>Sản phẩm cần hoàn tiền <span class="text-danger">*</span></label>
+                                <select id="Productselect" name="ProductsName" required>
+                                    <option value="" disabled selected>-- Bấm để chọn sản phẩm --</option>
+                                    @if (ProductsNames != null)
+                                    {
+                                        foreach (var Products in ProductsNames)
+                                        {
+                                            <option value="@Products">@Products</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-submit-main mt-4" @(disabledBtn ?? "")>
+                                <i class="fas fa-paper-plane me-2"></i>@(disabledBtn != "" ? Html.Raw("Bạn đã gửi yêu cầu") : Html.Raw("Gửi yêu cầu hoàn tiền"))
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* <div class="tab-pane fade" id="warranty" role="tabpanel">
+            @using (Html.BeginForm("SendSupport", "Contact", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.RequestType, new { Value = "Warranty" })
+                @Html.HiddenFor(m => m.CustomerName)
+                @Html.HiddenFor(m => m.Email)
+                @Html.HiddenFor(m => m.PhoneNumber)
+                @Html.HiddenFor(m => m.OrderNumber)
+                @Html.HiddenFor(m => m.PurchaseDate)
+
+                <div class="row g-4 align-items-stretch">
+                    <div class="col-lg-7 col-xl-8">
+                        <div class="form-section">
+                            <h4 class="mb-4 fw-bold"><i class="fas fa-tools text-warning me-2"></i>Thông tin & Lỗi kỹ thuật</h4>
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên</label>
+                                    <div class="custom-input">@Html.DisplayFor(model => model.CustomerName)</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <div class="custom-input">@Html.DisplayFor(model => model.PhoneNumber)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Email liên hệ</label>
+                                <div class="custom-input">@Html.DisplayFor(model => model.Email)</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mô tả tình trạng lỗi <span class="text-danger">*</span></label>
+                                @Html.TextAreaFor(m => m.Description, new { @class = "custom-input", rows = "5", placeholder = "Mô tả chi tiết sự cố kỹ thuật bạn đang gặp phải...", required = "required" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5 col-xl-4">
+                        <div class="summary-section" style="background: linear-gradient(180deg, #78350f 0%, #b45309 100%);">
+                            <div class="order-highlight">
+                                <h5 style="color: #fde68a;"><i class="fas fa-receipt me-2"></i>Mã đơn hàng</h5>
+                                <div class="order-id">#@Html.DisplayFor(model => model.OrderNumber)</div>
+                                <span style="color: #fcd34d; font-size: 0.85rem;">
+                                    <i class="far fa-calendar-check me-1"></i> Mua ngày: @Html.DisplayFor(model => model.PurchaseDate)
+                                </span>
+                            </div>
+
+                            <div class="product-select-wrapper mb-4">
+                                <label style="color: #fef3c7;"><i class="fas fa-laptop-medical me-2"></i>Sản phẩm bảo hành <span class="text-danger">*</span></label>
+                                <select id="ProductselectWarranty" name="ProductsName" style="border-color: #f59e0b;" required>
+                                    <option value="" disabled selected>-- Bấm để chọn sản phẩm --</option>
+                                    @if (ProductsNames != null)
+                                    {
+                                        foreach (var Products in ProductsNames)
+                                        {
+                                            <option value="@Products">@Products</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-submit-main mt-4" style="background: #f59e0b; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">
+                                <i class="fas fa-paper-plane me-2"></i>Gửi Yêu Cầu Bảo Hành
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div> *@
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#refund-tab').click(function (e) {
+            e.preventDefault();
+            switchTab('refund', 'warranty', $(this), $('#warranty-tab'));
+        });
+
+        $('#warranty-tab').click(function (e) {
+            e.preventDefault();
+            switchTab('warranty', 'refund', $(this), $('#refund-tab'));
+        });
+
+        function switchTab(activeTab, inactiveTab, activeElement, inactiveElement) {
+            activeElement.addClass('active');
+            inactiveElement.removeClass('active');
+
+            $('#' + inactiveTab).removeClass('show active');
+            setTimeout(function () {
+                $('#' + activeTab).addClass('show active');
+            }, 150);
+        }
+    });
+</script>

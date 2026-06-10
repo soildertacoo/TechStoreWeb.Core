@@ -1,0 +1,359 @@
+﻿@model List<TechStore.Models.SupportRequest>
+@{
+    ViewBag.Title = "Quản lý yêu cầu hỗ trợ";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        margin-bottom: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stats-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .filter-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .request-card {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .request-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .request-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .request-body {
+        padding: 15px 20px;
+    }
+    
+    .request-type-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .refund-badge {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .warranty-badge {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .btn-action {
+        margin: 0 2px;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .search-container {
+        position: relative;
+    }
+    
+    .search-container i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    .search-input {
+        padding-left: 45px;
+        border-radius: 25px;
+        border: 2px solid #e9ecef;
+    }
+    
+    .search-input:focus {
+        border-color: #007bff;
+        box-shadow: none;
+    }
+    
+    .no-requests {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .no-requests i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-headset"></i> Quản lý yêu cầu hỗ trợ</h2>
+        <button class="btn btn-outline-primary" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i> Làm mới
+        </button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">@ViewBag.TotalRequests</div>
+                <div class="stats-label">Tổng yêu cầu</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <div class="stats-number">@ViewBag.RefundRequests</div>
+                <div class="stats-label">Yêu cầu hoàn tiền</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                <div class="stats-number">@ViewBag.WarrantyRequests</div>
+                <div class="stats-label">Yêu cầu bảo hành</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);">
+                <div class="stats-number">@ViewBag.RecentRequests</div>
+                <div class="stats-label">7 ngày gần đây</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="filter-card">
+        <form method="get" class="row align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Lọc theo loại:</label>
+                <select name="filter" class="form-control" onchange="this.form.submit()">
+                    <option value="all" selected="@(ViewBag.Filter == "all")">Tất cả</option>
+                    <option value="refund" selected="@(ViewBag.Filter == "refund")">Hoàn tiền</option>
+                    <option value="warranty" selected="@(ViewBag.Filter == "warranty")">Bảo hành</option>
+                    <option value="recent" selected="@(ViewBag.Filter == "recent")">7 ngày gần đây</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Tìm kiếm:</label>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" class="form-control search-input" 
+                           placeholder="Tìm theo mã yêu cầu, tên khách hàng, email..." 
+                           value="@ViewBag.Search">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Support Requests List -->
+    @if (Model != null && Model.Any())
+    {
+        foreach (var request in Model)
+        {
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="mb-1">
+                                <i class="fas fa-ticket-alt"></i> @request.IdRequest
+                                <span class="request-type-badge @(request.RequestType == "Refund" ? "refund-badge" : "warranty-badge")">
+                                    @(request.RequestType == "Refund" ? "Hoàn tiền" : "Bảo hành")
+                                </span>
+                            </h6>
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> @request.RequestDate.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            
+                            <button class="btn btn-action btn-outline-success" 
+                                    onclick="processRequest('@request.IdRequest', 'approve')">
+                                <i class="fas fa-check"></i> Phê duyệt
+                            </button>
+                            <button class="btn btn-action btn-outline-warning" 
+                                    onclick="processRequest('@request.IdRequest', 'reject')">
+                                <i class="fas fa-times"></i> Từ chối
+                            </button>
+                            <button class="btn btn-action btn-outline-danger" 
+                                    onclick="deleteRequest('@request.IdRequest')">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="request-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-user"></i> Khách hàng:</strong><br>
+                            @request.CustomerName<br>
+                            <small class="text-muted">@request.Email</small>
+                        </div>
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-box"></i> Sản phẩm:</strong><br>
+                            @request.ProductsName<br>
+                            <small class="text-muted">Đơn hàng: @request.OrderNumber</small>
+                        </div>
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-comment-alt"></i> Mô tả:</strong><br>
+                            <small>@(request.Description.Length > 100 ? request.Description.Substring(0, 100) + "..." : request.Description)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="no-requests">
+            <i class="fas fa-inbox"></i>
+            <h4>Không có yêu cầu hỗ trợ nào</h4>
+            <p>@(string.IsNullOrEmpty(ViewBag.Search) ? "Chưa có yêu cầu hỗ trợ nào được gửi." : "Không tìm thấy yêu cầu phù hợp với từ khóa tìm kiếm.")</p>
+        </div>
+    }
+</div>
+
+<!-- Process Request Modal -->
+<div class="modal fade" id="processModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="processModalTitle">Xử lý yêu cầu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="processForm">
+                    <input type="hidden" id="requestId" name="requestId">
+                    <input type="hidden" id="action" name="action">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label" id="reasonLabel">Lý do / Ghi chú:</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="4" 
+                                  placeholder="Nhập lý do hoặc ghi chú (tùy chọn)"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn" id="confirmButton" onclick="confirmProcess()">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function processRequest(requestId, action) {
+        document.getElementById('requestId').value = requestId;
+        document.getElementById('action').value = action;
+        
+        const modal = new bootstrap.Modal(document.getElementById('processModal'));
+        const title = document.getElementById('processModalTitle');
+        const reasonLabel = document.getElementById('reasonLabel');
+        const confirmButton = document.getElementById('confirmButton');
+        
+        if (action === 'approve') {
+            title.textContent = 'Phê duyệt yêu cầu';
+            reasonLabel.textContent = 'Ghi chú (tùy chọn):';
+            confirmButton.textContent = 'Phê duyệt';
+            confirmButton.className = 'btn btn-success';
+        } else {
+            title.textContent = 'Từ chối yêu cầu';
+            reasonLabel.textContent = 'Lý do từ chối:';
+            confirmButton.textContent = 'Từ chối';
+            confirmButton.className = 'btn btn-warning';
+        }
+        
+        modal.show();
+    }
+    
+    function confirmProcess() {
+        const modal = new bootstrap.Modal(document.getElementById('processModal'));
+        const formData = new FormData();
+        formData.append("requestId", document.getElementById('requestId').value);
+        formData.append("action", document.getElementById('action').value);
+        formData.append("reason", document.getElementById('reason').value);
+        
+        fetch('@Url.Action("ProcessSupportRequest")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Có lỗi xảy ra: ' + error);
+        });
+        
+        modal.hide();
+    }
+    
+    function deleteRequest(requestId) {
+        if (confirm('Bạn có chắc chắn muốn xóa yêu cầu này? Hành động này không thể hoàn tác.')) {
+            fetch('@Url.Action("DeleteSupportRequest")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ requestId: requestId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Có lỗi xảy ra: ' + error);
+            });
+        }
+    }
+</script>

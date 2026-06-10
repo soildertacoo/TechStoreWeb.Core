@@ -1,0 +1,62 @@
+﻿@model TechStore.Models.OrderPro
+
+@{
+    ViewBag.Title = "Hủy Đơn Hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-danger text-white">
+            <h3 class="text-center mb-0">Hủy Đơn Hàng #@Model.ID</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning" role="alert">
+                <i class="fa fa-exclamation-triangle me-2"></i>
+                <strong>Cảnh báo:</strong> Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Chi tiết đơn hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Mã đơn hàng:</strong> @Html.DisplayFor(model => model.ID)</p>
+                            <p><strong>Ngày đặt hàng:</strong> @Html.DisplayFor(model => model.DateOrder)</p>
+                            <p><strong>Trạng thái:</strong> <span class="badge bg-info">@Html.DisplayFor(model => model.Status)</span></p>
+                            <p><strong>Tổng tiền:</strong> <span class="text-danger fw-bold">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", Model.TotalAmount)</span></p>
+                            <p><strong>Phương thức thanh toán:</strong> @Html.DisplayFor(model => model.PaymentMethod)</p>
+                            <p><strong>Trạng thái thanh toán:</strong> @Html.DisplayFor(model => model.PaymentStatus)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Chi tiết giao hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Tên khách hàng:</strong> @Html.DisplayFor(model => model.Customer.NameCus)</p>
+                            <p><strong>Địa chỉ giao hàng:</strong> @Html.DisplayFor(model => model.AddressDeliverry)</p>
+                            <p><strong>Ngày giao hàng:</strong> @Html.DisplayFor(model => model.DeliveryDate)</p>
+                            <p><strong>Mã vận đơn:</strong> @Html.DisplayFor(model => model.TrackingNumber)</p>
+                            <p><strong>Phí vận chuyển: </strong>@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", Model.ShippingCost) </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("Delete", "OrderPro", FormMethod.Post, new { @class = "text-center" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.ID" />
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <input type="submit" value="Xác nhận hủy đơn hàng" class="btn btn-danger btn-lg px-4" />
+                    @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary btn-lg px-4 ms-md-2" })
+                </div>
+            }
+        </div>
+    </div>
+</div>

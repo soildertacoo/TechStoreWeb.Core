@@ -1,0 +1,1081 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Diagnostics.Eventing.Reader
+@using System.Security.Claims
+@using TechStore.Models
+@using Microsoft.Extensions.DependencyInjection  
+@inject IServiceProvider ServiceProvider
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title | TechStoreVN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/Content/Site.css" asp-append-version="true" />
+   <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --success-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            --warning-gradient: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-accent: #00d4ff;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+        }
+        html[data-theme="dark"] body {
+            background-color: #1a202c ; /* Đen nhạt */
+            color: #e2e8f0 !important; /* Chữ trắng */
+        }
+        html[data-theme="dark"] .user-btn {
+            color: #ffffff !important;
+        }
+
+        html[data-theme="dark"] .container,
+        html[data-theme="dark"] .otp-card,
+        html[data-theme="dark"] .settings-modal,
+        html[data-theme="dark"] .profile-card, html[data-theme="dark"] .settings-sidebar,
+        html[data-theme="dark"] .tab-pane.active,html[data-theme="dark"] .setting-row
+        {
+            background-color: #2d3748 !important;
+            color: #ffffff !important;
+        }
+
+        html[data-theme="dark"] .form-control {
+            background-color: #1a202c !important;
+            color: white !important;
+            border-color: #4a5568 !important;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 70%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.12) 0%, transparent 70%),
+                radial-gradient(circle at 40% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 70%),
+                radial-gradient(circle at 60% 30%, rgba(245, 87, 108, 0.08) 0%, transparent 70%);
+            animation: backgroundShift 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        @@keyframes backgroundShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            33% { transform: scale(1.1) rotate(1deg); }
+            66% { transform: scale(0.95) rotate(-1deg); }
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.4s ease;
+            padding: 0.8rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar.scrolled {
+            background: rgba(5, 5, 5, 0.98) !important;
+            border-bottom-color: var(--text-accent);
+            box-shadow: 0 8px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .navbar .container-fluid {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .category-menu-btn {
+            background: rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--text-accent);
+            color: var(--text-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .hamburger-icon {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-line {
+            width: 20px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .category-menu-btn.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .category-menu-btn.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .category-menu-btn.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .navbar-brand {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            position: static;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .navbar-brand .brand-icon {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dropdown-menu {
+            background: rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 0.8rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-top: 0.5rem;
+            min-width: 220px;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .dropdown-item {
+            color: var(--text-primary) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            margin: 0.2rem 0;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: var(--glass-bg);
+            color: var(--text-accent) !important;
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover i {
+            color: var(--text-accent);
+            transform: scale(1.2);
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 0.2rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .search-form:hover,
+        .search-form:focus-within {
+            border-color: var(--text-accent);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .search-form input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+            width: 280px;
+            transition: all 0.3s ease;
+        }
+
+        .search-form input:focus {
+            outline: none;
+            width: 320px;
+        }
+
+        .search-form input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-btn {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 20px;
+            padding: 0.8rem 1.2rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .user-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color); /* Chốt đơn: Nền sáng -> Chữ đen xám */
+            border-radius: 20px;
+            padding: 0.5rem 1.2rem 0.5rem 0.6rem; 
+            font-weight: 600; /* In đậm */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-gradient);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+
+        .user-btn:hover::before {
+            left: 0; 
+        }
+
+        .user-btn:hover {
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+            border-color: transparent;
+        }
+
+        /* --- TRANG TRÍ AVATAR HEADER --- */
+        .header-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .user-btn:hover .header-avatar {
+            transform: scale(1.1);
+            border-color: #ffffff;
+        }
+
+        footer {
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.98) 0%, rgba(15, 15, 15, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            margin-top: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .footer-section h4 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .footer-section p {
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            line-height: 1.8;
+        }
+
+        .footer-section a {
+            color: var(--text-accent);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-section a:hover {
+            color: #8b5cf6;
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+            transform: translateX(5px);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        .social-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .social-icon i {
+            font-size: 22px;
+            color: white;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            transform: translateY(-8px) scale(1.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .social-facebook::before { background: linear-gradient(135deg, #3B5998, #4c6ef5); }
+        .social-youtube::before { background: linear-gradient(135deg, #bb0000, #ff3333); }
+        .social-instagram::before { background: linear-gradient(135deg, #125688, #e4405f); }
+
+        .quick-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .quick-link {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .quick-link:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--text-accent);
+            transform: translateX(8px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+            color: var(--text-accent);
+        }
+
+        .quick-link i {
+            width: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .quick-link:hover i {
+            transform: scale(1.2);
+            color: var(--text-accent);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--glass-border);
+            margin-top: 3rem;
+            padding-top: 2rem;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: var(--text-secondary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom .powered-by {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-gradient);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-gradient);
+        }
+
+        @@media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .navbar .container-fluid {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar-left {
+                align-self: flex-start;
+            }
+
+            .navbar-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .search-form input {
+                width: 200px;
+            }
+
+            .search-form input:focus {
+                width: 220px;
+            }
+
+            .social-icons {
+                justify-content: center;
+            }
+
+            .social-icon {
+                width: 45px;
+                height: 45px;
+            }
+
+            .user-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .user-btn {
+                justify-content: center;
+                width: 100%;
+            }
+        }
+
+        .main-content {
+            position: relative;
+            z-index: 1;
+            min-height: calc(100vh - 200px);
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @@keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        #toast-stack-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column; 
+            width: 340px;
+            pointer-events: none;
+        }
+
+        .chat-toast-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 5px solid #667eea;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            pointer-events: auto;
+            overflow: hidden; 
+            transform: translateY(-60px) scale(0.9);
+            opacity: 0;
+            max-height: 0;      
+            padding: 0 16px;    
+            margin-bottom: 0;   
+            border-left-width: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chat-toast-card.show {
+            transform: translateY(0) scale(1); 
+            opacity: 1;
+            max-height: 150px;   
+            padding: 16px;       
+            margin-bottom: 12px; 
+            border-left-width: 5px;
+        }
+
+        .chat-toast-card.hide {
+            transform: translateX(120%); 
+            opacity: 0;
+            max-height: 0;
+            padding: 0 16px;
+            margin-bottom: 0; 
+            border-width: 0;
+            transition: all 0.4s ease; 
+        }
+
+        .toast-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .toast-content { flex: 1; min-width: 0; }
+        .toast-name { font-weight: bold; color: #2c3e50; font-size: 0.95rem; margin-bottom: 3px; }
+        .toast-msg { color: #6c757d; font-size: 0.85rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .toast-close { background: none; border: none; color: #adb5bd; font-size: 1.2rem; cursor: pointer; line-height: 1; transition: 0.2s; }
+        .toast-close:hover { color: #e74c3c; }
+    </style>
+    <script>
+        const currentTheme = localStorage.getItem("theme");
+        if (currentTheme === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+        }
+    </script>
+    @if(User.Identity.IsAuthenticated){
+        @if (User.HasClaim("TrangThaiAnalytic","True")){
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-5BTV4J7VBN"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-5BTV4J7VBN');
+            console.log("Đã mở Google Analytic");
+        </script>
+        }
+    }
+</head>
+
+<body >
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid px-4">
+            <div class="navbar-left">
+                <div class="dropdown">
+                    <button class="category-menu-btn" type="button" id="categoryDropdown">
+                        <div class="hamburger-icon" style="color: black">
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                        </div>
+                        <span style="color: black">Danh mục</span>
+                    </button>
+                    <ul class="dropdown-menu" id="categoryDropdownMenu">
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("CatergoryPartial", "Home", new {catergory = "Laptop"})" style="color:#000 !important;">
+                                <i class="fas fa-laptop"></i>Laptop
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("CatergoryPartial", "Home", new {catergory = "Điện thoại"})" style="color:#000 !important;">
+                                <i class="fas fa-mobile-alt"></i>Điện thoại
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("CatergoryPartial", "Home", new {catergory = "Máy tính bảng"})" style="color:#000 !important;">
+                                <i class="fas fa-tablet-alt"></i>Máy tính bảng
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("CatergoryPartial", "Home", new {catergory = "PC"})" style="color:#000 !important;">
+                                <i class="fas fa-desktop"></i>PC & Workstation
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("CatergoryPartial", "Home", new {catergory = "Tai nghe"})" style="color:#000 !important;">
+                                <i class="fas fa-headphones"></i>Âm thanh
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("CatergoryPartial", "Home", new {catergory = "Phụ kiện"})" style="color:#000 !important;">
+                                <i class="fas fa-plug"></i>Phụ kiện
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <a class="navbar-brand" href="@Url.Action("Index", "Home")">
+                    <i class="fas fa-microchip brand-icon"></i>
+                    <span>TechStoreVN</span>
+                </a>
+            </div>
+
+            <div class="navbar-right">
+                <div class="search-container">
+                    <form action="@Url.Action("Search", "Home")" method="post" class="search-form">
+                        <input type="text" name="keyword" placeholder="Khám phá công nghệ mới nhất..." aria-label="Search" />
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="user-actions">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        // =================================================================
+                        // CÁCH MỚI: TẠO KẾT NỐI DB ĐỘC LẬP & AN TOÀN TUYỆT ĐỐI CHO LAYOUT
+                        // =================================================================
+                        string avatar = "Donald_Trump.jpg";
+                        
+                        using (var scope = ServiceProvider.CreateScope())
+                        {
+                            var db = scope.ServiceProvider.GetRequiredService<DBTechStoreEntities>();
+                            var currentUser = db.Customers.FirstOrDefault(c => c.NameCus == User.Identity.Name);
+                            
+                            if (currentUser != null && !string.IsNullOrEmpty(currentUser.ImagePro))
+                            {
+                                avatar = currentUser.ImagePro;
+                            }
+                        }
+                        // =================================================================
+                        
+                        <a href="@Url.Action("ThongTinCaNhan","User")" class="user-btn" style="padding-left: 6px;">
+                            <img src="~/Images/@avatar" alt="Avatar" class="header-avatar" id="layoutHeaderAvatar" />
+                            <span>@User.Identity.Name</span>
+                        </a>
+                    }
+                    else if (Context.Session.GetString("Admin") != null)
+                    {
+                        <a href="@Url.Action("Index","Admins")" class="user-btn">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>@Context.Session.GetString("Admin")</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("DangNhap","User")" class="user-btn">
+                            <i class="fas fa-sign-in-alt" style="color: black"></i>
+                            <span style="color: black">Đăng nhập</span>
+                        </a>
+                    }
+                    
+                    @await Html.PartialAsync(partialViewName: "~/Views/Cart/CartPartital.cshtml")
+                    @await Component.InvokeAsync("MiniCart")
+                    
+                    <div id="toast-stack-container"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5 main-content animate-fade-in">
+        @RenderBody()
+    </div>
+    
+    @await Html.PartialAsync("~/Views/_chatboxPartial.cshtml")
+    
+    <footer class="pt-5 pb-4">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-section">
+                        <h4>
+                            <i class="fas fa-microchip"></i>
+                            <span>TechStoreVN</span>
+                        </h4>
+                        <p class="mb-3">
+                            <strong>TECHSTORE</strong> - Mang công nghệ tiên tiến đến gần hơn với bạn!
+                        </p>
+                        <p class="mb-4">
+                            Khám phá thế giới công nghệ với những sản phẩm và dịch vụ chất lượng cao nhất.
+                            Chúng tôi cam kết mang đến trải nghiệm mua sắm tuyệt vời nhất.
+                        </p>
+                        <div class="social-icons">
+                            <a href="https://www.facebook.com" class="social-icon social-facebook" target="_blank" aria-label="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://www.youtube.com" class="social-icon social-youtube" target="_blank" aria-label="YouTube">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                            <a href="https://www.instagram.com" class="social-icon social-instagram" target="_blank" aria-label="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-section">
+                        <h4>
+                            <i class="fas fa-address-card"></i>
+                            <span>Thông tin liên hệ</span>
+                        </h4>
+                        <p><i class="fas fa-map-marker-alt me-3" style="color: var(--text-accent);"></i>38, Xã Trung Chánh, Hóc Môn, TP.HCM</p>
+                        <p><i class="fas fa-phone-alt me-3" style="color: var(--text-accent);"></i>0352650045</p>
+                        <p><i class="fas fa-envelope me-3" style="color: var(--text-accent);"></i>phuocvinh4@gmail.com</p>
+                        <p><i class="fas fa-clock me-3" style="color: var(--text-accent);"></i>24/7 Hỗ trợ khách hàng</p>
+                        <p><i class="fas fa-shipping-fast me-3" style="color: var(--text-accent);"></i>Giao hàng toàn quốc</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-12">
+                    <div class="footer-section">
+                        <h4>
+                            <i class="fas fa-link"></i>
+                            <span>Liên kết nhanh</span>
+                        </h4>
+                        <div class="quick-links">
+                          
+                            <a href="@Url.Action("About", "Home")" class="quick-link" aria-label="About Us">
+                                <i class="fas fa-info-circle"></i>Về chúng tôi
+                            </a>
+                            <a href="@Url.Action("Contact", "Home")" class="quick-link" aria-label="Contact Support">
+                                <i class="fas fa-envelope"></i>Liên hệ hỗ trợ
+                            </a>
+                            <a href="#" class="quick-link" aria-label="Shipping Policy">
+                                <i class="fas fa-shipping-fast"></i>Chính sách giao hàng
+                            </a>
+                            <a href="#" class="quick-link" aria-label="Warranty Policy">
+                                <i class="fas fa-shield-alt"></i>Chính sách bảo hành
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>
+                    <i class="fas fa-copyright me-1"></i>
+                    <span>@DateTime.Now.Year TechStoreVN.</span>
+                    <span class="powered-by" id="idHoldCopy">Powered by DonaldVinh</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // Lấy các phần tử cần thiết
+            const hamburgerBtn = document.getElementById('categoryDropdown');
+            const menuDropdown = document.getElementById('categoryDropdownMenu');
+            const menuItems = document.querySelectorAll('.dropdown-item');
+            
+            // --- Hàm để đóng menu ---
+            function closeMenu() {
+                hamburgerBtn.classList.remove('active');
+                menuDropdown.classList.remove('show');
+            }
+
+            // --- Hàm để mở/đóng menu ---
+            function toggleMenu() {
+                hamburgerBtn.classList.toggle('active');
+                menuDropdown.classList.toggle('show');
+            }
+
+            // 1. Sự kiện click vào nút hamburger
+            hamburgerBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                toggleMenu();
+            });
+
+            // 2. Sự kiện click vào các mục trong menu
+            menuItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    this.classList.add('clicked');
+                    setTimeout(() => {
+                        this.classList.remove('clicked');
+                    }, 150);
+                    setTimeout(() => {
+                        closeMenu();
+                    }, 300);
+                });
+            });
+
+            // 3. Sự kiện click ra ngoài để đóng menu
+            document.addEventListener('click', function (event) {
+                if (menuDropdown.classList.contains('show') && !hamburgerBtn.contains(event.target) && !menuDropdown.contains(event.target)) {
+                    closeMenu();
+                }
+            });
+            //Nhận thông báo 
+            const connection = new signalR.HubConnectionBuilder()
+                                .withUrl("/notifyHub") 
+                                .withAutomaticReconnect() 
+                                .build();
+    
+            connection.on("ReceiveNotification", function (user, room, message,type) {
+               
+                if (!user.trim() || !message.trim()) {console.log("Lỗi, ko thể set thông báo cho người dùng");return;}
+                pushChatNotification(user, message)
+                if (type === "banUser") {
+                    console.log("Tài khoản này đã bị Ban. Sẽ tự động văng ra sau 5 phút.");
+
+                    // Khởi tạo bộ đếm thời gian 1 phút (1 phút * 60 giây * 1000 mili-giây = 60.000 ms)
+                    setTimeout(function () {
+                        // Điều hướng người dùng về trang Đăng xuất để xóa Session/Cookie
+                        window.location.href = "User/DangXuat"; 
+
+                    }, 60000); 
+                }
+                
+            });
+            //Khởi động notifyHub lên, quan trọng 
+            connection.start().catch(err => console.error("Lỗi SignalR: ", err));
+            connection.onreconnected(() => console.log("Đã kết nối lại thành công!"));
+
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let timer = null;
+            const id_hold = document.getElementById('idHoldCopy');
+            id_hold.addEventListener('mousedown', start)
+            id_hold.addEventListener('mouseup', cancel);
+            id_hold.addEventListener('mouseleave', cancel);
+            function start() {
+                timer = setTimeout(() => {
+                    window.location.href = '@Url.Action("Index","Admins")'
+                }, 1000);
+            }
+            function cancel() {
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+            }
+        });
+    </script>
+    <script>
+        function pushChatNotification(senderName, message, avatarUrl) {
+            const container = document.getElementById('toast-stack-container');
+            // 1. Tạo một thẻ <div> mới
+            const card = document.createElement('div');
+            card.className = 'chat-toast-card';
+            
+            // Nếu không truyền avatar thì xài ảnh mặc định
+            const imgUrl = avatarUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+            // 2. Nhồi HTML vào trong tấm thẻ
+            card.innerHTML = `
+                <div class="toast-content">
+                    <div class="toast-name">${senderName}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+                <button class="toast-close" onclick="removeToast(this.parentElement)">&times;</button>
+            `;
+            
+            // 3. Nhét thẻ vào đầu rổ (prepend để thẻ mới nhất luôn nằm trên cùng)
+            container.prepend(card);
+            
+            // 4.  CSS kích hoạt hiệu ứng văng ra
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, 10);
+            });
+            
+            // 5. Cài đặt đồng hồ cát: Tự động xóa thẻ sau 5 giây
+            setTimeout(() => {
+                if (container.contains(card)) {
+                    removeToast(card);
+                }
+            }, 10000);
+        }
+
+        // HÀM XÓA THẺ (Kèm hiệu ứng thu gọn mượt mà)
+        function removeToast(card) {
+            card.classList.remove('show');
+            card.classList.add('hide'); 
+            
+            // Chờ 0.4s cho hiệu ứng bay ra hoàn tất rồi mới chém bỏ thẻ HTML
+            setTimeout(() => {
+                card.remove();
+            }, 400); 
+        }
+
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

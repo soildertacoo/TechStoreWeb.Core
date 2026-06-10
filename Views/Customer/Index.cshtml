@@ -1,0 +1,332 @@
+﻿@model IEnumerable<TechStore.Models.Customer>
+
+@{
+    ViewBag.Title = "Customer List";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<style>
+    /* Custom CSS để UI hiện đại hơn */
+    body { background-color: #f4f7f6; }
+    
+    /* Style cho các thẻ thống kê */
+    .stat-card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .bg-gradient-primary { background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%); }
+    .bg-gradient-danger { background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%); }
+    
+    /* Style cho ô tìm kiếm */
+    .search-input { border-radius: 20px 0 0 20px; border-right: none; }
+    .search-btn { border-radius: 0 20px 20px 0; background-color: #fff; border-left: none; }
+    
+    /* Style cho Bảng dữ liệu */
+    .custom-table-card { border-radius: 15px; border: none; }
+    .table-custom th {
+        background-color: #f8f9fc;
+        color: #4a5568;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        border-top: none;
+        letter-spacing: 0.5px;
+    }
+    .table-custom td { vertical-align: middle; }
+    
+    /* Nút icon bo tròn */
+    .btn-icon {
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: 0.2s;
+    }
+    .btn-icon:hover { opacity: 0.8; transform: scale(1.1); }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-7">
+            <h2 class="font-weight-bold text-dark mb-1" style="font-size: 2rem;">
+                <i class="fas fa-users text-primary mr-2"></i> Danh sách khách hàng
+            </h2>
+            <p class="text-muted mb-0">Quản lý thông tin khách hàng của hệ thống</p>
+        </div>
+        <div class="col-md-5">
+            <div class="input-group shadow-sm">
+                <input type="text" id="customerSearch" class="form-control search-input pl-4" placeholder="Tìm kiếm tên, số điện thoại, email...">
+                <div class="input-group-append">
+                    <span class="input-group-text search-btn text-primary"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card bg-gradient-primary text-white h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 font-weight-bold" style="opacity: 0.8">Tổng khách hàng</h6>
+                        <h2 class="display-4 font-weight-bold mb-0">@Model.Count()</h2>
+                    </div>
+                    <i class="fas fa-user-check fa-3x" style="opacity: 0.3"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card bg-gradient-warning text-white h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 font-weight-bold" style="opacity: 0.8">Khách hàng VIP</h6>
+                        <h2 class="display-4 font-weight-bold mb-0">@Model.Count(c => c.IsVIP ?? false)</h2>
+                    </div>
+                    <i class="fas fa-crown fa-3x" style="opacity: 0.3"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card bg-gradient-danger text-white h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 font-weight-bold" style="opacity: 0.8">Khách bị cấm</h6>
+                        <h2 class="display-4 font-weight-bold mb-0">@Model.Count(c => c.IsBanned == true)</h2>
+                    </div>
+                    <i class="fas fa-user-slash fa-3x" style="opacity: 0.3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm custom-table-card">
+        <div class="card-header bg-white border-0 py-3 d-flex align-items-center">
+            <h5 class="mb-0 text-primary font-weight-bold"><i class="fas fa-table mr-2"></i> Dữ liệu chi tiết</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-custom mb-0" id="customerTable">
+                    <thead>
+                        <tr>
+                            <th class="pl-4">Khách hàng</th>
+                            <th>Liên hệ</th>
+                            <th>Địa chỉ</th>
+                            <th class="text-center">Loại tài khoản</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.IsBanned == true ? "bg-light" : "")">
+                                <td class="pl-4">
+                                    <div class="font-weight-bold text-dark">@Html.DisplayFor(modelItem => item.NameCus)</div>
+                                </td>
+                                <td>
+                                    <div class="text-muted small"><i class="fas fa-phone mr-1"></i> @Html.DisplayFor(modelItem => item.PhoneCus)</div>
+                                    <div class="text-muted small"><i class="fas fa-envelope mr-1"></i> @Html.DisplayFor(modelItem => item.EmailCus)</div>
+                                </td>
+                                <td><span class="text-muted">@Html.DisplayFor(modelItem => item.City)</span></td>
+                                <td class="text-center">
+                                    @if (item.IsVIP == true)
+                                    {
+                                        <span class="badge badge-warning badge-pill px-3 py-2 shadow-sm text-dark"><i class="fas fa-crown"></i> VIP</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-light badge-pill px-3 py-2 border text-muted">Thường</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.IsBanned == true)
+                                    {
+                                        <span class="badge badge-danger badge-pill px-3 py-2"><i class="fas fa-lock mr-1"></i> Bị cấm</span>
+                                    }
+                                    else 
+                                    { 
+                                        <span class="badge badge-success badge-pill px-3 py-2 bg-success text-white"><i class="fas fa-check mr-1"></i> Hoạt động</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center">
+                                        @if (item.IsBanned == true)
+                                        {
+                                            <a href="@Url.Action("UnbanUser", "Customer", new { id = item.IDCus })" class="btn btn-success btn-icon mx-1 shadow-sm" title="Bỏ cấm">
+                                                <i class="fas fa-unlock"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-warning btn-icon mx-1 shadow-sm text-white" title="Cấm người dùng" onclick="showBanModal('@item.IDCus', '@item.NameCus')">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        }
+                                        <a href="@Url.Action("Delete", "Customer", new { id = item.IDCus })" class="btn btn-danger btn-icon mx-1 shadow-sm" title="Xóa">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="banUserModal" tabindex="-1" role="dialog" aria-labelledby="banUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 15px; overflow: hidden;">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title" id="banUserModalLabel"><i class="fas fa-user-slash mr-2"></i> Cấm khách hàng</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="banUserForm">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="customerId" name="IDCus" />
+                    
+                    <div class="alert alert-danger" style="border-radius: 10px;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> Bạn đang thực hiện cấm tài khoản: <strong id="customerName" class="text-uppercase"></strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="banReason" class="font-weight-bold"><i class="fas fa-gavel text-muted mr-1"></i> Lý do cấm:</label>
+                        <select class="form-control" id="banReason" required style="border-radius: 10px;">
+                            <option value="">-- Chọn lý do --</option>
+                            <option value="Vi phạm điều khoản dịch vụ">Vi phạm điều khoản dịch vụ</option>
+                            <option value="Thông tin giả mạo">Thông tin giả mạo</option>
+                            <option value="Lừa đảo">Lừa đảo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-light" style="border-radius: 20px; padding: 8px 20px;" onclick="unshowBanModal()" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger shadow-sm" id="btnBan" style="border-radius: 20px; padding: 8px 20px;"><i class="fas fa-ban mr-1"></i> Xác nhận cấm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        let cusID = null;
+        let cusName = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Simple search functionality
+            document.getElementById('customerSearch').addEventListener('keyup', function () {
+                var searchValue = this.value.toLowerCase();
+                var table = document.getElementById('customerTable');
+                var rows = table.getElementsByTagName('tr');
+
+                for (var i = 1; i < rows.length; i++) {
+                    var found = false;
+                    var cells = rows[i].getElementsByTagName('td');
+
+                    for (var j = 0; j < cells.length; j++) {
+                        if (cells[j].textContent.toLowerCase().indexOf(searchValue) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    rows[i].style.display = found ? '' : 'none';
+                }
+            });
+        });
+
+        // Chức năng xác nhận ban
+      // BƯỚC 1: Thêm chữ 'async' vào sự kiện click
+        document.getElementById('btnBan').addEventListener('click', async function (e) {
+            e.preventDefault();
+
+            const reasonValue = document.getElementById('banReason').value;
+            if (!reasonValue) {
+                alert('Vui lòng chọn lý do để ban khách hàng');
+                return;
+            }
+
+            if (confirm('Bạn có chắc chắn muốn ban khách hàng này không với lý do: ' + reasonValue + ' với ID Khách hàng là ' + cusID)) {
+
+                const btn = this;
+                const originalText = btn.innerHTML;
+
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
+                btn.style.pointerEvents = 'none';
+
+                const formData = new FormData();
+                formData.append('customerId', cusID);
+                formData.append('reason', reasonValue);
+
+                try {
+                    // Dùng await thay cho .then() chain
+                    const response = await fetch('@Url.Action("BanUser", "Customer")', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error("Mã lỗi máy chủ: " + response.status);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        await sendNotify("Admin", data.nameCus, data.reasonBanned, "banUser");
+                        if (confirm('Đã ban thành công, nhấn ok để reset trang lại')) {
+                            // Lưu ý: Đảm bảo hàm sendNotify() của bạn đã được khai báo với từ khóa 'async'
+                            // Gửi xong xuôi rồi mới nhảy trang
+                            window.location.href = "@Url.Action("Index", "Customer")";
+                        }
+                    }
+                    else {
+                        if (confirm('Ban không thành công (' + data.message + '), nhấn ok để reload lại trang ')) {
+                            window.location.href = "@Url.Action("Index", "Customer")";
+                        }
+                        else {
+                            btn.innerHTML = originalText;
+                            btn.style.pointerEvents = 'auto';
+                        }
+                    }
+                } catch (error) {
+                    alert('Bị lỗi khi gửi yêu cầu: ' + error.message);
+                    btn.innerHTML = originalText;
+                    btn.style.pointerEvents = 'auto';
+                }
+            }
+        });
+
+        // Chức năng dismiss cửa sổ
+        function unshowBanModal() {
+            cusID = null;
+            cusName = null;
+            $('#banUserModal').modal('hide');
+        }
+
+        // Function to show the ban modal
+        function showBanModal(customerId, customerName) {
+            cusID = customerId;
+            cusName = customerName;
+            if (cusID != null && cusName != null) {
+                document.getElementById('customerId').value = cusID;
+                document.getElementById('customerName').textContent = cusName;
+                $('#banUserModal').modal('show');
+            }
+        }
+    </script>
+}

@@ -1,0 +1,542 @@
+﻿@model TechStore.Models.Payment
+@{
+    ViewBag.Title = "Thanh toán đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- RESET & VARIABLES --- */
+    body {
+        background-color: #f3f4f6;
+        color: #1f2937;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* --- LAYOUT TỔNG --- */
+    .checkout-page {
+        padding: 40px 0 80px 0;
+        min-height: 100vh;
+    }
+    
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .checkout-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+
+    /* --- STEPPER (THANH TIẾN ĐỘ) --- */
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+    .step {
+        display: flex;
+        align-items: center;
+        color: #9ca3af;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    .step.active {
+        color: #2563eb;
+        font-weight: 600;
+    }
+    .step-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .step.active .step-number {
+        background: #2563eb;
+        color: white;
+    }
+    .step-divider {
+        width: 60px;
+        height: 2px;
+        background: #e5e7eb;
+        margin: 0 15px;
+    }
+
+    /* --- WHITE CARDS (THẺ TRẮNG) --- */
+    .checkout-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f3f4f6;
+        padding: 30px;
+        margin-bottom: 25px;
+    }
+    .checkout-card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 15px;
+    }
+    .checkout-card-title i {
+        color: #2563eb;
+    }
+
+    /* --- FORM INPUTS --- */
+    .form-group-modern {
+        margin-bottom: 20px;
+    }
+    .form-label-modern {
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.95rem;
+    }
+    .form-control-modern {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: #f9fafb;
+        width: 100%;
+        color: #1f2937;
+        box-sizing: border-box;
+    }
+    .form-control-modern:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        background: #ffffff;
+        outline: none;
+    }
+    .input-icon-wrapper {
+        position: relative;
+    }
+    .input-icon-wrapper .form-control-modern {
+        padding-left: 40px;
+    }
+    .input-icon-wrapper .input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+    }
+    
+    .row-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    /* --- USER INFO BANNER --- */
+    .user-banner {
+        background: #eff6ff;
+        border: 1px dashed #93c5fd;
+        color: #1e3a8a;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .user-banner-icon {
+        background: #bfdbfe;
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    /* --- CART ITEMS LIST --- */
+    .cart-item-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #f3f4f6;
+        border-radius: 12px;
+        background: #fafafa;
+        transition: border-color 0.2s;
+    }
+    .cart-item:hover {
+        border-color: #e5e7eb;
+    }
+    .cart-item-info {
+        flex: 1;
+    }
+    .cart-item-name {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+    .cart-item-meta {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    .cart-item-price-wrapper {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+    }
+    .cart-item-price {
+        font-weight: 600;
+        color: #111827;
+        font-size: 1rem;
+    }
+    .btn-delete {
+        color: #ef4444;
+        font-size: 0.85rem;
+        background: #fef2f2;
+        padding: 4px 10px;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .btn-delete:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        text-decoration: none;
+    }
+
+    /* --- TOTAL BOX --- */
+    .total-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 25px 0;
+        border: 1px dashed #cbd5e1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .total-title {
+        font-size: 1.1rem;
+        color: #475569;
+        font-weight: 500;
+    }
+    .total-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ef4444;
+    }
+
+    /* --- PAYMENT METHOD SELECT --- */
+    .payment-method-select select {
+        appearance: none; 
+        background: #f9fafb url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>') no-repeat right 16px center; 
+        background-size: 20px; 
+        padding-right: 40px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    /* --- MAIN BUTTON --- */
+    .btn-submit-order {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 16px 20px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+    .btn-submit-order:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+
+    /* --- VALIDATION --- */
+    .text-danger {
+        color: #ef4444; 
+        font-size: 0.85rem; 
+        margin-top: 6px; 
+        display: block;
+    }
+    .input-validation-error {
+        border-color: #ef4444 !important; 
+        background-color: #fef2f2 !important;
+    }
+
+    /* --- RESPONSIVE --- */
+    @@media (max-width: 768px) {
+        .row-grid-2 { grid-template-columns: 1fr; gap: 0; }
+        .progress-steps { flex-direction: column; gap: 10px;}
+        .step-divider { width: 2px; height: 20px; margin: 0; }
+        .checkout-card { padding: 20px; }
+    }
+</style>
+
+<div class="checkout-page">
+    <div class="container">
+        
+        <div class="checkout-header">
+            <h1 class="checkout-title">Thanh toán đơn hàng</h1>
+            <p style="color: #6b7280;">Vui lòng kiểm tra lại thông tin trước khi hoàn tất</p>
+        </div>
+
+        <div class="progress-steps">
+            <div class="step">
+                <div class="step-number"><i class="fas fa-shopping-cart" style="font-size:12px;"></i></div>
+                <span>Giỏ hàng</span>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step active">
+                <div class="step-number">2</div>
+                <span>Thanh toán</span>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <span>Hoàn tất</span>
+            </div>
+        </div>
+
+        @using (Html.BeginForm("PaymentCart", "Cart", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger", style = "text-align:center; margin-bottom:20px; font-weight:600;" })
+
+            <div class="row">
+                <!-- CỘT TRÁI: THÔNG TIN KHÁCH HÀNG -->
+                <div class="col-lg-7">
+                    <div class="checkout-card">
+                        <div class="checkout-card-title">
+                            <i class="fas fa-id-card"></i> Thông tin giao hàng
+                        </div>
+                        
+                        @Html.HiddenFor(model => model.Customers.IDCus)
+
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <div class="user-banner">
+                                <div class="user-banner-icon"><i class="fas fa-user-circle"></i></div>
+                                <div>
+                                    <div style="font-size: 0.85rem; opacity: 0.8;">Khách hàng đang đăng nhập</div>
+                                    <strong style="font-size: 1.1rem;">@User.Identity.Name</strong>
+                                </div>
+                            </div>
+                        }
+                        
+                        <div class="form-group-modern">
+                            @Html.LabelFor(model => model.Customers.NameCus, "Họ và tên", new { @class = "form-label-modern" })
+                            @Html.TextBoxFor(model => model.Customers.NameCus, new { @class = "form-control-modern", placeholder = "Nhập họ và tên người nhận" })
+                            @Html.ValidationMessageFor(model => model.Customers.NameCus, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="row-grid-2">
+                            <div class="form-group-modern">
+                                @Html.LabelFor(model => model.Customers.PhoneCus, "Số điện thoại", new { @class = "form-label-modern" })
+                                @Html.TextBoxFor(model => model.Customers.PhoneCus, new { @class = "form-control-modern", placeholder = "09xx xxx xxx" })
+                                @Html.ValidationMessageFor(model => model.Customers.PhoneCus, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group-modern">
+                                @Html.LabelFor(model => model.Customers.EmailCus, "Địa chỉ Email", new { @class = "form-label-modern" })
+                                @Html.TextBoxFor(model => model.Customers.EmailCus, new { @class = "form-control-modern", placeholder = "email@domain.com" })
+                                @Html.ValidationMessageFor(model => model.Customers.EmailCus, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            @Html.LabelFor(model => model.Customers.StreetAddress, "Địa chỉ chi tiết (Số nhà, Đường)", new { @class = "form-label-modern" })
+                            @Html.TextBoxFor(model => model.Customers.StreetAddress, new { @class = "form-control-modern", placeholder = "Ví dụ: 123 Đường Lê Lợi" })
+                            @Html.ValidationMessageFor(model => model.Customers.StreetAddress, "", new { @class = "text-danger" })
+                        </div>
+                            
+                        <div class="row-grid-2">
+                            <div class="form-group-modern">
+                                @Html.LabelFor(model => model.Customers.City, "Tỉnh/Thành phố", new { @class = "form-label-modern" })
+                                <div class="input-icon-wrapper">
+                                    <select id="province" name="City" class="form-control-modern" required>
+                                        @if (!string.IsNullOrEmpty(Model.Customers.City))
+                                        {
+                                            <option value="@Model.Customers.City" selected>@Model.Customers.City</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" selected disabled>Chọn Tỉnh/Thành phố</option>
+                                        }
+                                    </select>
+                                    <i class="fas fa-map-marker-alt input-icon"></i>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.Customers.City, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group-modern">
+                                @Html.LabelFor(model => model.Customers.Ward, "Phường/Xã/Quận", new { @class = "form-label-modern" })
+                                <div class="input-icon-wrapper">
+                                    <select id="ward" name="Ward" class="form-control-modern" required>
+                                        @if (!string.IsNullOrEmpty(Model.Customers.Ward))
+                                        {
+                                            <option value="@Model.Customers.Ward" selected>@Model.Customers.Ward</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" selected disabled>Vui lòng chọn Tỉnh/Thành trước</option>
+                                        }
+                                    </select>
+                                    <i class="fas fa-building input-icon"></i>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.Customers.Ward, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div> 
+                </div> 
+
+                <!-- CỘT PHẢI: GIỎ HÀNG & THANH TOÁN -->
+                <div class="col-lg-5">
+                    <div class="checkout-card" style="background: #fafafa; border: 1px solid #e5e7eb;">
+                        <div class="checkout-card-title">
+                            <i class="fas fa-shopping-bag"></i> Đơn hàng của bạn
+                        </div>
+                        
+                        <!-- List Sản phẩm -->
+                        <div class="cart-item-list">
+                            @foreach (var item in Model.mycart)
+                            {
+                                <div class="cart-item">
+                                    <div class="cart-item-info">
+                                        <div class="cart-item-name">@item.NamePro</div>
+                                        <div class="cart-item-meta">Số lượng: <strong>@item.Number</strong></div>
+                                    </div>
+                                    <div class="cart-item-price-wrapper">
+                                        <div class="cart-item-price">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.Price)</div>
+                                        @* @Html.ActionLink("Xóa", "RemoveFromCart", new { id = @item.ProductID }, new { @class = "btn-delete", title = "Xóa khỏi đơn" }) *@
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Phương thức thanh toán -->
+                        <div class="payment-method-select form-group-modern">
+                            <label class="form-label-modern">Phương thức thanh toán</label>
+                            @Html.DropDownListFor(model => model.Order.PaymentMethod, new SelectList(new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "Thanh toán tiền mặt khi nhận hàng (COD)", Value = "2" },
+                                new SelectListItem { Text = "Thanh toán trực tuyến (VNPAY/Thẻ)", Value = "1" }
+                            }, "Value", "Text"), new { @class = "form-control-modern" })
+                        </div>
+
+                        <!-- Khung Tổng Tiền -->
+                        <div class="total-box">
+                            <div class="total-title">Tổng thanh toán</div>
+                            <div class="total-amount">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", ViewBag.Total)</div>
+                        </div>
+
+                        <!-- Nút Submit -->
+                        <button type="submit" class="btn-submit-order">
+                            <i class="fas fa-check-circle"></i> Đặt hàng ngay
+                        </button>
+                    </div> 
+                </div> 
+            </div> 
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            
+            // 1. XỬ LÝ LỊCH (Ngày Sinh) - Nếu code gốc có dùng
+            flatpickr("#DateOfBirth", {
+                locale: "vn",
+                dateFormat: "d-m-Y",
+                allowInput: true, 
+                minDate: "01-01-1936",
+                maxDate: "31-12-2099",
+            });
+            
+            // 2. KHỞI CHẠY API ĐỊA CHỈ
+            await loadAddressData();
+        });
+
+        async function loadAddressData() {
+            try {
+                const res = await fetch("https://cdn.jsdelivr.net/gh/giaodienblog/cdn@master/provinces-database.json");
+                const data = await res.json();
+                
+                const provinceSelect = document.getElementById('province');
+                const wardSelect = document.getElementById('ward');
+                
+                const currentCity = '@Html.Raw(Model.Customers.City)';
+                
+                data.forEach(p => {
+                    const opt = document.createElement("option");
+                    const name = p.Name || p.FullName || p.name;
+                    
+                    opt.value = name; 
+                    opt.textContent = name;
+                    opt.setAttribute('data-code', p.Code || p.code); 
+                    
+                    if (name !== currentCity) {
+                        provinceSelect.appendChild(opt);
+                    }
+                });
+
+                provinceSelect.addEventListener("change", () => {
+                    wardSelect.innerHTML = '<option value="" selected disabled>Chọn Phường/Xã/Quận</option>';
+                    
+                    const selectedOption = provinceSelect.options[provinceSelect.selectedIndex];
+                    const provinceCode = selectedOption.getAttribute('data-code');
+                    
+                    const prov = data.find(p => (p.Code || p.code) == provinceCode);
+                    
+                    if (prov && prov.Wards) {
+                        prov.Wards.forEach(w => {
+                            const o = document.createElement("option");
+                            const wardName = (w.AdministrativeUnitShortName ? w.AdministrativeUnitShortName + " " : "") + (w.Name || w.FullName || w.name);
+                            o.value = wardName; 
+                            o.textContent = wardName;
+                            wardSelect.appendChild(o);
+                        });
+                    }
+                });
+
+            } catch (error) {
+                console.error("Lỗi tải dữ liệu địa chỉ:", error);
+            }
+        }
+    </script>
+}

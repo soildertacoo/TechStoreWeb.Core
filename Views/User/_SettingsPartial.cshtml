@@ -1,0 +1,637 @@
+@using System.Security.Claims
+<style>
+    /* Chỉnh lại 100vw và 100vh để bao phủ mượt mà cả thanh cuộn, đẩy z-index lên cao ngất ngưởng */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+    }
+
+    .settings-modal {
+        background: white;
+        width: 90%;
+        max-width: 900px;
+        height: 80vh;
+        border-radius: 15px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        display: flex;
+        overflow: hidden;
+        position: relative;
+        animation: slideUp 0.4s ease-out;
+    }
+
+    .btn-close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #999;
+        cursor: pointer;
+        transition: 0.3s;
+        z-index: 10;
+    }
+
+        .btn-close-modal:hover {
+            color: #ff6b6b;
+            transform: rotate(90deg);
+        }
+
+    .settings-sidebar {
+        width: 250px;
+        background: #f8f9fc;
+        padding: 20px 0;
+        border-right: 1px solid #e9ecef;
+        overflow-y: auto;
+    }
+
+    .tab-btn {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 15px 25px;
+        background: none;
+        border: none;
+        font-size: 1rem;
+        color: #495057;
+        cursor: pointer;
+        transition: 0.3s;
+        font-weight: 500;
+    }
+
+        .tab-btn:hover {
+            background: #e2e8f0;
+            color: #667eea;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            border-left: 4px solid #4a5568;
+        }
+
+    .settings-content {
+        flex: 1;
+        padding: 40px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .tab-pane {
+        display: none;
+        animation: fadeIn 0.4s;
+    }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+    /* CSS Toggle Switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+    input:checked + .slider.round {
+        background-color: #00dd63;
+    }
+
+        input:checked + .slider.round:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+    input:checked + .slider.dark.round {
+        background-color: rgb(212, 18, 164);
+    }
+
+        input:checked + .slider.dark.round:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+    .slider.round {
+        border-radius: 34px;
+    }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+    .slider.dark.round {
+        border-radius: 34px;
+    }
+
+        .slider.dark.round:before {
+            border-radius: 50%;
+        }
+
+    /* Flexbox để chia hàng ngang (Chữ trái - Nút phải) */
+    .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .setting-row-box {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+        padding: 15px 20px;
+    }
+
+    .setting-info p {
+        margin: 5px 0 0 0;
+        font-size: 0.9rem;
+        color: gray;
+    }
+
+
+    /* --- GIAO DIỆN FORM 2FA --- */
+    .visual-options-wrapper {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .visual-option-item input[type="radio"] {
+        display: none;
+    }
+
+    .visual-option-card {
+        display: block;
+        width: 200px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        background: #fff;
+    }
+
+        .visual-option-card img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+    .visual-option-title {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        display: block;
+    }
+
+    .visual-option-card:hover {
+        border-color: #adb5bd;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .visual-option-item input[type="radio"]:checked + .visual-option-card {
+        border-color: #667eea;
+        background-color: #f4f6ff;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+        .visual-option-item input[type="radio"]:checked + .visual-option-card .visual-option-title {
+            color: #667eea;
+        }
+
+    .otp-card {
+        text-align: center;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #eaeaea;
+        width: 100%;
+    }
+
+    .otp-qr-section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: inline-block;
+    }
+
+    .otp-qr-img {
+        width: 150px;
+        height: 150px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .otp-input-section {
+        margin-bottom: 25px;
+    }
+
+    .otp-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .input-wrapper {
+        position: relative;
+        width: 200px;
+        margin: 0 auto;
+    }
+
+        .input-wrapper .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+    .otp-input {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        font-size: 1.2rem;
+        letter-spacing: 5px;
+        text-align: center;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+        transition: 0.3s;
+        box-sizing: border-box;
+    }
+
+        .otp-input:focus {
+            border-color: #5b73e8;
+            box-shadow: 0 0 5px rgba(91, 115, 232, 0.3);
+        }
+
+    .otp-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .btn-otp {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-verify {
+        background: #5b73e8;
+        color: white;
+    }
+
+        .btn-verify:hover {
+            background: #4a62d8;
+        }
+
+    .btn-back {
+        background: #f1f3f5;
+        color: #555;
+    }
+
+        .btn-back:hover {
+            background: #e2e6ea;
+        }
+
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+</style>
+@{
+    string url = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Demo";
+}
+<div id="SettingsModalOverlay" class="modal-overlay">
+    <div class="settings-modal">
+        <button class="btn-close-modal" onclick="closeSettingsModal()">✖</button> <div class="settings-sidebar">
+            <button class="tab-btn active" onclick="openSettingTab('tab-security', this)">🔐 Bảo mật & Đăng nhập</button>
+            <button class="tab-btn" onclick="openSettingTab('tab-privacy', this)">🍪 Quyền riêng tư</button>
+            <button class="tab-btn" onclick="openSettingTab('tab-theme', this)">🎨 Trải nghiệm người dùng</button>
+
+        </div>
+
+        <div class="settings-content">
+
+            <div id="tab-security" class="tab-pane active">
+                <h3>Bảo mật tài khoản</h3>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Lưu phiên đăng nhập</strong>
+                        <p>Giữ bạn luôn đăng nhập trên thiết bị này.</p>
+                    </div>
+
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnckCookie" @(User.HasClaim("TrangThaiCookie", "True") ? "checked" : "") />
+                            <span class="slider round" id="sliderSpan"></span>
+                        </label>
+                    </div>
+                    @await Html.PartialAsync("~/Views/_testToasr.cshtml")
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Bật xác thực hai lớp qua Authencator</strong>
+                        <p>Giúp bạn đăng nhập an toàn hơn</p>
+                    </div>
+
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnToggle2FA" @(User.HasClaim("TrangThaiAuth", "True") ? "checked" : "") />
+                            <span class="slider round" id="sliderSpan"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-row" id="form2FA" style="display: @(User.HasClaim("TrangThaiAuth","True") ? "flex" : "none");">
+                    <div class="setting-info">
+                        <strong>Xác thực hai lớp (2FA)</strong>
+                        <p>Dùng app Google Authenticator hoặc Microsoft Authenticator để quét mã và lấy OTP.</p>
+                    </div>
+
+                    <div class="setting-action">
+                        <div class="otp-qr-section">
+                            <img id="imgQR" src=" @(User.FindFirstValue("QRImage") ?? " ")" alt="QR Code ứng dụng" class="otp-qr-img" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-privacy" class="tab-pane">
+                <h3>Tùy chỉnh Analytics</h3>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Cho phép Analytics(Khuyến khích nên mở)</strong>
+                        <p>Giúp chúng tôi cải thiện trải nghiệm web.</p>
+                    </div>
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnckAnalytic" @(User.HasClaim("TrangThaiAnalytic", "True") ? "checked" : "") />
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-theme" class="tab-pane">
+                <h3>Giao diện người dùng</h3>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <strong>Mở dark mode</strong>
+                        <p>Giúp bạn lướt web thoải mái hơn vào ban đêm</p>
+                    </div>
+
+                    <div class="setting-action">
+                        <label class="switch">
+                            <input type="checkbox" id="btnDarkMode" />
+                            <span class="slider dark round" id="sliderSpan"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-row-box">
+                    <div class="setting-info">
+                        <strong>Tùy chọn thông báo chat</strong>
+                        <p class="text-muted">Chọn kiểu thông báo chat mà bạn thích</p>
+                    </div>
+
+                    <div class="visual-options-wrapper">
+                        @* Để input radio vào  lable là khi chọn tự động tô màu lên  *@
+                        <label class="visual-option-item" onclick="toggleChat('badge')">
+                            <input type="radio" name="notification_style" value="badge">
+                            <div class="visual-option-card">
+                                <img src="~/Images/badgeNotify.png" alt="Chat Badge">
+                                <span class="visual-option-title">Thông báo chat Badge</span>
+                            </div>
+                        </label>
+
+                        <label class="visual-option-item" onclick="toggleChat('popup')">
+                            <input type="radio" name="notification_style" value="popup">
+                            <div class="visual-option-card">
+                                <img src="~/Images/popupNotify.png" alt="Hiện đại">
+                                <span class="visual-option-title">Thông báo chat popup</span>
+                            </div>
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // 🚀 CHIÊU THUẬT QUAN TRỌNG: Bưng hộp Modal này ra làm con trực tiếp của <body>
+            // Điều này giúp Modal thoát khỏi mọi lệnh "transform" hay "animation" của các thẻ cha bên ngoài
+            document.body.appendChild(document.getElementById('SettingsModalOverlay'));
+
+            // --- XỬ LÝ NÚT ANALYTICS ---
+            const btnAnalytic = document.getElementById("btnckAnalytic");
+            btnAnalytic.addEventListener("change", async function () {
+                try {
+                    let response = await fetch('/User/ToggleAnalytic', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ isToogled: this.checked })
+                    });
+
+                    let data = await response.json();
+
+                    if (data.success) {
+                        if (this.checked) {
+                            console.log("Đã lưu trạng thái thành công");
+                            alert("Đã bật Google Analytic. Cảm ơn bạn vì đã giúp chúng tôi có được nguồn dữ liệu quý giá");
+                        }
+                        else {
+                            form2FA.style.display = "none";
+                            alert("Đã tắt Google Analytic.");
+                        }
+                    }
+                    else {
+                        alert("Lỗi từ máy chủ, không thể lưu trạng thái!");
+                        this.checked = !this.checked;
+                    }
+                }
+                catch (error) {
+                    console.error("Lỗi mạng:", error);
+                    alert("Lỗi kết nối mạng! Vui lòng kiểm tra lại internet.");
+                    this.checked = !this.checked;
+                    form2FA.style.display = "none";
+                }
+            });
+
+            // --- XỬ LÝ NÚT COOKIE ĐĂNG NHẬP, và bật 2FA ---
+            const btnCookie = document.getElementById("btnckCookie");
+            btnCookie.addEventListener("change", async function () {
+                console.log("Trạng thái lưu phiên hiện tại là:", this.checked);
+                let response = await fetch('/User/ToogleSession', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isToogled: this.checked })
+                });
+
+                if (response.ok && this.checked) {
+                    console.log("Đã lưu trạng thái thành công!");
+                    alert("Đã bật lưu phiên đăng nhập, lần sau ko cần đăng nhập lại");
+                } else if (response.ok && !this.checked) {
+                    alert("Đã tắt lưu phiên đăng nhập, tắt trình duyệt để log out");
+                }
+                else {
+                    alert("Lỗi mạng, không thể lưu!");
+                    this.checked = !this.checked;
+                }
+            });
+
+            const btnToggle2FA = document.getElementById("btnToggle2FA");
+            const form2FA = document.getElementById("form2FA");
+            btnToggle2FA.addEventListener("change", async function () {
+                console.log("Trạng thái lưu phiên hiện tại là:", this.checked);
+
+                try {
+                    let response = await fetch('/User/Factor2Setup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ isToogled: this.checked })
+                    });
+
+                    let data = await response.json();
+
+                    if (data.success) {
+                        if (this.checked) {
+                            console.log("Đã lưu trạng thái thành công");
+                            const img = document.getElementById("imgQR");
+                            img.src = data.factorModel.qrCodeImage;
+                            form2FA.style.display = "flex";
+                            alert("Đã bật đăng nhập 2FA. Vui lòng quét mã QR!");
+                        }
+                        else {
+                            form2FA.style.display = "none";
+                            alert("Đã tắt xác thực 2 lớp (2FA).");
+                        }
+                    }
+                    else {
+                        alert("Lỗi từ máy chủ, không thể lưu trạng thái!");
+                        this.checked = !this.checked;
+                        form2FA.style.display = "none";
+                    }
+                }
+                catch (error) {
+                    console.error("Lỗi mạng:", error);
+                    alert("Lỗi kết nối mạng! Vui lòng kiểm tra lại internet.");
+                    this.checked = !this.checked;
+                    form2FA.style.display = "none";
+                }
+            });
+
+            //Xử lý nút mở dark mode
+            const btnDark = document.getElementById("btnDarkMode");
+            const isDark = localStorage.getItem("theme");
+
+            // Sửa nhẹ ở đây để tránh lỗi 'currentTheme is not defined' nếu bạn chưa khai báo ở ngoài
+            if (isDark === "dark") btnDark.checked = true;
+
+            btnDark.addEventListener("click", function () {
+                if (this.checked) {
+                    document.documentElement.setAttribute("data-theme", "dark");
+                    localStorage.setItem("theme", "dark");
+                } else {
+                    document.documentElement.removeAttribute("data-theme");
+                    localStorage.setItem("theme", "light");
+                }
+            });
+
+            //Hiện thông báo lên
+            let savedStyle = localStorage.getItem("toggleChat") ?? "badge";
+
+            if (savedStyle) {
+                let targetInput = document.querySelector(`input[name="notification_style"][value="${savedStyle}"]`);
+                if (targetInput) {
+                    targetInput.checked = true;
+                    console.log("Đã khôi phục thiết lập cũ:", savedStyle);
+                }
+            }
+        });
+
+        // --- CÁC HÀM ĐIỀU KHIỂN GIAO DIỆN MODAL ---
+        function openSettingsModal() {
+            document.getElementById('SettingsModalOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+        }
+        function toggleChat(notifyTypes) {
+            localStorage.setItem("toggleChat", notifyTypes);
+            console.log("Đã lưu thiết lập:", notifyTypes);
+        }
+        function closeSettingsModal() {
+            document.getElementById('SettingsModalOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        window.addEventListener('click', function (event) {
+            let modalOverlay = document.getElementById('SettingsModalOverlay');
+            if (event.target === modalOverlay) closeSettingsModal();
+        });
+
+        function openSettingTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+    </script>

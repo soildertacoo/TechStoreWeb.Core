@@ -1,0 +1,219 @@
+﻿
+@{
+    ViewBag.Title = "DangKy";
+    Layout = "~/Views/Shared/_LogSignLayout.cshtml";
+}
+
+<style>
+    .power-container {
+        background-color: #2E424D;
+        width: 50%;
+        height: 15px;
+        border-radius: 5px;
+    }
+
+    #powerPoint {
+        background-color: #D73F40;
+        width: 1%;
+        height: 100%;
+        border-radius: 5px;
+        transition: 0.5s;
+    }
+
+    .invalid-feedback {
+        display: none;
+    }
+</style>
+<link rel="stylesheet" href="~/Content/styleLogSign.css" />
+<link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+
+<div class="form-control">
+    <div class="container" style="width:80%; margin:auto; padding: 100px">
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-info">
+                @ViewBag.Error;
+            </div>
+        }
+        else if (ViewBag.Success != null)
+        {
+            <div class="alert alert-success">
+                @ViewBag.Success;
+            </div>
+        }
+        <p style="text-align: center">Đăng ký tài khoản</p>
+        @using (Html.BeginForm("DangKy", "User", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate" }))
+        {
+            @Html.ValidationSummary(true);
+            <div>
+                <lable class="form-label"> Tên bạn </lable>
+                <input type="text" id="username" name="NameCus" required placeholder="Nhập tên bạn vào" />
+                <div class="invalid-feedback">
+                    Vui lòng nhập tên của bạn.
+                </div>
+            </div>
+            <div class="mt-3  mb-3">
+                <label for="number" class="form-label">Số điện thoại</label>
+                <input type="tel" class="form-control" id="number" name="PhoneCus" required placeholder="Nhập số điện thoại của bạn" pattern="^\d{10}$" />
+                <div class="invalid-feedback">
+                    Số của bạn phải đủ 10 số
+                </div>
+            </div>
+            <div>
+                <lable class="form-label"> Email của bạn </lable>
+                <input type="email" id="email" name="EmailCus" required placeholder="Nhập email của bạn vào" />
+                <div class="invalid-feedback">
+                    Vui lòng nhập email hợp lệ.
+                </div>
+            </div>
+            <div>
+                <lable class="form-label"> Địa chỉ nhà </lable>
+                <input type="text" id="streetAdd" name="StreetAddress" required placeholder="Nhập địa chỉ của bạn vào" />
+                <div class="invalid-feedback">
+                    Vui lòng nhập địa chỉ nhà.
+                </div>
+            </div>
+            <div>
+                <lable class="form-label"> Phường, xã, thị trấn </lable>
+                <input type="text" id="streetWard" name="Ward" required placeholder="Nhập địa chỉ của bạn vào" />
+                <div class="invalid-feedback">
+                    Vui lòng nhập phường, xã , thị trấn.
+                </div>
+            </div>
+            <div>
+                <lable class="form-label"> Quận, huyện, thành phố, thị xã </lable>
+                <input type="text" id="streetDistrict" name="District" required placeholder="Nhập địa chỉ của bạn vào" />
+                <div class="invalid-feedback">
+                    Vui lòng nhập quận, huyện, thành phố, thị xã.
+                </div>
+            </div>
+            <div>
+                <lable class="form-label"> Thành phố, tỉnh </lable>
+                <input type="text" id="streetCity" name="City" required placeholder="Nhập địa chỉ của bạn vào" />
+                <div class="invalid-feedback">
+                    Vui lòng nhập thành phố, tỉnh.
+                </div>
+            </div>
+            @*<div>
+                    <lable class="form-label"> Mật khẩu </lable>
+                    <input type="text" id="pass" name="PassCus" required placeholder="Nhập MK của bạn vào" />
+                    <div class="invalid-feedback">
+                        Vui lòng nhập mật khẩu ít nhất hoặc hơn 8 ký tự.
+                    </div>
+                </div>*@
+            <div>
+                <label class="form-label"> Mật khẩu </label>
+                <input type="password" id="pass" name="PassCus" required placeholder="Nhập MK của bạn vào" onkeyup="validatePassword()" />
+                <div class="invalid-feedback">
+                    Vui lòng nhập mật khẩu ít nhất hoặc hơn 8 ký tự.
+                </div>
+                <div class="power-container">
+                    <div id="powerPoint"></div>
+                </div>
+            </div>
+            <div>
+                <label class="form-label"> Ngày tháng năm sinh </label>
+                <input type="date" id="dob" name="DateOfBirth" required />
+            </div>
+
+            @*<div>
+                    <lable class="form-label"> Độ mạnh mật khẩu </lable>
+                    <div class="power-container">
+                        <div class="power-point"></div>
+                    </div>
+                </div>*@
+            <input type="submit" class="registerbtn" value="Xác nhận" />
+        }
+        <div class="card-footer text-muted text-center">
+            Bạn đã có tài khoản? <a href="@Url.Action("DangNhap", "User")">Đăng nhập</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        // Select all forms with the class 'needs-validation'
+        var forms = document.querySelectorAll('.needs-validation');
+
+        // Convert the NodeList to an array and iterate over each form
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                // Add a 'submit' event listener to each form
+                form.addEventListener('submit', function (event) {
+                    // Check if the form is valid
+                    if (!form.checkValidity()) {
+                        // If the form is not valid, prevent form submission
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    // Add the 'was-validated' class to the form to apply Bootstrap validation styles
+                    form.classList.add('was-validated');
+                }, false);
+            });
+    }
+    )
+        (function validatePassword() {
+            var password = document.getElementById("pass").value;
+            var powerPoint = document.getElementById("powerPoint");
+
+            // Password strength criteria
+            var minLength = 8;
+            var hasUpperCase = /[A-Z]/.test(password);
+            var hasLowerCase = /[a-z]/.test(password);
+            var hasNumber = /[0-9]/.test(password);
+            var strength = 0;
+
+            if (password.length >= minLength) strength += 1;
+            if (hasUpperCase) strength += 1;
+            if (hasLowerCase) strength += 1;
+            if (hasNumber) strength += 1;
+
+            // Update the strength meter
+            switch (strength) {
+                case 1:
+                    powerPoint.style.width = "25%";
+                    powerPoint.style.backgroundColor = "#D73F40"; // Weak
+                    break;
+                case 2:
+                    powerPoint.style.width = "50%";
+                    powerPoint.style.backgroundColor = "#FFA500"; // Medium
+                    break;
+                case 3:
+                    powerPoint.style.width = "75%";
+                    powerPoint.style.backgroundColor = "#FFD700"; // Strong
+                    break;
+                case 4:
+                    powerPoint.style.width = "100%";
+                    powerPoint.style.backgroundColor = "#4CAF50"; // Very Strong
+                    break;
+                default:
+                    powerPoint.style.width = "1%";
+                    powerPoint.style.backgroundColor = "#D73F40"; // Very Weak
+                    break;
+            }
+        }
+
+            (function () {
+                'use strict';
+                // Select all forms with the class 'needs-validation'
+                var forms = document.querySelectorAll('.needs-validation');
+
+                // Convert the NodeList to an array and iterate over each form
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        // Add a 'submit' event listener to each form
+                        form.addEventListener('submit', function (event) {
+                            // Check if the form is valid
+                            if (!form.checkValidity()) {
+                                // If the form is not valid, prevent form submission
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            // Add the 'was-validated' class to the form to apply Bootstrap validation styles
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+            })
+        )();
+</script>

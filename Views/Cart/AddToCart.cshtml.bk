@@ -1,0 +1,66 @@
+﻿@model IEnumerable<TechStore.Models.CartItem>
+@{
+    ViewBag.Title = "CartOut";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{int? session = @Context.Session.GetInt32("currentProducts"); }
+
+<div style="margin: 20px auto; width: 80%; padding: 100px">
+    <h2>Giỏ hàng</h2>
+    @Html.ActionLink("<- Quay lại","Details","CustomerPro", new { id = session })
+    <table class="table">
+        <tr>
+            <th>
+                Tên sản phẩm
+            </th>
+            <th>
+                Số lượng
+            </th>
+            <th>
+                Cập nhật số lượng
+            </th>
+            <th>
+                Giảm số lượng
+            </th>
+            <th>
+                Giá sản phẩm
+            </th>
+        </tr>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <p>@item.NamePro</p>
+                </td>
+                <td>
+                    <p>@item.Number</p>
+                </td>
+                <td>
+                    @*<form asp-action="UpdateQuantity" method="post">
+            @Html.HiddenFor(model => item.ProductID)
+            <input type="hidden" name="quantity" value="@item.Number" min="1" class="form-control" style="width: 60px; display: inline;" />
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>*@
+                    @Html.ActionLink("Tăng", "UpdateCart", new { id = item.ProductID }, htmlAttributes: new { @class = "btn btn-success" })
+                </td>
+                <td>
+                    @Html.ActionLink("Giảm", "RemoveSubtractionCart", new { id = item.ProductID }, htmlAttributes: new { @class = "btn btn-danger" })
+                </td>
+                <td>
+                    <p style="text-align:justify">
+                        @item.Price <span>/1 sản phẩm</span>
+                    </p>
+                </td>
+                <td>
+                    @Html.ActionLink("Xóa", "RemoveFromCart", new { id = item.ProductID }, htmlAttributes: new { @class = "btn btn-danger" })
+                </td>
+            </tr>
+        }
+    </table>
+    <p>Tổng số tiền thanh toán: @ViewBag.Total</p>
+    @Html.ActionLink("Thanh toán", "PaymentCart", "Cart", htmlAttributes: new { @class = "btn btn-success" })
+
+</div>
+
+
+

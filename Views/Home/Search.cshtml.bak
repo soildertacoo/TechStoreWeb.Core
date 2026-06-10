@@ -1,0 +1,28 @@
+﻿@model IEnumerable<TechStore.Models.Products>
+
+@{
+    ViewBag.Title = "Search";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@if (ViewBag.Loi != null)
+{
+    <div class="alert alert-info">
+        @ViewBag.Loi
+    </div>
+}
+
+<link rel="stylesheet" href="~/Content/stylepro.css" />
+<div id="div-pro-list"style="width: 80%; margin: auto">
+    @foreach (var item in Model)
+    {
+        <div class="card" onclick="window.location.href='@Url.Action("Details", "CustomerPro", new { id = item.ProductID })'">
+            @if (item.Discount > 0)
+            {
+                <span class="discount-badge">@item.Discount% OFF</span>
+            }
+            <img src="~/Images/@item.ImagePro" alt="tech-pro" class="Products-image">
+            <h1 class="Products-name">@item.NamePro</h1>
+            <p class="price">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", item.Price)</p>
+        </div>
+    }
+</div>

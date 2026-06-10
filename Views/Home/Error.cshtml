@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Đã xảy ra lỗi";
+}
+
+<div style="text-align: center; padding: 50px; margin-top: 50px;">
+    <h1 style="color: #e74c3c; font-size: 80px; margin-bottom: 10px;">Oops!</h1>
+    
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <h3 style="color: #fffdfd;">@ViewBag.ErrorMessage</h3>
+    }
+    else
+    {
+        <h3 style="color: #ffffff;">Đã xảy ra sự cố kỹ thuật. Đội ngũ của chúng tôi đang tiến hành khắc phục!</h3>
+    }
+    
+    <br />
+    <a href="/" style="padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 5px;">
+        Quay về Trang chủ
+    </a>
+</div>

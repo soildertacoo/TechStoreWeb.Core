@@ -1,0 +1,57 @@
+﻿@model TechStore.Models.Products
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h3 class="text-center">Chi tiết sản phẩm</h3>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>Products</h4>
+            <hr />
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="~/Images/@Model.ImagePro" class="img-fluid" />
+                </div>
+                <div class="col-md-8">
+                    <dl class="dl-horizontal">
+                        <div class="row" style="font-size: 20px">
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.NamePro)
+                            </dt>
+                            <dd class="col-sm-8">
+                                @Html.DisplayFor(model => model.NamePro)
+                            </dd>
+
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.DecriptionPro)
+                            </dt>
+                            <dd class="col-sm-8">
+                                @Html.DisplayFor(model => model.DecriptionPro)
+                            </dd>
+
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.Price)
+                            </dt>
+                            <dd class="col-sm-8">
+                                @Html.DisplayFor(model => model.Price)
+                            </dd>
+
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.Category1.NameCate)
+                            </dt>
+                            <dd class="col-sm-8">
+                                @Html.DisplayFor(model => model.Category1.NameCate)
+                            </dd>
+                        </div>
+                    </dl>
+                    <div class="form-actions">
+                        @Html.ActionLink("Quay lại trang trước", "Index", "", htmlAttributes: new { @class = "btn btn-secondary" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

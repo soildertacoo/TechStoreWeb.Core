@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="00ff2c8692ec4c15807598fa24b1f2e3" Name="Diagram1" ZoomLevel="74">
+        <EntityTypeShape EntityType="DBTechStoreModel.AdminUsers" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBTechStoreModel.Category" Width="1.5" PointX="0.75" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBTechStoreModel.Customer" Width="1.5" PointX="3" PointY="9.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBTechStoreModel.LoveProducts" Width="1.5" PointX="5.25" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBTechStoreModel.OrderDetails" Width="1.5" PointX="8.25" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBTechStoreModel.OrderPro" Width="1.5" PointX="6" PointY="8.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBTechStoreModel.Products" Width="1.5" PointX="3" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBTechStoreModel.Review" Width="1.5" PointX="5.25" PointY="0.75" IsExpanded="true" />
+        <AssociationConnector Association="DBTechStoreModel.FK_Pro_Category" ManuallyRouted="false" />
+        <AssociationConnector Association="DBTechStoreModel.FK__LoveProdu__Custo__395884C4" ManuallyRouted="false" />
+        <AssociationConnector Association="DBTechStoreModel.FK__OrderPro__IDCus__73BA3083" ManuallyRouted="false" />
+        <AssociationConnector Association="DBTechStoreModel.FK__Reviews__Custome__628FA481" ManuallyRouted="false" />
+        <AssociationConnector Association="DBTechStoreModel.FK__LoveProdu__Produ__3864608B" ManuallyRouted="false" />
+        <AssociationConnector Association="DBTechStoreModel.FK__OrderDeta__IDOrd__787EE5A0" ManuallyRouted="false" />
+        <AssociationConnector Association="DBTechStoreModel.FK__OrderDeta__IDPro__778AC167" ManuallyRouted="false" />
+        <AssociationConnector Association="DBTechStoreModel.FK__Reviews__Products__619B8048" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="DBTechStoreModel.SupportRequest" Width="1.5" PointX="7.75" PointY="0.875" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
