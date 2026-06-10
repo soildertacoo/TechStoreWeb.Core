@@ -40,7 +40,7 @@
 1. Clone the repository:
    ```bash
    git clone [https://github.com/soildertacoo/TechStoreWeb.Core.git](https://github.com/soildertacoo/TechStoreWeb.Core.git)
-#Vietnamese Readme.md
+---------------------------------------------------------------------------------------------------------------------------
 # 🛒 TechStore - Ứng Dụng Web Thương Mại Điện Tử Hiện Đại
 
 ## 📖 Tổng quan dự án
