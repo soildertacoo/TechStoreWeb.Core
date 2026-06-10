@@ -32,14 +32,14 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
-* Visual Studio 2022,VS Code
-* .NET SDK (10)
+* Visual Studio 2022-2026 or VS Code
+* .NET SDK (10+)
 * SQL Server Management Studio 2022 (SSMS)
 
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/soildertacoo/TechStoreWeb.Core.git](https://github.com/soildertacoo/TechStoreWeb.Core.git)
+   git clone https://github.com/soildertacoo/TechStoreWeb.Core.git
 ---------------------------------------------------------------------------------------------------------------------------
 # 🛒 TechStore - Ứng Dụng Web Thương Mại Điện Tử Hiện Đại
 
@@ -74,4 +74,4 @@ Trong quá trình phát triển dự án, tôi đã nghiên cứu và giải quy
 ### Các bước triển khai
 1. Clone mã nguồn về máy local:
    ```bash
-   git clone [https://github.com/soildertacoo/TechStoreWeb.Core.git](https://github.com/soildertacoo/TechStoreWeb.Core.git)
+      git clone https://github.com/soildertacoo/TechStoreWeb.Core.git
