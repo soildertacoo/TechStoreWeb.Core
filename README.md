@@ -79,9 +79,9 @@ Trong quá trình phát triển dự án, tôi đã nghiên cứu và giải quy
 
 ### Yêu cầu hệ thống
 * Windows 10+, Linux x64, macOS 13+
-* Visual Studio 2022 (hoặc Visual Studio Code)
-* .NET SDK 
-* SQL Server / SQL Server Management Studio (SSMS)
+* Visual Studio 2022 (hoặc VS Code)
+* .NET SDK (10+)
+* SQL Server Management Studio 2022 (SSMS)
 
 ### Các bước triển khai
 1. Clone mã nguồn về máy local và clone trực tiếp trong VS Studio hay VS Code:
