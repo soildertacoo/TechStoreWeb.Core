@@ -32,6 +32,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
+* Windows 10+, Linux x64, macOS 13+
 * Visual Studio 2022-2026 or VS Code
 * .NET SDK (10+)
 * SQL Server Management Studio 2022 (SSMS)
@@ -40,6 +41,12 @@
 1. Clone the repository:
    ```bash
    git clone https://github.com/soildertacoo/TechStoreWeb.Core.git
+2. Download .NET 10 SDK :
+   [Linux here](https://learn.microsoft.com/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website)
+   [Windows](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-windows-x64-binaries)
+   [macOS(M1-later)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-arm64-installer)
+   [macOS(Intel)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-x64-installer)
+
 ---------------------------------------------------------------------------------------------------------------------------
 # 🛒 TechStore - Ứng Dụng Web Thương Mại Điện Tử Hiện Đại
 
@@ -67,6 +74,7 @@ Trong quá trình phát triển dự án, tôi đã nghiên cứu và giải quy
 ## 🚀 Hướng dẫn cài đặt (Getting Started)
 
 ### Yêu cầu hệ thống
+* Windows 10+, Linux x64, macOS 13+
 * Visual Studio 2022 (hoặc Visual Studio Code)
 * .NET SDK 
 * SQL Server / SQL Server Management Studio (SSMS)
@@ -75,3 +83,8 @@ Trong quá trình phát triển dự án, tôi đã nghiên cứu và giải quy
 1. Clone mã nguồn về máy local:
    ```bash
       git clone https://github.com/soildertacoo/TechStoreWeb.Core.git
+2. Download .NET 10 SDK :
+   [Linux here](https://learn.microsoft.com/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website)
+   [Windows](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-windows-x64-binaries)
+   [macOS(M1-later)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-arm64-installer)
+   [macOS(Intel)](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-10.0.301-macos-x64-installer)
