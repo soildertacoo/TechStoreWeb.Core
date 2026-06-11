@@ -4,16 +4,17 @@
     <RestoreSuccess Condition=" '$(RestoreSuccess)' == '' ">True</RestoreSuccess>
     <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
     <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
-    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">/home/soildertacoo/.nuget/packages/</NuGetPackageRoot>
-    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">/home/soildertacoo/.nuget/packages/</NuGetPackageFolders>
+    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\GIGABYTE\.nuget\packages\;C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
     <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">7.0.0</NuGetToolVersion>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <SourceRoot Include="/home/soildertacoo/.nuget/packages/" />
+    <SourceRoot Include="C:\Users\GIGABYTE\.nuget\packages\" />
+    <SourceRoot Include="C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\" />
   </ItemGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Content Include="$(NuGetPackageRoot)select.pdf/26.1.0/contentFiles/any/any/Select.Html.dep" Condition="Exists('$(NuGetPackageRoot)select.pdf/26.1.0/contentFiles/any/any/Select.Html.dep')">
+    <Content Include="$(NuGetPackageRoot)select.pdf\26.1.0\contentFiles\any\any\Select.Html.dep" Condition="Exists('$(NuGetPackageRoot)select.pdf\26.1.0\contentFiles\any\any\Select.Html.dep')">
       <NuGetPackageId>Select.Pdf</NuGetPackageId>
       <NuGetPackageVersion>26.1.0</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
@@ -23,7 +24,7 @@
       <Private>True</Private>
       <Link>Select.Html.dep</Link>
     </Content>
-    <Content Include="$(NuGetPackageRoot)select.pdf/26.1.0/contentFiles/any/any/Select.Tools.dep" Condition="Exists('$(NuGetPackageRoot)select.pdf/26.1.0/contentFiles/any/any/Select.Tools.dep')">
+    <Content Include="$(NuGetPackageRoot)select.pdf\26.1.0\contentFiles\any\any\Select.Tools.dep" Condition="Exists('$(NuGetPackageRoot)select.pdf\26.1.0\contentFiles\any\any\Select.Tools.dep')">
       <NuGetPackageId>Select.Pdf</NuGetPackageId>
       <NuGetPackageVersion>26.1.0</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
@@ -35,7 +36,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Content Include="$(NuGetPackageRoot)select.htmltopdf.netcore/26.1.0/contentFiles/any/any/Select.Html.dep" Condition="Exists('$(NuGetPackageRoot)select.htmltopdf.netcore/26.1.0/contentFiles/any/any/Select.Html.dep')">
+    <Content Include="$(NuGetPackageRoot)select.htmltopdf.netcore\26.1.0\contentFiles\any\any\Select.Html.dep" Condition="Exists('$(NuGetPackageRoot)select.htmltopdf.netcore\26.1.0\contentFiles\any\any\Select.Html.dep')">
       <NuGetPackageId>Select.HtmlToPdf.NetCore</NuGetPackageId>
       <NuGetPackageVersion>26.1.0</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
@@ -47,11 +48,11 @@
     </Content>
   </ItemGroup>
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)microsoft.entityframeworkcore/10.0.9/buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props" Condition="Exists('$(NuGetPackageRoot)microsoft.entityframeworkcore/10.0.9/buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.codeanalysis.analyzers/3.11.0/buildTransitive/Microsoft.CodeAnalysis.Analyzers.props" Condition="Exists('$(NuGetPackageRoot)microsoft.codeanalysis.analyzers/3.11.0/buildTransitive/Microsoft.CodeAnalysis.Analyzers.props')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.entityframeworkcore.design/10.0.9/build/net10.0/Microsoft.EntityFrameworkCore.Design.props" Condition="Exists('$(NuGetPackageRoot)microsoft.entityframeworkcore.design/10.0.9/build/net10.0/Microsoft.EntityFrameworkCore.Design.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.entityframeworkcore\10.0.9\buildTransitive\net10.0\Microsoft.EntityFrameworkCore.props" Condition="Exists('$(NuGetPackageRoot)microsoft.entityframeworkcore\10.0.9\buildTransitive\net10.0\Microsoft.EntityFrameworkCore.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codeanalysis.analyzers\3.11.0\buildTransitive\Microsoft.CodeAnalysis.Analyzers.props" Condition="Exists('$(NuGetPackageRoot)microsoft.codeanalysis.analyzers\3.11.0\buildTransitive\Microsoft.CodeAnalysis.Analyzers.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.entityframeworkcore.design\10.0.9\build\net10.0\Microsoft.EntityFrameworkCore.Design.props" Condition="Exists('$(NuGetPackageRoot)microsoft.entityframeworkcore.design\10.0.9\build\net10.0\Microsoft.EntityFrameworkCore.Design.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgMicrosoft_CodeAnalysis_Analyzers Condition=" '$(PkgMicrosoft_CodeAnalysis_Analyzers)' == '' ">/home/soildertacoo/.nuget/packages/microsoft.codeanalysis.analyzers/3.11.0</PkgMicrosoft_CodeAnalysis_Analyzers>
+    <PkgMicrosoft_CodeAnalysis_Analyzers Condition=" '$(PkgMicrosoft_CodeAnalysis_Analyzers)' == '' ">C:\Users\GIGABYTE\.nuget\packages\microsoft.codeanalysis.analyzers\3.11.0</PkgMicrosoft_CodeAnalysis_Analyzers>
   </PropertyGroup>
 </Project>
