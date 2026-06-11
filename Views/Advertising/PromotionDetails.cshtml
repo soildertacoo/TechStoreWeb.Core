@@ -1,0 +1,56 @@
+@model TechStore.Models.Promotion
+
+@{
+    ViewData["Title"] = "Chi tiết Khuyến mãi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-info-circle mr-2"></i> Chi tiết Khuyến mãi</h2>
+    <div>
+        <a asp-action="EditPromotion" asp-route-id="@Model.PromotionID" class="btn btn-info">
+            <i class="fas fa-edit"></i> Chỉnh sửa
+        </a>
+        <a asp-action="Promotions" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-lg">
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-md-12">
+                <h5 class="text-muted mb-4 border-bottom pb-2">Thông tin chương trình</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">Tên chương trình:</dt>
+                    <dd class="col-sm-9 font-weight-bold text-primary">@Model.Name</dd>
+
+                    <dt class="col-sm-3">Mô tả:</dt>
+                    <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Description) ? "Không có mô tả" : Model.Description)</dd>
+
+                    <dt class="col-sm-3">Giảm giá:</dt>
+                    <dd class="col-sm-9"><span class="badge badge-danger p-2" style="font-size: 1.1em;">@Model.DiscountPercentage%</span></dd>
+
+                    <dt class="col-sm-3">Thời gian diễn ra:</dt>
+                    <dd class="col-sm-9">
+                        <span class="text-success">@Model.StartDate.ToString("dd/MM/yyyy")</span> 
+                        <i class="fas fa-long-arrow-alt-right mx-2 text-muted"></i> 
+                        <span class="text-danger">@Model.EndDate.ToString("dd/MM/yyyy")</span>
+                    </dd>
+
+                    <dt class="col-sm-3">Trạng thái:</dt>
+                    <dd class="col-sm-9">
+                        @{
+                            var now = DateTime.Now;
+                            if (!Model.IsActive) { <span class="badge badge-secondary p-2">Tạm dừng</span> }
+                            else if (now < Model.StartDate) { <span class="badge badge-info p-2">Sắp diễn ra</span> }
+                            else if (now > Model.EndDate) { <span class="badge badge-danger p-2">Đã kết thúc</span> }
+                            else { <span class="badge badge-success p-2">Đang diễn ra</span> }
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

@@ -71,6 +71,38 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5zXFN1cHBvcnRSZXF1ZXN0TWFuYWdlbWVudC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/TechStoreWeb.Core/Views/Advertising/BannerDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcQmFubmVyRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Advertising/Banners.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcQmFubmVycy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Advertising/CreateBanner.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcQ3JlYXRlQmFubmVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Advertising/CreatePromotion.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcQ3JlYXRlUHJvbW90aW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Advertising/EditBanner.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcRWRpdEJhbm5lci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Advertising/EditPromotion.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcRWRpdFByb21vdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Advertising/PromotionDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcUHJvbW90aW9uRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Advertising/Promotions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWR2ZXJ0aXNpbmdcUHJvbW90aW9ucy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/TechStoreWeb.Core/Views/Cart/CartDetails.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FydFxDYXJ0RGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -169,6 +201,22 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/TechStoreWeb.Core/Views/Home/Search.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTZWFyY2guY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Inventory/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52ZW50b3J5XENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Inventory/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52ZW50b3J5XERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Inventory/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52ZW50b3J5XEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Inventory/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52ZW50b3J5XEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/TechStoreWeb.Core/Views/OrderDetails/Create.cshtml]
@@ -285,6 +333,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/TechStoreWeb.Core/Views/Shared/_LogSignLayout_backup.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Mb2dTaWduTGF5b3V0X2JhY2t1cC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/TechStoreWeb.Core/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/TechStoreWeb.Core/Views/User/DangKy.cshtml]

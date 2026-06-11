@@ -370,10 +370,23 @@
                                     <input type="number" name="quantity" class="quantity-input" value="1" min="1" max="999" id="quantityInput">
                                 </div>
 
+                                <div class="mt-4">
+                                    <span class="badge bg-success fs-6">
+                                        Tồn kho: @Model.StockQuantity
+                                    </span>
+                                </div>
+
                                 <div class="action-buttons">
                                     <button type="submit" class="btn-modern btn-primary-modern">
                                         <i class="fas fa-bolt"></i> Mua Ngay
                                     </button>
+
+                                    @if (TempData["Error"] != null)
+                                    {
+                                        <div class="alert alert-danger">
+                                            @TempData["Error"]
+                                        </div>
+}
                                     <button type="submit" class="btn-modern btn-secondary-modern">
                                         <i class="fas fa-cart-plus"></i> Thêm Vào Giỏ
                                     </button>

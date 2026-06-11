@@ -10,6 +10,7 @@ namespace TechStore.Models
         public Review Review { get; set; }
         public Customer Customer { get; set; }
         public Dictionary<int,int> SoldItem { get; set; }
+        public int StockQuantity { get; set; }
 
     }
 }

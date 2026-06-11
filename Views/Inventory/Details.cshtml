@@ -1,0 +1,133 @@
+@model TechStore.Models.Inventory
+
+@{
+    ViewData["Title"] = "Chi tiết tồn kho";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-info-circle mr-2"></i> Chi tiết tồn kho</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.InventoryID" class="btn btn-info">
+            <i class="fas fa-edit"></i> Chỉnh sửa
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-lg">
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-md-4 text-center border-right">
+                <h5 class="text-muted mb-3">Hình ảnh sản phẩm</h5>
+                <div class="img-thumbnail p-2 bg-light d-inline-block">
+                    @if (Model.Product != null && !string.IsNullOrEmpty(Model.Product.ImagePro))
+                    {
+                        <img src="~/Images/@Model.Product.ImagePro" alt="@Model.Product.NamePro" class="img-fluid rounded" style="max-height: 200px;" />
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/200?text=No+Image" alt="No Image" class="img-fluid rounded" />
+                    }
+                </div>
+                <h4 class="mt-3 text-primary">@Model.Product?.NamePro</h4>
+                <p class="text-muted small">Mã SP: @Model.ProductID</p>
+            </div>
+            <div class="col-md-8">
+                <h5 class="text-muted mb-3">Thông tin kho hàng</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Số lượng hiện có:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge @(Model.StockQuantity < 10 ? "badge-danger" : "badge-success") p-2" style="font-size: 1.1em;">
+                            @Model.StockQuantity đơn vị
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-4">Cập nhật lần cuối:</dt>
+                    <dd class="col-sm-8 text-info font-weight-bold">
+                        @Model.LastUpdated.ToString("dd/MM/yyyy HH:mm:ss")
+                    </dd>
+
+                    <dt class="col-sm-4">Ghi chú:</dt>
+                    <dd class="col-sm-8">
+                        @(string.IsNullOrEmpty(Model.Note) ? "Không có ghi chú" : Model.Note)
+                    </dd>
+                </dl>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-lightbulb mr-2"></i>
+                    <strong>Gợi ý:</strong> 
+                    @if (Model.StockQuantity < 10)
+                    {
+                        <span>Số lượng sản phẩm trong kho đang ở mức thấp. Vui lòng xem xét nhập thêm hàng.</span>
+                    }
+                    else
+                    {
+                        <span>Số lượng hàng trong kho hiện tại đang ổn định.</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (ViewBag.SameCategoryProducts != null)
+        {
+            <div class="mt-5">
+                <h5 class="text-muted mb-3 border-bottom pb-2">
+                    <i class="fas fa-layer-group mr-2"></i> Danh sách sản phẩm cùng loại: <span class="text-primary">@Model.Product?.Category1?.NameCate</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover border">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th class="text-center">Số lượng tồn</th>
+                                <th class="text-center">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in (List<TechStore.Models.Products>)ViewBag.SameCategoryProducts)
+                            {
+                                <tr class="@(item.ProductID == Model.ProductID ? "table-warning" : "")">
+                                    <td style="width: 60px;">
+                                        <img src="~/Images/@item.ImagePro" alt="@item.NamePro" class="rounded" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    </td>
+                                    <td>
+                                        @item.NamePro
+                                        @if (item.ProductID == Model.ProductID)
+                                        {
+                                            <span class="badge badge-pill badge-dark ml-2">Đang xem</span>
+                                        }
+                                    </td>
+                                    <td class="text-center font-weight-bold">
+                                        @{
+                                            var stockInfo = ViewBag.StockInfo as Dictionary<int, int>;
+                                            int quantity = (stockInfo != null && stockInfo.ContainsKey(item.ProductID)) ? stockInfo[item.ProductID] : 0;
+                                            @quantity
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (quantity <= 0)
+                                        {
+                                            <span class="badge badge-danger">Hết hàng</span>
+                                        }
+                                        else if (quantity < 10)
+                                        {
+                                            <span class="badge badge-warning">Sắp hết</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-success">Sẵn sàng</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>

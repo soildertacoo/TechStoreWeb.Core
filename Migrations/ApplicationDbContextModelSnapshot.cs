@@ -53,6 +53,40 @@ namespace TechStoreWeb.Core.Migrations
                     b.ToTable("AdminUsers");
                 });
 
+            modelBuilder.Entity("TechStore.Models.Banner", b =>
+                {
+                    b.Property<int>("BannerID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BannerID"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LinkUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("BannerID");
+
+                    b.ToTable("Banner");
+                });
+
             modelBuilder.Entity("TechStore.Models.CartItem", b =>
                 {
                     b.Property<int>("IDCart")
@@ -205,6 +239,34 @@ namespace TechStoreWeb.Core.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("TechStore.Models.Inventory", b =>
+                {
+                    b.Property<int>("InventoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryID"));
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("InventoryID");
+
+                    b.HasIndex("ProductID");
+
+                    b.ToTable("Inventory");
+                });
+
             modelBuilder.Entity("TechStore.Models.LoveProducts", b =>
                 {
                     b.Property<int>("ProductID")
@@ -355,6 +417,39 @@ namespace TechStoreWeb.Core.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("TechStore.Models.Promotion", b =>
+                {
+                    b.Property<int>("PromotionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PromotionID"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PromotionID");
+
+                    b.ToTable("Promotion");
+                });
+
             modelBuilder.Entity("TechStore.Models.Review", b =>
                 {
                     b.Property<int>("ReviewID")
@@ -455,6 +550,17 @@ namespace TechStoreWeb.Core.Migrations
                     b.Navigation("AdminUsers");
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("TechStore.Models.Inventory", b =>
+                {
+                    b.HasOne("TechStore.Models.Products", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("TechStore.Models.LoveProducts", b =>

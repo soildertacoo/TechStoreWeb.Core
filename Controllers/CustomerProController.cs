@@ -25,7 +25,9 @@ namespace TechStore.Controllers
         {
                 
                 var Products = _context.Products.FirstOrDefault(s => s.ProductID == id);
+                var inventory = _context.Inventories.FirstOrDefault(s => s.ProductID == id);
                 //var relatedProducts = _context.Products.Where(s => s.Category1.IDCate == Products.Category1.IDCate).ToList();//Tìm sản phẩm tương tự nhưng có mã Catrgory giống như sản phẩm hồi nãy
+               
                 var reviews = _context.Reviews.Where(s => s.ProductID == id && s.IsHidden == false).ToList();
 
             // Tính toán số lượng đã bán cho mỗi sản phẩm
@@ -55,7 +57,8 @@ namespace TechStore.Controllers
                 {
                     Products = Products,
                     RelatedReviews = reviews,
-                    SoldItem = soldQuantities
+                    SoldItem = soldQuantities,
+                    StockQuantity = inventory?.StockQuantity ?? 0
                 };
                 return View(relatedPro);
             

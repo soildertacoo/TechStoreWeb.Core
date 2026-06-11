@@ -98,6 +98,23 @@ namespace TechStore.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToShowCart(int id, int quantity)
         {
+            var inventory = _context.Inventories.FirstOrDefault(x => x.ProductID == id);
+
+            if (inventory == null)
+            {
+                TempData["Error"] = "Sản phẩm hiện không có trong kho!";
+                return RedirectToAction("Details", "CustomerPro", new { id });
+            }
+
+            if (quantity > inventory.StockQuantity)
+            {
+                TempData["Error"] =
+                $"Chỉ còn {inventory.StockQuantity} sản phẩm trong kho!";
+
+                return RedirectToAction("Details", "CustomerPro", new { id });
+            }
+
+
             if (quantity <= 0 || quantity > 999) return RedirectToAction("Details", "CustomerPro", new { id = id });
             var myCart = GetCart(); var cartitem = new CartItem(); string command = "add";
 
@@ -139,7 +156,9 @@ namespace TechStore.Controllers
             List<CartItem> myCart = GetCart();
             if (!myCart.Any()) return RedirectToAction("ShowCart");
 
-            var providers =  db.ShippingProvider.Where(item => item.IsActive).ToList();
+            
+            //var providers =  db.ShippingProvider.Where(item => item.IsActive).ToList();
+            var providers = new List<ShippingProvider>();
             ViewBag.Total = TotalMoney();
             var checkout = new Payment
             {
@@ -246,6 +265,23 @@ namespace TechStore.Controllers
 
                     db.OrderDetails.AddRange(orderDetailsList); //Nếu lưu nguyên list vào sql
                     db.SaveChanges(); 
+
+                    foreach (var item in myCart)
+                    {
+                        // Giảm tồn kho
+                        var inventory = _context.Inventories
+                        .FirstOrDefault(x => x.ProductID == item.ProductID);
+
+                        if (inventory != null)
+                            {
+                                inventory.StockQuantity -= item.Number;
+
+                                if (inventory.StockQuantity < 0)
+                                throw new Exception($"Sản phẩm {item.NamePro} không đủ tồn kho");
+                            }
+                    }
+                    _context.CartItems.RemoveRange(myCart); // Xóa giỏ hàng sau khi đã tạo đơn hàng
+                    _context.SaveChanges(); // Lưu thay đổi tồn kho
 
                     // Xác nhận toàn bộ quá trình thành công
                     transaction.Commit();

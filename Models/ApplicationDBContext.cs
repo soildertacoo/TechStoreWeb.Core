@@ -22,6 +22,10 @@ namespace TechStore.Models
         public virtual DbSet<Review> Reviews { get; set; }
         public virtual DbSet<ChatMessage> ChatMessage { get; set; }
         public virtual DbSet<CartItem> CartItems {get; set;}
+        public virtual DbSet<Inventory> Inventories { get; set; }
+        public virtual DbSet<Banner> Banners { get; set; }
+        public virtual DbSet<Promotion> Promotions { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
