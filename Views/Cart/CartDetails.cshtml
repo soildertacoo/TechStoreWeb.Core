@@ -49,6 +49,13 @@
                     if (data.success) {
                         loadCartData();
                     }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: data.message || 'Không thể cập nhật giỏ hàng.',
+                        });
+                    }
                 } catch (error) {
                     alert('Bị lỗi khi gửi yêu cầu: ' + error.message);
                     // LỖI ĐÃ XÓA: btn và originalText chưa được khai báo ở đây, nếu để lại code sẽ bị sập khi có lỗi mạng.

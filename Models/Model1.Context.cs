@@ -31,6 +31,9 @@ namespace TechStore.Models
 
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<Review> Reviews { get; set; }
+        public virtual DbSet<CartItem> CartItems { get; set; }
+        public virtual DbSet<Inventory> Inventories { get; set; }
+ 
         public virtual DbSet<SupportRequest> SupportRequests { get; set; }
     }
 }

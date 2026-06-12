@@ -194,12 +194,12 @@ namespace TechStore.Controllers
                 isValid = false; 
             }
 
-            var phoneCheck = ValidatePhoneNumber(cus.PhoneCus);
-            if (!phoneCheck.IsValid) 
-            { 
-                ModelState.AddModelError("Customers.PhoneCus", phoneCheck.Error); 
-                isValid = false; 
-            }
+            // var phoneCheck = ValidatePhoneNumber(cus.PhoneCus);
+            // if (!phoneCheck.IsValid) 
+            // { 
+            //     ModelState.AddModelError("Customers.PhoneCus", phoneCheck.Error); 
+            //     isValid = false; 
+            // }
 
             var emailCheck = ValidateEmail(cus.EmailCus);
             if (!emailCheck.IsValid) 
@@ -272,17 +272,20 @@ namespace TechStore.Controllers
                         var inventory = _context.Inventories
                         .FirstOrDefault(x => x.ProductID == item.ProductID);
 
-                        if (inventory != null)
-                            {
-                                inventory.StockQuantity -= item.Number;
+                        if (inventory?.StockQuantity < item.Number)
+                        {
+                            throw new Exception($"Sản phẩm {item.NamePro} chỉ còn {inventory.StockQuantity} trong kho, không đủ để đặt hàng.");
+                        }
 
-                                if (inventory.StockQuantity < 0)
-                                throw new Exception($"Sản phẩm {item.NamePro} không đủ tồn kho");
-                            }
+                        inventory?.StockQuantity -= item.Number;
+                        //Sau khi trừ xong thì kiểm tra lại xem có hết giỏ ko nếu có thì gỡ sản phẩm đó khỏi giỏ 
+                        if (inventory?.StockQuantity < 0 )
+                        {
+                            //Gỡ sản phẩm khỏi giỏ hàng nếu tồn kho đã hết 
+                            db.CartItems.Remove(item);
+                        }
                     }
-                    _context.CartItems.RemoveRange(myCart); // Xóa giỏ hàng sau khi đã tạo đơn hàng
-                    _context.SaveChanges(); // Lưu thay đổi tồn kho
-
+                    db.SaveChanges();
                     // Xác nhận toàn bộ quá trình thành công
                     transaction.Commit();
                     if (isCardPayment){ 
@@ -650,15 +653,19 @@ namespace TechStore.Controllers
         {
             
             var cartItem = _context.CartItems.FirstOrDefault(item => item.ProductID == data.productID);
-
-            if (cartItem != null && cartItem.Number > 0 && cartItem.Number < 100)
+            var inventory = db.Inventories
+                        .FirstOrDefault(x => x.ProductID == data.productID);
+            try
             {
+                if (cartItem == null || inventory == null) throw new Exception("Có lỗi xảy ra khi thêm giỏ hàng");
+                if (cartItem.Number < 0 || cartItem.Number > inventory.StockQuantity) throw new Exception("Có lỗi xảy ra khi thêm giỏ hàng vì kho đã hết");
+                
                 cartItem.Number++;
                 await DBCart(cartItem, "update"); // LƯU SAU KHI SỬA xong giỏ hàng, can thiệp trực tiếp vào list kia
             }
-            else
+            catch
             {
-                    return Json(new { 
+                return Json(new { 
                     success = false
                 });
             }
