@@ -272,12 +272,11 @@ namespace TechStore.Controllers
                         var inventory = db.Inventories
                         .FirstOrDefault(x => x.ProductID == item.ProductID);
 
-                        if (inventory == null || inventory?.StockQuantity < item.Number )
+                        if (inventory == null || inventory.StockQuantity < item.Number )
                         {
                             throw new Exception($"Sản phẩm không đủ để đặt hàng hoặc ko tồn tại.");
                         }
-
-                        inventory?.StockQuantity -= item.Number;
+                        inventory.StockQuantity -= item.Number;
                     }
                     db.CartItems.RemoveRange(myCart);
                     db.SaveChanges();
@@ -658,10 +657,10 @@ namespace TechStore.Controllers
                 cartItem.Number++;
                 await DBCart(cartItem, "update"); // LƯU SAU KHI SỬA xong giỏ hàng, can thiệp trực tiếp vào list kia
             }
-            catch
+            catch (Exception ex)
             {
                 return Json(new { 
-                    success = false
+                    success = false, message = ex.Message
                 });
             }
             //Mục đích cập nhật lại số lượng
