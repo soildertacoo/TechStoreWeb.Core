@@ -7,6 +7,8 @@ using TechStore.Models;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using System.IO;
+
 namespace TechStore.Controllers
 {
     public class CustomerController : Controller
@@ -226,20 +228,23 @@ namespace TechStore.Controllers
                         
                         var baseFilename = Path.GetFileName(data.imageURL.FileName);
                         var path = Path.Combine(_env.WebRootPath, "Images", baseFilename);
-                        int count = 0;
+                        int count = 0; bool isDuplicate = false;
+                         //Lưu file vào thư mục server
 
                         //Kiểm tra tên file có giống ko
                         while (System.IO.File.Exists(path))
                         {
                             //Nếu file có tên là (1),(2)
-                            string fileNameOnly = Path.GetFileNameWithoutExtension(baseFilename); //Bỏ đuôi file ra
-                            string extension = Path.GetExtension(data.imageURL.FileName);//Lấy đuổi file
+                            string fileNameOnly = Path.GetFileNameWithoutExtension(baseFilename); 
+                            string extension = Path.GetExtension(data.imageURL.FileName);
+                            if (checkDuplicateImages(path, data.imageURL)) {isDuplicate = true; break;}
                             //Cập nhật filename mới
-                            //Tăng số lên đuôi file nếu có file trùng lặp
+                            //Tăng số lên đuôi file nếu có file trùng lặp vaf ko trùng lặp về hash
                             Console.WriteLine("Đã phát hiện file trùng lặp có tên là" + Path.GetFileName(path));
                             path = Path.Combine(_env.WebRootPath, "Images", $"{fileNameOnly}({++count}){extension}");
                         }
-                        using (var stream = new FileStream(path, FileMode.Create))
+                        if (isDuplicate) return Json(new { success = false, message = "File đã tồn tại trên server và có nội dung giống nhau. Vui lòng đổi tên file hoặc chọn file khác." });
+                        else using (var stream = new FileStream(path, FileMode.Create))
                         {
                             await data.imageURL.CopyToAsync(stream);
                         }
@@ -258,6 +263,41 @@ namespace TechStore.Controllers
                 }
             }
              return Json(new { success = true, message = "Đã set hình thành công." });
+        }
+        private bool checkDuplicateImages(string file1, IFormFile file2)
+        {
+            // Chỉ cần so sánh trực tiếp 2 mã Hash, bỏ luôn HashSet thừa
+            return GetFileHash(file1) == GetFileHash(file2);
+        }
+
+        // Hàm phụ 1: Tính mã Hash từ ĐƯỜNG DẪN FILE trên ổ cứng (dành cho file1)
+        private string GetFileHash(string filePath)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                // Dùng System.IO.File để mở luồng từ ổ cứng
+                using (var stream = System.IO.File.OpenRead(filePath))
+                {
+                    var hashBytes = sha256.ComputeHash(stream);
+                    return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                }
+            }
+        }
+
+        // Hàm phụ 2: Tính mã Hash từ IFORMFILE vừa upload lên (dành cho file2)
+        private string GetFileHash(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return string.Empty;
+
+            using (var sha256 = SHA256.Create())
+            {
+                // Dùng OpenReadStream() để mở luồng trực tiếp từ file upload trên RAM
+                using (var stream = file.OpenReadStream())
+                {
+                    var hashBytes = sha256.ComputeHash(stream);
+                    return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                }
+            }
         }
         [HttpPost]
         public ActionResult BanUser(int customerId, string reason)

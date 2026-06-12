@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting; // Bắt buộc cho IWebHostEnvironment
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Google.GenAI.Types;    // Bắt buộc cho IFormFile
+using System.Security.Cryptography;
 
 namespace TechStore.Controllers
 {
@@ -55,7 +56,7 @@ namespace TechStore.Controllers
             }
             try
             {
-                    string nameImg = "";
+                    string? nameImg = null;
                     // Chuyển file hình vào thư mục IMg
                     if (ImagePro != null && ImagePro.Length > 0 )
                     {
@@ -64,16 +65,18 @@ namespace TechStore.Controllers
                         var path = Path.Combine(_env.WebRootPath, "Images", baseFilename);
                         string fileNameOnly = Path.GetFileNameWithoutExtension(baseFilename); //Bỏ đuôi file ra
                         string extension = Path.GetExtension(ImagePro.FileName);//Lấy đuổi file
-                        int count = 0;
+                        int count = 0; bool isDuplicate = false;
 
                         //Kiểm tra tên file có giống ko
                         while (System.IO.File.Exists(path))
                         {
+                            if (checkDuplicateImages(path, ImagePro)) {isDuplicate = true; break;}
                             //Cập nhật filename mới
                             //Tăng số lên đuôi file nếu có file trùng lặp
                             Console.WriteLine("Đã phát hiện file trùng lặp có tên là" + Path.GetFileName(path));
                             path = Path.Combine(_env.WebRootPath, "Images", $"{fileNameOnly}({++count}){extension}");
                         }
+                        if (isDuplicate) throw new Exception("File đã tồn tại trên server và có nội dung giống nhau. Vui lòng đổi tên file hoặc chọn file khác.");
                         using (var stream = new FileStream(path, FileMode.Create))
                         {
                             await ImagePro.CopyToAsync(stream);
@@ -89,9 +92,9 @@ namespace TechStore.Controllers
                 db.Products.Add(pro);
                 db.SaveChanges();
             }
-            catch
+            catch (Exception ex)
             {
-                ViewBag.ErrorCreate = "Bị lỗi khi tạo sản phẩm";
+                ViewBag.ErrorCreate = "Bị lỗi khi tạo sản phẩm : " + ex.Message;
                 isValid = false;
             }
             if (!isValid)
@@ -100,6 +103,40 @@ namespace TechStore.Controllers
                 return View();
             }
             return RedirectToAction("Index");
+        }
+        private bool checkDuplicateImages(string file1, IFormFile file2)
+        {
+            // Chỉ cần so sánh trực tiếp 2 mã Hash, bỏ luôn HashSet thừa
+            return GetFileHash(file1) == GetFileHash(file2);
+        }
+
+        // Hàm phụ 1: Tính mã Hash từ ĐƯỜNG DẪN FILE trên ổ cứng (dành cho file1)
+        private string GetFileHash(string filePath)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                // Dùng System.IO.File để mở luồng từ ổ cứng
+                using (var stream = System.IO.File.OpenRead(filePath))
+                {
+                    var hashBytes = sha256.ComputeHash(stream);
+                    return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                }
+            }
+        }
+        // Hàm phụ 2: Tính mã Hash từ IFORMFILE vừa upload lên (dành cho file2)
+        private string GetFileHash(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return string.Empty;
+
+            using (var sha256 = SHA256.Create())
+            {
+                // Dùng OpenReadStream() để mở luồng trực tiếp từ file upload trên RAM
+                using (var stream = file.OpenReadStream())
+                {
+                    var hashBytes = sha256.ComputeHash(stream);
+                    return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                }
+            }
         }
 
         [HttpGet]
