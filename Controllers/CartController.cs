@@ -269,22 +269,17 @@ namespace TechStore.Controllers
                     foreach (var item in myCart)
                     {
                         // Giảm tồn kho
-                        var inventory = _context.Inventories
+                        var inventory = db.Inventories
                         .FirstOrDefault(x => x.ProductID == item.ProductID);
 
-                        if (inventory?.StockQuantity < item.Number)
+                        if (inventory == null || inventory?.StockQuantity < item.Number )
                         {
-                            throw new Exception($"Sản phẩm {item.NamePro} chỉ còn {inventory.StockQuantity} trong kho, không đủ để đặt hàng.");
+                            throw new Exception($"Sản phẩm không đủ để đặt hàng hoặc ko tồn tại.");
                         }
 
                         inventory?.StockQuantity -= item.Number;
-                        //Sau khi trừ xong thì kiểm tra lại xem có hết giỏ ko nếu có thì gỡ sản phẩm đó khỏi giỏ 
-                        if (inventory?.StockQuantity < 0 )
-                        {
-                            //Gỡ sản phẩm khỏi giỏ hàng nếu tồn kho đã hết 
-                            db.CartItems.Remove(item);
-                        }
                     }
+                    db.CartItems.RemoveRange(myCart);
                     db.SaveChanges();
                     // Xác nhận toàn bộ quá trình thành công
                     transaction.Commit();
