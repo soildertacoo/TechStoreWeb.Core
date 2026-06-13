@@ -273,13 +273,27 @@ namespace TechStore.Controllers
         {
             var user = ValidateUser(data.NameCus, data.PassCus);
             
-            if (user == null)
-                return Json(new { success = false, message = "Tên đăng nhập hoặc mật khẩu không đúng!" });
-
-            if (user.IsBanned == true)
-                return Json(new { success = false, message = "Tài khoản bị khóa. Lý do: " + user.ReasonBanned });
-
-            if (user.Is2FAEnabled == true) 
+            if (user == null && signAttempt < 5) // Giới hạn 5 lần thử
+            {
+                //Nếu quá 5 lần thì khóa hẳn tài khoản
+                if (signAttempt >= 4) 
+                {
+                    var cus = dbO_Cus.Customers.FirstOrDefault(c => c.NameCus == data.NameCus);
+                    if (cus != null)
+                    {
+                        cus.IsBanned = true; // Cột IsBanned trong database để đánh dấu tài khoản bị khóa
+                        cus.ReasonBanned = "Quá nhiều lần đăng nhập thất bại"; // Lý do khóa tài khoản
+                        await dbO_Cus.SaveChangesAsync();
+                    }
+                    return Json(new { success = false, message = "Tài khoản đã bị khóa do quá nhiều lần đăng nhập thất bại. Vui lòng liên hệ bộ phận hỗ trợ." });
+                }
+                signAttempt++;
+                return Json(new { success = false, message = $"Sai thông tin đăng nhập. Còn {5 - signAttempt} lần thử." });
+            }
+            //Đúng thì reset lại biến đếm
+            signAttempt = 0;
+            //Kiểm tra có bật 2FA hay không
+            if (user.Is2FAEnabled) 
             {
                 return Json(new { success = true, need2fa = true });
             }
