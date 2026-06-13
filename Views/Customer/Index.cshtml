@@ -133,7 +133,23 @@
                         {
                             <tr class="@(item.IsBanned == true ? "bg-light" : "")">
                                 <td class="pl-4">
-                                    <div class="font-weight-bold text-dark">@Html.DisplayFor(modelItem => item.NameCus)</div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3" style="width: 45px; height: 45px; flex-shrink: 0;">
+                                            @if (!string.IsNullOrEmpty(item.ImagePro))
+                                            {
+                                                <img src="~/Images/@item.ImagePro" alt="Avatar" class="rounded-circle shadow-sm" style="width: 100%; height: 100%; object-fit: cover; border: 2px solid #e3e6f0;">
+                                            }
+                                            else
+                                            {
+                                                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Default Avatar" class="rounded-circle shadow-sm" style="width: 100%; height: 100%; object-fit: cover; border: 2px solid #e3e6f0; opacity: 0.7;">
+                                            }
+                                        </div>
+                                        
+                                        <div>
+                                            <div class="font-weight-bold text-dark" style="font-size: 1.05rem;">@Html.DisplayFor(modelItem => item.NameCus)</div>
+                                            <div class="text-muted small">ID: #@item.IDCus</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="text-muted small"><i class="fas fa-phone mr-1"></i> @Html.DisplayFor(modelItem => item.PhoneCus)</div>

@@ -254,6 +254,7 @@
         </div>
     }
 </div>
+</div> @await Html.PartialAsync("~/Views/_ChatAdminPartial.cshtml", (List<string>)ViewBag.ChatRooms ?? new List<string>())
 
 <!-- Process Request Modal -->
 <div class="modal fade" id="processModal" tabindex="-1">

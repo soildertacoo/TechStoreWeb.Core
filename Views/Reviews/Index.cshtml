@@ -91,57 +91,59 @@
         </div>
     </div>
 </div>
-<script>
-    // Add some interactive effects
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add loading animation for cancel buttons
-        const cancelBtns = document.querySelectorAll('.btn.btn-success.btn-sm');
-        cancelBtns.forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                const review = this.dataset.review;
-                if (confirm('Bạn có chắc chắn hiện review này không?: ')) {
-                    const originalText = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
-                    this.style.pointerEvents = 'none';
-                    setTimeout(() => {
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Bắt sự kiện cho tất cả các nút "Hiện review"
+            const cancelBtns = document.querySelectorAll('.btn.btn-success.btn-sm');
+            
+            cancelBtns.forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    const reviewId = this.dataset.review;
+                    
+                    if (confirm('Bạn có chắc chắn muốn HIỆN đánh giá này lên không?')) {
+                        // Lưu lại trạng thái nút để lỡ lỗi thì khôi phục lại
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
+                        this.style.pointerEvents = 'none';
+
+                        // 🚨 SỬA LỖI Ở ĐÂY: Dùng FormData thay vì JSON.stringify
+                        const formData = new FormData();
+                        formData.append('id', reviewId);
+
                         fetch('@Url.Action("ShowReview", "Reviews")', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ id: review })
-                        }).then(response => response.json())
+                            body: formData // Đẩy thẳng form data đi để C# tự động bắt được biến 'id'
+                        })
+                        .then(response => {
+                            if (!response.ok) throw new Error("Mã lỗi máy chủ: " + response.status);
+                            return response.json();
+                        })
                         .then(data => {
                             if (data.success) {
-                                if (confirm('Đã hiện thành công, nhấn ok để reset trang lại để hoàn tấc')) {
+                                if (confirm('Đã hiện thành công! Nhấn OK để tải lại trang.')) {
                                     window.location.href = "@Url.Action("Index", "Reviews")";
                                 }
-                                else
-                                    return;
-                            }
-                            else {
-                                if (confirm('Hiện review không thành công, nhấn ok để reload lại trang')) {
-                                      window.location.href = "@Url.Action("Index", "Reviews")";
-                                }
-                                else {
+                            } else {
+                                if (confirm('Lỗi: ' + (data.message || 'Không thể hiện review') + '. Nhấn OK để tải lại trang.')) {
+                                    window.location.href = "@Url.Action("Index", "Reviews")";
+                                } else {
                                     this.innerHTML = originalText;
                                     this.style.pointerEvents = 'auto';
-                                    return;
-
                                 }
                             }
-                        }
-                        );
-                    }, 100);
-                }
-                else {
-                    this.innerHTML = originalText;
-                    this.style.pointerEvents = 'auto';
-                }
+                        })
+                        .catch(error => {
+                            // Bọc lót an toàn: Nếu lỗi rớt mạng/sập server thì bung thông báo và nhả nút ra
+                            alert("Đã xảy ra lỗi hệ thống: " + error.message);
+                            this.innerHTML = originalText;
+                            this.style.pointerEvents = 'auto';
+                        });
+                    }
+                });
             });
         });
-
-    });
-</script>
+    </script>
+}
 
 
