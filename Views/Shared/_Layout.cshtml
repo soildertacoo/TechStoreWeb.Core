@@ -292,11 +292,17 @@
         .search-form input {
             background: transparent;
             border: none;
-            color: var(--text-primary);
+            /* Đổi sang màu chữ tối để hiện rõ trên nền sáng */
+            color: var(--text-color); 
             padding: 0.8rem 1rem;
             font-size: 0.95rem;
             width: 280px;
             transition: all 0.3s ease;
+        }
+
+        /* Thêm quy tắc bọc lót: Khi người dùng bật Dark Mode (Giao diện tối) thì chữ tự đổi sang trắng */
+        html[data-theme="dark"] .search-form input {
+            color: #ffffff;
         }
 
         .search-form input:focus {

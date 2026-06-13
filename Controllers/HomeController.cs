@@ -5,6 +5,8 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using TechStore.Models;
+using TechStoreWeb.Core.AI;
+using static TechStoreWeb.Core.AI.geminiGen;
 
 namespace TechStore.Controllers
 {
@@ -74,18 +76,86 @@ namespace TechStore.Controllers
             System.Diagnostics.Debug.WriteLine(message);
             return new EmptyResult(); // Return an empty result since this is a logging action
         }
+     // 1. VIẾT MỘT HÀM PHỤ ĐỂ LỘT SẠCH DẤU TIẾNG VIỆT
+        // Khách gõ "Mắc búc" hay "mác búc" thì nó đều biến thành "mac buc"
+        private string RemoveVietnameseAccents(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return text;
+            
+            string[] arr1 = new string[] { "á", "à", "ả", "ã", "ạ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ",
+            "đ", "é","è","ẻ","ẽ","ẹ","ê","ế","ề","ể","ễ","ệ", "í","ì","ỉ","ĩ","ị",
+            "ó","ò","ỏ","õ","ọ","ô","ố","ồ","ổ","ỗ","ộ","ơ","ớ","ờ","ở","ỡ","ợ",
+            "ú","ù","ủ","ũ","ụ","ư","ứ","ừ","ử","ữ","ự", "ý","ỳ","ỷ","ỹ","ỵ" };
+            
+            string[] arr2 = new string[] { "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a",
+            "d", "e","e","e","e","e","e","e","e","e","e","e", "i","i","i","i","i",
+            "o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o",
+            "u","u","u","u","u","u","u","u","u","u","u", "y","y","y","y","y" };
+            
+            text = text.ToLower().Trim();
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                text = text.Replace(arr1[i], arr2[i]);
+            }
+            return text;
+        }
+
+        // 2. HÀM TÌM KIẾM CHÍNH THỨC
         [HttpPost]
         public ActionResult Search(string keyword)
         {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return View(new List<Products>());
+            }
+
             try
             {
-                var Products = dbO.Products.Where(p => p.NamePro.Contains(keyword)).ToList();
+                // Bước 1: Cắt khoảng trắng dư và loại bỏ toàn bộ dấu tiếng Việt
+                string originalKeyword = keyword.Trim().ToLower();
+                string cleanKeyword = RemoveVietnameseAccents(originalKeyword);
+
+                // Bước 2: Chuẩn hóa "Từ lóng không dấu" thành tên chuẩn
+                // Vì đã bỏ dấu rồi nên bạn không cần bắt trường hợp "mắc búc" hay "mác búc" nữa,
+                // Chỉ cần bắt mỗi chữ "mac buc" là ôm trọn mọi thể loại sai dấu!
+                string searchKeyword = cleanKeyword
+                    .Replace("ai bat", "ipad")
+                    .Replace("ai pat", "ipad")
+                    .Replace("ai phon", "iphone")
+                    .Replace("ip phon", "iphone")
+                    .Replace("phon", "phone")
+                    .Replace("mac buc", "macbook")
+                    .Replace("mac bôk", "macbook")
+                    .Replace("sam sung", "samsung")
+                    .Replace("xam xung", "samsung")
+                    .Replace("deo", "dell")
+                    .Replace("a xut", "asus")
+                    .Replace("dong ho", "watch")
+                    .Replace("lap top", "laptop")
+                    .Replace("pe ce", "pc")
+                    .Replace("pi xi", "pc")
+                    .Replace("a co", "aker")
+                    .Replace("ai co", "aker");
+
+                System.Diagnostics.Debug.WriteLine($"[ĐÃ DỊCH TỪ KHÓA]: {keyword} ---> {searchKeyword}");
+
+                // Bước 3: Đem cả từ khóa đã lột xác VÀ từ khóa gốc đi quét trong Database
+                // Dùng thêm ToLower() cho NamePro để chắc chắn không phân biệt hoa thường
+                var Products = dbO.Products
+                    .Where(p => p.NamePro.ToLower().Contains(searchKeyword) || 
+                                p.NamePro.ToLower().Contains(originalKeyword))
+                    .ToList();
+
+                // Ném kết quả ra View
+                ViewBag.KeywordUsed = searchKeyword;
+
                 return View(Products);
             }
-            catch
+            catch (Exception ex)
             {
-                ViewBag.Error = "Không tìm thấy sản phẩm";
-                return new NotFoundResult();
+                System.Diagnostics.Debug.WriteLine($"[LỖI TÌM KIẾM]: {ex.Message}");
+                ViewBag.Error = "Đã xảy ra sự cố trong quá trình tìm kiếm. Vui lòng thử lại!";
+                return View(new List<Products>()); 
             }
         }
 
