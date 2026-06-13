@@ -308,6 +308,37 @@ namespace TechStoreWeb.Core.Migrations
                     b.ToTable("LoveProducts");
                 });
 
+            modelBuilder.Entity("TechStore.Models.OTPModel", b =>
+                {
+                    b.Property<int>("IdOTP")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdOTP"));
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpirationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NameCus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtpCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("sendedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("typeOTP")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdOTP");
+
+                    b.ToTable("OTPModels");
+                });
+
             modelBuilder.Entity("TechStore.Models.OrderDetails", b =>
                 {
                     b.Property<int>("ID")

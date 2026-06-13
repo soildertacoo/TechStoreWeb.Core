@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using TechStoreWeb.Core.Models.EmailSystem;
 
 namespace TechStore.Controllers
 {
@@ -20,12 +21,15 @@ namespace TechStore.Controllers
         private readonly DBTechStoreEntities dbO_Cus;
         private readonly ApplicationDbContext _context;
         private readonly string MasterKey = "#@TechStoreWeb_BaomatSieuCapNasa_A234667@#";
+        private string? otpEmailCode = null; 
+        private EmailUtils emailUtils;
 
     // 2. Tạo hàm khởi tạo (Constructor) và yêu cầu hệ thống "tiêm" DbContext vào
-        public UserController(DBTechStoreEntities dbContext, ApplicationDbContext appContext)
+        public UserController(DBTechStoreEntities dbContext, ApplicationDbContext appContext, IConfiguration configuration)
         {
             dbO_Cus = dbContext;
             _context = appContext;
+            emailUtils = new EmailUtils(configuration);
         }
         
         #region Đăng ký
@@ -310,7 +314,6 @@ namespace TechStore.Controllers
 
                     if (cus.FailedLoginAttempts >= 5)
                     {
-                        // 🚨 QUAN TRỌNG: Cập nhật CẢ 3 trường dữ liệu
                         cus.IsBanned = true;
                         cus.ReasonBanned = "Quá nhiều lần đăng nhập thất bại";
                         cus.BannedUntil = DateTime.Now.AddMinutes(30); // Thiết lập thời gian khóa 30 phút
@@ -354,6 +357,63 @@ namespace TechStore.Controllers
             
             await SignInUserInternal(user, data.isRemember); //Lưu cookie phiên đăng nhập
             return Json(new { success = true, redirectUrl = "/Home/Index"});
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> SendResetOTP(String email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập email." });
+            }
+            
+            // Tìm khách hàng trước để lấy tên 
+            var customer = _context.Customers.FirstOrDefault(c => c.EmailCus == email);
+            if (customer == null)
+            {
+                return Json(new { success = false, message = "Email không tồn tại trong hệ thống." });
+            }
+
+            // Tạo mã OTP ngẫu nhiên
+            string otpEmailCode = new Random().Next(100000, 999999).ToString();
+            
+            // Lưu vào Database
+            _context.OTPModels.Add(new OTPModel
+            {
+                Email = email,
+                NameCus = customer.NameCus, 
+                OtpCode = otpEmailCode,     
+                sendedTime = DateTime.Now,
+                ExpirationTime = DateTime.Now.AddMinutes(5),
+                typeOTP = 1
+            });
+            
+            await _context.SaveChangesAsync();
+
+            // Gửi Email
+            await emailUtils.SendEmailAsync(
+                email, 
+                "Mã OTP đặt lại mật khẩu TechStore", 
+                $"Mã OTP của bạn là: <b style='font-size:24px'>{otpEmailCode}</b>. Mã có hiệu lực trong 5 phút."
+            );
+            
+            return Json(new { success = true, message = "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư." });
+            
+        }
+        [HttpPost]
+        public async Task<IActionResult> VerifyResetOTP([FromBody] OTPRequestModel otpIn)
+        {
+            var getCus = _context.OTPModels
+                            .Where(x => x.Email == otpIn.emailInput && x.typeOTP == 1)
+                            .OrderByDescending(x => x.sendedTime)
+                            .FirstOrDefault();
+            if (getCus == null)
+            {
+                return Json(new { success = false, message = "Lỗi xác thực OTP, vui lòng kiểm tra lại" });
+            }
+            bool isValid = (getCus.OtpCode == otpIn.otpInput && getCus.ExpirationTime > DateTime.Now) ? true : false ;
+            if (!isValid) return Json(new { success = false, message = "Sai mã OTP hoặc đã hết hạn quá 5 phút, vui lòng kiểm tra lại" });
+            return Json(new { success = true});
         }
         public bool VerifyOTP(String OtpCode, String SecretKey) 
         {

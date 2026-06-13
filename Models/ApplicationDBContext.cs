@@ -25,6 +25,7 @@ namespace TechStore.Models
         public virtual DbSet<Inventory> Inventories { get; set; }
         public virtual DbSet<Banner> Banners { get; set; }
         public virtual DbSet<Promotion> Promotions { get; set; }
+        public virtual DbSet<OTPModel> OTPModels { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
