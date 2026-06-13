@@ -247,7 +247,7 @@ namespace TechStore.Controllers
                 if (adminUser.IsBanned == true)
                 {
                     // Kiểm tra xem đã hết thời hạn 30 phút chưa
-                    if (adminUser.BannedUntil != null && DateTime.Now.Subtract(adminUser.BannedUntil.Value) < TimeSpan.FromMinutes(30))
+                    if (adminUser.BannedUntil != null && adminUser.BannedUntil > DateTime.Now)
                     {
                         isRetryAttempt = true;
                         ViewBag.ThongBao = $"Tài khoản của bạn đã bị khóa đến {adminUser.BannedUntil:HH:mm}. Lý do: {adminUser.ReasonBanned}";
