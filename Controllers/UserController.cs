@@ -270,7 +270,7 @@ namespace TechStore.Controllers
         [HttpPost]
         public async Task<IActionResult> DangNhapXThuc([FromBody] LoginRequest data)
         {
-            // BƯỚC 1: Lấy thông tin user dựa trên Tên đăng nhập (Chưa quan tâm mật khẩu vội)
+           
                 var cus = dbO_Cus.Customers.FirstOrDefault(c => c.NameCus == data.NameCus);
 
                 // Nếu không tìm thấy User trong DB -> Chặn luôn
@@ -289,18 +289,17 @@ namespace TechStore.Controllers
                     }
                     else
                     {
-                        // Đã hết 30 phút -> Mở khóa ngầm và cho phép đi tiếp
-                        cus.IsBanned = false;
-                        cus.ReasonBanned = null;
-                        cus.BannedUntil = null;
-                        cus.FailedLoginAttempts = 0; // Reset lại số lần thử sau khi mở khóa
-                        // Bắt buộc SaveChanges để cập nhật trạng thái mở khóa
-                        await dbO_Cus.SaveChangesAsync();
+                            // Mở khóa tài khoản
+                            cus.IsBanned = false;
+                            cus.ReasonBanned = null;
+                            cus.BannedUntil = null;
+                            cus.FailedLoginAttempts = 0; // Reset lại số lần thử sau khi mở khóa
+                            await dbO_Cus.SaveChangesAsync();
                     }
                 }
 
                 
-                bool isPasswordCorrect = (cus.PassCus == data.PassCus) ? true : false; 
+                bool isPasswordCorrect = (cus.PassCus.Trim() == data.PassCus.Trim()) ? true : false; 
 
                 if (!isPasswordCorrect)
                 {
@@ -323,7 +322,10 @@ namespace TechStore.Controllers
                     
                     return Json(new { success = false, message = $"Sai thông tin đăng nhập. Bạn còn {5 - cus.FailedLoginAttempts} lần thử." });
                 }
-
+            
+            cus.FailedLoginAttempts = 0; // Reset lại số lần thử sau khi mở khóa
+            await dbO_Cus.SaveChangesAsync();
+            
             //Kiểm tra có bật 2FA hay không
             if (cus.Is2FAEnabled) 
             {

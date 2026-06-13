@@ -235,12 +235,12 @@ namespace TechStore.Controllers
         public async Task<IActionResult> LoginConfirm(AdminUsers admin)
         {
             var adminUser = dBO.AdminUsers.FirstOrDefault(c => c.NameUser == admin.NameUser);
-            bool isRetryAttempt = false;
 
                 // Nếu không tìm thấy User trong DB -> Chặn luôn
                 if (adminUser == null)
                 {
-                    return Json(new { success = false, message = "Sai thông tin đăng nhập." });
+                    ViewBag.ThongBao = "Tài khoản không tồn tại!";
+                    return View();
                 }
 
                 // BƯỚC 2: Kiểm tra xem tài khoản có đang bị khóa hay không?
@@ -249,31 +249,28 @@ namespace TechStore.Controllers
                     // Kiểm tra xem đã hết thời hạn 30 phút chưa
                     if (adminUser.BannedUntil != null && adminUser.BannedUntil > DateTime.Now)
                     {
-                        isRetryAttempt = true;
                         ViewBag.ThongBao = $"Tài khoản của bạn đã bị khóa đến {adminUser.BannedUntil:HH:mm}. Lý do: {adminUser.ReasonBanned}";
+                        return View();
                     }
-                    else
-                    {
-                        // Đã hết 30 phút -> Mở khóa ngầm và cho phép đi tiếp
+                    else // Nếu đã hết thời hạn khóa thì tự động mở khóa cho người dùng
+                     {
                         adminUser.IsBanned = false;
                         adminUser.ReasonBanned = null;
                         adminUser.BannedUntil = null;
                         adminUser.FailedLoginAttempts = 0; // Reset lại số lần thử sau khi mở khóa
-                        // Bắt buộc SaveChanges để cập nhật trạng thái mở khóa
-                        await _context.SaveChangesAsync();
+                        await dBO.SaveChangesAsync();
                     }
+                   
                 }
 
                 
-                bool isPasswordCorrect = (adminUser.PasswordUser == admin.PasswordUser) ? true : false; 
+                bool isPasswordCorrect = (adminUser.PasswordUser.Trim() == admin.PasswordUser.Trim()) ? true : false; 
 
                 if (!isPasswordCorrect)
                 {
-                   
                     //Thêm số lần thử vào database để tránh trường hợp tấn công bằng cách gửi nhiều request
                     adminUser.FailedLoginAttempts = (adminUser.FailedLoginAttempts ?? 0) + 1;
-                    await _context.SaveChangesAsync();
-                    isRetryAttempt = true;
+                    await dBO.SaveChangesAsync();
 
                     if (adminUser.FailedLoginAttempts >= 5)
                     {
@@ -282,18 +279,18 @@ namespace TechStore.Controllers
                         adminUser.ReasonBanned = "Quá nhiều lần đăng nhập thất bại";
                         adminUser.BannedUntil = DateTime.Now.AddMinutes(30); // Thiết lập thời gian khóa 30 phút
                         
-                        await _context.SaveChangesAsync();
+                        await dBO.SaveChangesAsync();
                         
                         ViewBag.ThongBao = "Không đăng nhập thành công vì bạn đã nhập sai quá 5 lần. Tài khoản sẽ bị khóa 30 phút.";
-                    }
-                    ViewBag.ThongBao = $"Không đăng nhập thành công vì bạn đã nhập sai, bạn còn {5 - adminUser.FailedLoginAttempts} lần thử.";
-                }
-                if (isRetryAttempt)
-                {
+                    } else ViewBag.ThongBao = $"Không đăng nhập thành công vì bạn đã nhập sai, bạn còn {5 - adminUser.FailedLoginAttempts} lần thử.";
+                    
                     return View();
                 }
-                //N
+
+                
                 ViewBag.ThongBao = "Chúc mừng đăng nhập thành công ";
+                adminUser.FailedLoginAttempts = 0; // Reset lại số lần thử sau khi mở khóa
+                await dBO.SaveChangesAsync();
                 HttpContext.Session.SetString("admin", admin.NameUser);
                 return RedirectToAction("Statistics", "Admins");
         }
