@@ -232,23 +232,70 @@ namespace TechStore.Controllers
             return View();
         }
         [HttpPost, ActionName("Login")]
-        public ActionResult LoginConfirm(AdminUsers admin)
+        public async Task<IActionResult> LoginConfirm(AdminUsers admin)
         {
-            var user = ValidateUser(admin.NameUser, admin.PasswordUser);
-            // Add your authentication logic here
-            if (user != null)
-            {
+            var adminUser = dBO.AdminUsers.FirstOrDefault(c => c.NameUser == admin.NameUser);
+            bool isRetryAttempt = false;
 
-                // Redirect to a different page on successful login
+                // Nếu không tìm thấy User trong DB -> Chặn luôn
+                if (adminUser == null)
+                {
+                    return Json(new { success = false, message = "Sai thông tin đăng nhập." });
+                }
+
+                // BƯỚC 2: Kiểm tra xem tài khoản có đang bị khóa hay không?
+                if (adminUser.IsBanned == true)
+                {
+                    // Kiểm tra xem đã hết thời hạn 30 phút chưa
+                    if (adminUser.BannedUntil != null && DateTime.Now.Subtract(adminUser.BannedUntil.Value) < TimeSpan.FromMinutes(30))
+                    {
+                        isRetryAttempt = true;
+                        ViewBag.ThongBao = $"Tài khoản của bạn đã bị khóa đến {adminUser.BannedUntil:HH:mm}. Lý do: {adminUser.ReasonBanned}";
+                    }
+                    else
+                    {
+                        // Đã hết 30 phút -> Mở khóa ngầm và cho phép đi tiếp
+                        adminUser.IsBanned = false;
+                        adminUser.ReasonBanned = null;
+                        adminUser.BannedUntil = null;
+                        adminUser.FailedLoginAttempts = 0; // Reset lại số lần thử sau khi mở khóa
+                        // Bắt buộc SaveChanges để cập nhật trạng thái mở khóa
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                
+                bool isPasswordCorrect = (adminUser.PasswordUser == admin.PasswordUser) ? true : false; 
+
+                if (!isPasswordCorrect)
+                {
+                   
+                    //Thêm số lần thử vào database để tránh trường hợp tấn công bằng cách gửi nhiều request
+                    adminUser.FailedLoginAttempts = (adminUser.FailedLoginAttempts ?? 0) + 1;
+                    await _context.SaveChangesAsync();
+                    isRetryAttempt = true;
+
+                    if (adminUser.FailedLoginAttempts >= 5)
+                    {
+                        // 🚨 QUAN TRỌNG: Cập nhật CẢ 3 trường dữ liệu
+                        adminUser.IsBanned = true;
+                        adminUser.ReasonBanned = "Quá nhiều lần đăng nhập thất bại";
+                        adminUser.BannedUntil = DateTime.Now.AddMinutes(30); // Thiết lập thời gian khóa 30 phút
+                        
+                        await _context.SaveChangesAsync();
+                        
+                        ViewBag.ThongBao = "Không đăng nhập thành công vì bạn đã nhập sai quá 5 lần. Tài khoản sẽ bị khóa 30 phút.";
+                    }
+                    ViewBag.ThongBao = $"Không đăng nhập thành công vì bạn đã nhập sai, bạn còn {5 - adminUser.FailedLoginAttempts} lần thử.";
+                }
+                if (isRetryAttempt)
+                {
+                    return View();
+                }
+                //N
                 ViewBag.ThongBao = "Chúc mừng đăng nhập thành công ";
                 HttpContext.Session.SetString("admin", admin.NameUser);
                 return RedirectToAction("Statistics", "Admins");
-            }
-            else
-            {
-                ViewBag.ThongBao = "Không đăng nhập thành công ";
-                return View();
-            }
         }
         private AdminUsers? ValidateUser(string username, string password)
         {

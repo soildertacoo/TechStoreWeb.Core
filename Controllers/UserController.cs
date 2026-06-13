@@ -225,21 +225,20 @@ namespace TechStore.Controllers
             }
             return View(customer);
         }
-        [HttpPost]
-        public ActionResult SetVIP(int id, String membership, String message)
+        [HttpGet]
+        public async Task<IActionResult> SetVIP(string name, String membership)
         {
-            System.Diagnostics.Debug.WriteLine(message);
             bool success_bool = false;
-            var customer = dbO_Cus.Customers.FirstOrDefault(c => c.IDCus == id);
+            var customer = dbO_Cus.Customers.FirstOrDefault(c => c.NameCus == name);
             if (customer != null)
             {
                 customer.IsVIP = true;
                 customer.MembershipLevel = membership ;
-                dbO_Cus.SaveChanges();
+                await dbO_Cus.SaveChangesAsync();
                 success_bool = true;
                 return Json(new { success = success_bool });
             }
-            return Json(new { success = success_bool });
+            return Json(new { success = success_bool, message = "Không tìm thấy khách hàng để nâng cấp VIP hay lỗi hệ thống." });
         }
         #endregion
 
@@ -271,35 +270,67 @@ namespace TechStore.Controllers
         [HttpPost]
         public async Task<IActionResult> DangNhapXThuc([FromBody] LoginRequest data)
         {
-            var user = ValidateUser(data.NameCus, data.PassCus);
-            
-            if (user == null && signAttempt < 5) // Giới hạn 5 lần thử
-            {
-                //Nếu quá 5 lần thì khóa hẳn tài khoản
-                if (signAttempt >= 4) 
+            // BƯỚC 1: Lấy thông tin user dựa trên Tên đăng nhập (Chưa quan tâm mật khẩu vội)
+                var cus = dbO_Cus.Customers.FirstOrDefault(c => c.NameCus == data.NameCus);
+
+                // Nếu không tìm thấy User trong DB -> Chặn luôn
+                if (cus == null)
                 {
-                    var cus = dbO_Cus.Customers.FirstOrDefault(c => c.NameCus == data.NameCus);
-                    if (cus != null)
+                    return Json(new { success = false, message = "Sai thông tin đăng nhập." });
+                }
+
+                // BƯỚC 2: Kiểm tra xem tài khoản có đang bị khóa hay không?
+                if (cus.IsBanned == true)
+                {
+                    // Kiểm tra xem đã hết thời hạn 30 phút chưa
+                    if (cus.BannedUntil != null && cus.BannedUntil > DateTime.Now)
                     {
-                        cus.IsBanned = true; // Cột IsBanned trong database để đánh dấu tài khoản bị khóa
-                        cus.ReasonBanned = "Quá nhiều lần đăng nhập thất bại"; // Lý do khóa tài khoản
+                        return Json(new { success = false, message = $"Tài khoản của bạn đã bị khóa đến {cus.BannedUntil:HH:mm}. Lý do: {cus.ReasonBanned}" });
+                    }
+                    else
+                    {
+                        // Đã hết 30 phút -> Mở khóa ngầm và cho phép đi tiếp
+                        cus.IsBanned = false;
+                        cus.ReasonBanned = null;
+                        cus.BannedUntil = null;
+                        cus.FailedLoginAttempts = 0; // Reset lại số lần thử sau khi mở khóa
+                        // Bắt buộc SaveChanges để cập nhật trạng thái mở khóa
                         await dbO_Cus.SaveChangesAsync();
                     }
-                    return Json(new { success = false, message = "Tài khoản đã bị khóa do quá nhiều lần đăng nhập thất bại. Vui lòng liên hệ bộ phận hỗ trợ." });
                 }
-                signAttempt++;
-                return Json(new { success = false, message = $"Sai thông tin đăng nhập. Còn {5 - signAttempt} lần thử." });
-            }
-            //Đúng thì reset lại biến đếm
-            signAttempt = 0;
+
+                
+                bool isPasswordCorrect = (cus.PassCus == data.PassCus) ? true : false; 
+
+                if (!isPasswordCorrect)
+                {
+                   
+                    //Thêm số lần thử vào database để tránh trường hợp tấn công bằng cách gửi nhiều request
+                    cus.FailedLoginAttempts = (cus.FailedLoginAttempts ?? 0) + 1;
+                    await dbO_Cus.SaveChangesAsync();
+
+                    if (cus.FailedLoginAttempts >= 5)
+                    {
+                        // 🚨 QUAN TRỌNG: Cập nhật CẢ 3 trường dữ liệu
+                        cus.IsBanned = true;
+                        cus.ReasonBanned = "Quá nhiều lần đăng nhập thất bại";
+                        cus.BannedUntil = DateTime.Now.AddMinutes(30); // Thiết lập thời gian khóa 30 phút
+                        
+                        await dbO_Cus.SaveChangesAsync();
+                        
+                        return Json(new { success = false, message = "Tài khoản đã bị khóa 30 phút do nhập sai quá 5 lần. Vui lòng liên hệ hỗ trợ." });
+                    }
+                    
+                    return Json(new { success = false, message = $"Sai thông tin đăng nhập. Bạn còn {5 - cus.FailedLoginAttempts} lần thử." });
+                }
+
             //Kiểm tra có bật 2FA hay không
-            if (user.Is2FAEnabled) 
+            if (cus.Is2FAEnabled) 
             {
                 return Json(new { success = true, need2fa = true });
             }
-
             // Nếu ko bật OTP thì vào luôn
-            await SignInUserInternal(user, data.isRemember); 
+            await SignInUserInternal(cus, data.isRemember); 
             return Json(new { success = true, need2fa = false, redirectUrl = "/Home/Index" });
         }
         // Hàm Xác thực OTP (Chỉ chạy khi khách có 2FA)
@@ -400,6 +431,7 @@ namespace TechStore.Controllers
         }
         private Customer? ValidateUser(string username, string password)
         {
+            
             return dbO_Cus.Customers.FirstOrDefault(s => s.NameCus == username && s.PassCus == password);
         }
         [HttpGet]

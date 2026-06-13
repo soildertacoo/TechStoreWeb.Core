@@ -22,7 +22,10 @@ namespace TechStore.Models
         public string RoleUser { get; set; }
         public string PasswordUser { get; set; }
         public string Email { get; set; }
-        public Nullable<System.DateTime> LastLogin { get; set; }
+        public Nullable<bool> IsBanned { get; set; }
+        public string ReasonBanned { get; set; }
+        public DateTime? BannedUntil { get; set; }
+        public Nullable<int> FailedLoginAttempts { get; set; }
         public Nullable<bool> IsActive { get; set; }
     }
 }

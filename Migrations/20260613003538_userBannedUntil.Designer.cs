@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TechStore.Models;
 
@@ -11,9 +12,11 @@ using TechStore.Models;
 namespace TechStoreWeb.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260613003538_userBannedUntil")]
+    partial class userBannedUntil
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,28 +33,19 @@ namespace TechStoreWeb.Core.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<DateTime?>("BannedUntil")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FailedLoginAttempts")
-                        .HasColumnType("int");
 
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsBanned")
-                        .HasColumnType("bit");
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("NameUser")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordUser")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReasonBanned")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleUser")
@@ -203,9 +197,6 @@ namespace TechStoreWeb.Core.Migrations
 
                     b.Property<string>("EmailCus")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FailedLoginAttempts")
-                        .HasColumnType("int");
 
                     b.Property<string>("ImagePro")
                         .HasColumnType("nvarchar(max)");

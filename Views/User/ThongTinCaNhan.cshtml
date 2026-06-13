@@ -35,10 +35,7 @@
         membershipClass = "membership-gold";
         memberShip = "VIP Vàng";
     }
-    else
-    {
-        muctoida = 1000000m; // 1 triệu để lên hạng Đồng
-    }
+    
 
     // Tính phần trăm
     if (memberShip != "VIP Vàng" && muctoida > 0)
@@ -462,10 +459,10 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
         
         // 1. Chạy hàm cập nhật VIP
-        updateVIP();
+        await updateVIP();
 
         const avatarInput = document.getElementById('AvatarBtn');
         const mainAvatar = document.getElementById('mainAvatar');
@@ -562,7 +559,7 @@
         var totalSpent = parseFloat('@Html.Raw(totalSpent.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))');
         var currentMembership = '@Html.Raw(Model.MembershipLevel ?? "")';
         let newMembership = "";
-
+        let userName = '@Html.Raw(User.Identity?.Name)';
         if (totalSpent >= 1000000 && totalSpent < 5000000) {
             newMembership = "Đồng";
         } else if (totalSpent >= 5000000 && totalSpent < 50000000) {
@@ -570,21 +567,70 @@
         } else if (totalSpent >= 50000000) {
             newMembership = "Vàng";
         }
-
-        if (newMembership !== "" && newMembership !== currentMembership) {
-            fetch('@Html.Raw(Url.Action("SetVIP", "User"))', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: '@Model.IDCus', membership: newMembership, message: "Đang cập nhật VIP" })
-            })
+        
+        if (newMembership !== "" && newMembership !== currentMembership && userName !== "") {
+            fetch(`/User/setVIP?name=${userName}&membership=${newMembership}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     console.log("Đã nâng cấp lên VIP: " + newMembership);
+                    // Cập nhật giao diện ngay lập tức
+                    updateVIPInAdvance(newMembership);
+                }
+                else {
+                    alert('Lỗi khi nâng cấp VIP: ' + (data.message || "Không thể cập nhật VIP."));
+                    console.error('Lỗi khi nâng cấp VIP:', data.message || "Không thể cập nhật VIP.");
                 }
             })
-            .catch(error => { console.error('Lỗi khi nâng cấp VIP:', error); });
+            .catch(error => { alert('Lỗi khi nâng cấp VIP: ' + error.message); console.error('Lỗi khi nâng cấp VIP:', error); });
         }
     }
+    function updateVIPInAdvance(newMembership) {
+    // 1. Cập nhật Badge VIP
+    const membershipBadge = document.querySelector('.membership-level');
+    if (membershipBadge) {
+        membershipBadge.textContent = "VIP " + newMembership;
+        membershipBadge.classList.remove('membership-bronze', 'membership-silver', 'membership-gold');
+        if (newMembership === "Đồng") {
+            membershipBadge.classList.add('membership-bronze');
+        } else if (newMembership === "Bạc") {
+            membershipBadge.classList.add('membership-silver');
+        } else if (newMembership === "Vàng" || newMembership === "VIP Vàng") {
+            membershipBadge.classList.add('membership-gold');
+        }
+    }
+
+    // 2. Cập nhật phần trăm tiến độ VIP
+    const progressContainer = document.querySelector('.vip-progress-container');
+    if (progressContainer) {
+        //  dùng 'let' để dùng 'html +='
+        let html = `<div class="progress-info">
+                Tổng đơn: <strong>@Html.Raw(totalOrders.ToString("n0"))</strong> &middot; Đã chi: <strong>@Html.Raw(totalSpent.ToString("n0"))₫</strong>
+            </div>`;
+
+        if (newMembership === "Vàng" || newMembership === "VIP Vàng") {
+            html += ` <div class="progress-note" style="color: #10b981; font-weight: 600;">
+                <i class="fas fa-crown" style="color: #fbbf24;"></i> Chúc mừng! Bạn đã đạt mức VIP cao nhất.
+            </div>`;
+        }
+        else {
+            let className = "";
+            if (newMembership === "Đồng") {
+                className = "vip-progress-bar-inner-bronze";
+            }
+            else {
+                className = "vip-progress-bar-inner-silver";
+            }
+            
+            html += `<div class="vip-progress-bar-outer">
+                        <div class="${className}" style="width:${@Html.Raw(progressPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))}%"></div>
+                     </div>
+                     <div class="progress-note">
+                        Hoàn thành <strong>@Html.Raw(progressPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%</strong> để lên hạng VIP kế tiếp (@Html.Raw(muctoida.ToString("n0"))₫)
+                     </div>`;
+        }
+        progressContainer.innerHTML = html;
+    }
+}
     </script>
 }

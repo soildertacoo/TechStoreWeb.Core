@@ -38,6 +38,8 @@ namespace TechStore.Models
         public string MembershipLevel { get; set; }
         public Nullable<bool> IsBanned { get; set; }
         public string ReasonBanned { get; set; }
+        public DateTime? BannedUntil { get; set; }
+        public Nullable<int> FailedLoginAttempts { get; set; }
         public byte[] TwoFactorSecret { get; set; }
 
         public bool Is2FAEnabled { get; set; }
