@@ -180,7 +180,7 @@ internal class Program
         app.MapHealthChecks("/health");
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=GateKeeper}/{action=turnstileSafeGuard}/{id?}");
         app.Run();
     }
 }
