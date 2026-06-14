@@ -834,11 +834,47 @@
             transform: scale(1.5) !important;
         }
 
+    .shopee-banner {
+    margin: 20px 0;
+}
+
+.banner-left img,
+.banner-right img {
+    width: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.banner-left img {
+    height: 350px;
+}
+
+.banner-right img {
+    height: 170px;
+}
+
+.banner-right .top-banner {
+    margin-bottom: 10px;
+}
+
+.banner-left,
+.banner-right {
+    padding: 5px;
+}
+
+.banner-hover {
+    transition: all .3s ease;
+}
+
+.banner-hover:hover {
+    transform: scale(1.02);
+}
+
 </style>
 
 <main class="homepage-container">
     <!-- Hero Carousel Section -->
-    <section class="hero-section" aria-label="Bannières promotionnelles">
+   <!-- <section class="hero-section" aria-label="Bannières promotionnelles">
         <div class="hero-carousel"
              onmouseover="carouselController.pause()"
              onmouseout="carouselController.resume()">
@@ -864,10 +900,10 @@
                         Khám phá ngay
                     </a>
                 </div>
-            </div>
+            </div>-->
 
             <!-- Navigation Controls -->
-            <button class="carousel-nav carousel-prev"
+          <!--  <button class="carousel-nav carousel-prev"
                     onclick="carouselController.moveSlide(-1)"
                     aria-label="Image précédente">
                 <i class="fas fa-chevron-left"></i>
@@ -876,10 +912,10 @@
                     onclick="carouselController.moveSlide(1)"
                     aria-label="Image suivante">
                 <i class="fas fa-chevron-right"></i>
-            </button>
+            </button>-->
 
             <!-- Indicators -->
-            <div class="carousel-indicators" role="tablist" aria-label="Sélection de slide">
+          <!--  <div class="carousel-indicators" role="tablist" aria-label="Sélection de slide">
                 <button class="indicator active"
                         onclick="carouselController.goToSlide(0)"
                         aria-label="Aller au slide 1"></button>
@@ -891,7 +927,7 @@
                         aria-label="Aller au slide 3"></button>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Featured Products Section -->
     <!--<section class="section featured-section" aria-labelledby="featured-title">
@@ -1035,6 +1071,80 @@
             </article>
         </div>
     </section>-->
+
+    <section class="shopee-banner">
+
+    <div class="row">
+
+        <div class="col-md-8 banner-left">
+
+            <div id="mainBanner"
+                 class="carousel slide"
+                 data-bs-ride="carousel">
+
+                <<div class="carousel-inner">
+
+                @{
+                    bool first = true;
+                }
+
+        @foreach (var banner in Model.banners)
+        {
+            <div class="carousel-item @(first ? "active" : "")">
+
+                <a href="@banner.LinkUrl">
+
+                    <img src="~/Images/banner/@banner.ImageUrl"
+                         class="d-block w-100">
+
+                </a>
+
+            </div>
+
+            first = false;
+        }
+
+    </div>
+
+                <button class="carousel-control-prev"
+                        type="button"
+                        data-bs-target="#mainBanner"
+                        data-bs-slide="prev">
+
+                    <span class="carousel-control-prev-icon"></span>
+
+                </button>
+
+                <button class="carousel-control-next"
+                        type="button"
+                        data-bs-target="#mainBanner"
+                        data-bs-slide="next">
+
+                    <span class="carousel-control-next-icon"></span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 banner-right">
+
+            <div class="top-banner">
+                <img src="~/Images/banner/right1.jpg"
+                     class="banner-hover">
+            </div>
+
+            <div>
+                <img src="~/Images/banner/right2.jpg"
+                     class="banner-hover">
+            </div>
+
+        </div>
+
+    </div>
+
+    </section>
 
     <!-- All Products Section -->
     <section class="section" id="Products" aria-labelledby="Products-title">

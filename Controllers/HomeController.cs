@@ -29,6 +29,10 @@ namespace TechStore.Controllers
                 var proList = db.Products.ToList();
                 // Tính toán số lượng đã bán cho mỗi sản phẩm
                 var soldQuantities = new Dictionary<int, int>();
+                var banners = _context.Banners
+                      .Where(x => x.IsActive)
+                      .OrderBy(x => x.DisplayOrder)
+                      .ToList();
                 //Lấy điểm của sản phẩm và số lượng đánh giá 
                 // Query để lấy số lượng đã bán từ OrderDetailss
                 if(proList.Count > 0)
@@ -62,7 +66,8 @@ namespace TechStore.Controllers
                     {
                         products = proList,
                         soldQuantities = soldItems,
-                        scoreProducts = scoreProducts
+                        scoreProducts = scoreProducts,
+                        banners = banners
                     };
                     return View(indexpros);
                 }
