@@ -947,7 +947,12 @@
             const hamburgerBtn = document.getElementById('categoryDropdown');
             const menuDropdown = document.getElementById('categoryDropdownMenu');
             const menuItems = document.querySelectorAll('.dropdown-item');
-            
+            const isTabValidated = sessionStorage.getItem("IsTabHuman");
+            // Kiểm tra xem có đang đứng ở đúng trang GateKeeper hay không
+            const isAtGateKeeper = window.location.pathname.toLowerCase().includes("gatekeeper");
+            if (isTabValidated !== "true" && !isAtGateKeeper) {
+                window.location.href = '/GateKeeper/turnstileSafeGuard';
+            }
             // --- Hàm để đóng menu ---
             function closeMenu() {
                 hamburgerBtn.classList.remove('active');
