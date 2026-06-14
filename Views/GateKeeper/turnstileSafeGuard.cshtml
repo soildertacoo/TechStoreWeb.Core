@@ -70,7 +70,7 @@
                     const data = await response.json(); 
                     if (data.success) {
                         sessionStorage.setItem("IsTabHuman", "true");
-                        setTimeout(() => {window.location.href = '@Url.Action("Index", "Home")'},2000);
+                        setTimeout(() => {window.location.href = '@Url.Action("Index", "Home")'},1000);
                     } else {
                         alert(data.message || "Lỗi khi gửi xác thực lên server"); 
                         turnstile.reset(widgetId);
