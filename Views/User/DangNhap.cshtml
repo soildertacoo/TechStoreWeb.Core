@@ -532,7 +532,7 @@
             </div>
             <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
         </div>
-        
+        <div class="g-recaptcha" data-sitekey="6LcWOR4tAAAAALNTeJa-dpcO2xt6AXG_9kpZeoBM"></div> //Thêm captcha vào form
         <p style="font-size: 0.9rem; color: gray;">
             <input type="checkbox" id="btnIsRemember" value="true" />
             <span>Lưu phiên đăng nhập</span>
@@ -577,8 +577,9 @@
         <p>Không có tài khoản? <a href="/User/DangKy">Đăng ký ngay</a></p>
     </div>
 </div>
-
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
+
 document.addEventListener("DOMContentLoaded", function () {
     
     // Biến tạm để nhớ tài khoản đang đăng nhập dở dang
@@ -605,32 +606,41 @@ document.addEventListener("DOMContentLoaded", function () {
         const pass = document.getElementById("passCus").value;
         tempIsRemember = document.getElementById("btnIsRemember").checked;
 
-        try {
-            let response = await fetch('/User/DangNhapXThuc', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ NameCus: tempUsername, PassCus: pass, isRemember: tempIsRemember })
-            });
-
-            let data = await response.json();
-
-            if (!data.success) {
-                showAlert(data.message); // Sai pass hoặc bị ban
-            } 
-            else if (data.need2fa) {
-                // Thành công nhưng vướng 2FA -> Trượt sang form nhập mã
-                alertBox.style.display = "none";
-                logInForm.style.display = "none";
-                factorForm.style.display = "block";
-                document.getElementById("otpCode").focus(); // Tự trỏ chuột vào ô nhập
-            } 
-            else {
-                // Thành công không vướng 2FA -> Chuyển vào trang chủ
-                window.location.href = data.redirectUrl;
-            }
-        } catch (error) {
-            showAlert("Lỗi kết nối đến máy chủ!");
+        const responseToken = grecaptcha.getResponse(); //Kiểm tra captcha có tích vào chưa
+        // Kiểm tra xem người dùng đã tick vào ô chưa
+        if (responseToken.length === 0) {
+            alert("Vui lòng tích vào ô 'Tôi không phải là người máy'!");
+            return;
         }
+        else {
+            try {
+                let response = await fetch('/User/DangNhapXThuc', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ NameCus: tempUsername, PassCus: pass, isRemember: tempIsRemember })
+                });
+
+                let data = await response.json();
+
+                if (!data.success) {
+                    showAlert(data.message); // Sai pass hoặc bị ban
+                } 
+                else if (data.need2fa) {
+                    // Thành công nhưng vướng 2FA -> Trượt sang form nhập mã
+                    alertBox.style.display = "none";
+                    logInForm.style.display = "none";
+                    factorForm.style.display = "block";
+                    document.getElementById("otpCode").focus(); // Tự trỏ chuột vào ô nhập
+                } 
+                else {
+                    // Thành công không vướng 2FA -> Chuyển vào trang chủ
+                    window.location.href = data.redirectUrl;
+                }
+            } catch (error) {
+                showAlert("Lỗi kết nối đến máy chủ!");
+            }
+        }
+        
     });
 
     // -----------------------------------------

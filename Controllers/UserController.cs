@@ -257,6 +257,10 @@ namespace TechStore.Controllers
         [HttpGet]
         public ActionResult DangNhap()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index","Home");
+            }
             return View();
         }
         public class LoginRequest 
@@ -499,6 +503,10 @@ namespace TechStore.Controllers
         [HttpGet]
         public ActionResult ResetPassword()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index","Home");
+            }
             return View(); //Hiện view để đặt lại mật khẩu
         }
         [HttpPost]
