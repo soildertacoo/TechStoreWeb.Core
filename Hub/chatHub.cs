@@ -32,7 +32,7 @@ namespace TechStoreWeb.Core.Hub
 
             if (room != "Room_AI_Support")
             {
-                var history = await _context.ChatMessage
+                var history = await _context.ChatMessages
                     .Where(m => m.RoomId == room)
                     .OrderBy(m => m.SentAt)
                     .Take(50)
@@ -51,7 +51,7 @@ namespace TechStoreWeb.Core.Hub
     // LƯU TIN NHẮN VÀO SQL SERVER
     if (room != "Room_AI_Support")
     {
-        bool isSupport = sender == "admin" || sender == "Chăm sóc khách hàng";
+        bool isSupport = sender == "Admin" || sender == "Chăm sóc khách hàng";
         
         // 1. Khai báo biến lưu ID
         int? idCus = null;
@@ -60,8 +60,8 @@ namespace TechStoreWeb.Core.Hub
         // 2. Tìm ID tương ứng trong Database
         if (isSupport)
         {
-            var AdminUsers = await _context.AdminUsers.FirstOrDefaultAsync(a => a.NameUser == sender);
-            if (AdminUsers != null) idAdmin = AdminUsers.ID;
+            var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(a => a.NameUser == sender);
+            if (adminUser != null) idAdmin = adminUser.ID;
         }
         else
         {
@@ -69,7 +69,7 @@ namespace TechStoreWeb.Core.Hub
             if (cusUser != null) idCus = cusUser.IDCus;
         }
 
-        // 3. Lưu kèm ID vào bảng ChatMessage
+        // 3. Lưu kèm ID vào bảng ChatMessages
         var newMsg = new ChatMessage
         {
             RoomId = room, 
@@ -80,7 +80,7 @@ namespace TechStoreWeb.Core.Hub
             AdminID = idAdmin    // <--- Đã có ID Admin
         };
 
-        _context.ChatMessage.Add(newMsg);
+        _context.ChatMessages.Add(newMsg);
         await _context.SaveChangesAsync();
     }
 

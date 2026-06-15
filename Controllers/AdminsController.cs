@@ -439,7 +439,7 @@ namespace TechStore.Controllers
                 // Update the request description to include status
                 request.Status = Status;
                 request.Description = statusMessage ;
-                dBO.Entry(request).State = Microsoft.EntityFrameworkCore.EntityState.Modified;                 
+                dBO.Entry(request).State = Microsoft.EntityFrameworkCore.EntityState.Modified;                
                 dBO.SaveChanges();
 
                 return Json(new { 
@@ -495,11 +495,12 @@ namespace TechStore.Controllers
 
             try
             {
-                // Tìm toàn bộ tin nhắn của phòng chat này
-                var messages = _context.ChatMessage.Where(m => m.RoomId == roomName).ToList();
+                // Sửa thành ChatMessages (có s)
+                var messages = _context.ChatMessages.Where(m => m.RoomId == roomName).ToList();
                 if (messages.Any())
                 {
-                    _context.ChatMessage.RemoveRange(messages);
+                    // Sửa thành ChatMessages (có s)
+                    _context.ChatMessages.RemoveRange(messages);
                     _context.SaveChanges();
                 }
 
@@ -525,13 +526,15 @@ namespace TechStore.Controllers
 
             try
             {
-                var rooms = _context.ChatMessage.Select(m => m.RoomId).Distinct().ToList();
+                // Sửa thành ChatMessages (có s)
+                var rooms = _context.ChatMessages.Select(m => m.RoomId).Distinct().ToList();
                 var result = new List<object>();
 
                 foreach (var room in rooms)
                 {
                     // Lấy tin nhắn mới nhất của phòng này
-                    var lastMsg = _context.ChatMessage
+                    // Sửa thành ChatMessages (có s)
+                    var lastMsg = _context.ChatMessages
                         .Where(m => m.RoomId == room)
                         .OrderByDescending(m => m.SentAt)
                         .FirstOrDefault();
@@ -558,6 +561,5 @@ namespace TechStore.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-    }
-    
+    }   
 }

@@ -5,37 +5,57 @@ namespace TechStore.Models
 {
     public class ApplicationDbContext : DbContext
     {
-    
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
     : base(options)
         {
         }
-        //Khi tạo một class mới và muốn nhập vào DB thì phải đăng ký vào trong DbContext này 
+        
+        // 1. Tên class là AdminUsers (chuẩn theo file của bạn), tên biến DbSet cũng là AdminUsers (để ChatHub gọi được)
         public virtual DbSet<AdminUsers> AdminUsers { get; set; }
+        
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<OrderDetails> OrderDetails { get; set; }
         public virtual DbSet<ShippingProvider> ShippingProvider { get; set; }
-
         public virtual DbSet<OrderPro> OrderPro { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<Review> Reviews { get; set; }
-        public virtual DbSet<ChatMessage> ChatMessage { get; set; }
+        
+        // 2. Tên biến ChatMessages có "s" để ChatHub không báo lỗi
+        public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+        
         public virtual DbSet<CartItem> CartItems {get; set;}
         public virtual DbSet<Inventory> Inventories { get; set; }
         public virtual DbSet<Banner> Banners { get; set; }
         public virtual DbSet<Promotion> Promotions { get; set; }
         public virtual DbSet<OTPModel> OTPModels { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            
             modelBuilder.Entity<Products>()
-            .HasOne(p => p.Category1) // (Tên thuộc tính Navigation trong bảng Product)
-            .WithMany(c => c.Products) // (Tên danh sách Products trong bảng Category)
-            .HasForeignKey(p => p.Category) // Cột Khóa ngoại bên bảng Product
-            .HasPrincipalKey(c => c.IDCate); //Bắt buộc cột ko phải khóa chính phải là unique nếu muốn trỏ vào
+                .HasOne(p => p.Category1) 
+                .WithMany(c => c.Products) 
+                .HasForeignKey(p => p.Category) 
+                .HasPrincipalKey(c => c.IDCate); 
+                
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(c => c.Customer)
+                .WithMany() 
+                .HasForeignKey(c => c.IDCus)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // 3. Sử dụng đúng class AdminUsers (CÓ CHỮ S) để tạo khóa ngoại
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(a => a.AdminUser)
+                .WithMany()
+                .HasForeignKey(a => a.AdminID)
+                .OnDelete(DeleteBehavior.SetNull);
+                
+            // 4. Báo cho hệ thống biết class AdminUsers sẽ map với bảng tên "AdminUser" trong SQL
+            modelBuilder.Entity<AdminUsers>()
+                .ToTable("AdminUsers"); 
         }
     }
 }

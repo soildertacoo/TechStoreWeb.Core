@@ -16,7 +16,7 @@ namespace TechStore.Models
 
         public int? AdminID { get; set; } 
         [ForeignKey("AdminID")]
-        public virtual AdminUsers? AdminUsers { get; set; }
+        public virtual AdminUsers? AdminUser { get; set; }
 
         [Required]
         [MaxLength(100)]
