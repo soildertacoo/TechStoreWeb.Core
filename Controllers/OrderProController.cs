@@ -172,7 +172,14 @@ namespace TechStore.Controllers
             var item = db.OrderPro.FirstOrDefault(s => s.TrackingNumber == data.id);
             if (item != null)
             {
-                if ( item.Status != "Đã giao") 
+                if ( item.Status.Trim() != "Đã giao") 
+                {
+                    item.Status ="Hủy đơn";
+                    db.Entry(item).State = EntityState.Modified;
+                    await db.SaveChangesAsync();
+                    return Json(new { success = true });
+                }
+                else if ( item.Status.Trim() != "Đang xử lý")
                 {
                     item.Status ="Hủy đơn";
                     db.Entry(item).State = EntityState.Modified;
