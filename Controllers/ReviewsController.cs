@@ -126,7 +126,7 @@ namespace TechStore.Controllers
                     review.IsHidden = false;
                     db.Entry(review).State = EntityState.Modified;
                     db.SaveChanges();
-                    return Json(new { success = true });  
+                    return Json(new { success = true });
                 }
                 else
                 {
@@ -135,7 +135,78 @@ namespace TechStore.Controllers
             }
             return Json(new { success = false }); // Đã bỏ phần Redirect không cần thiết phía sau
         }
-        
         // Đã xóa hàm Dispose()
+        // =========================================================
+/// =========================================================
+        // =========================================================
+        // PHẦN API DÀNH CHO KHÁCH HÀNG (SỬA / XÓA REVIEW CỦA CHÍNH HỌ)
+        // =========================================================
+
+        [HttpPost]
+        public ActionResult EditReview([FromBody] EditReviewRequest req)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated) 
+                return Json(new { success = false, message = "Vui lòng đăng nhập!" });
+
+            string currentUserName = User.Identity.Name;
+            var customer = db.Customers.FirstOrDefault(c => c.NameCus == currentUserName);
+            if (customer == null) 
+                return Json(new { success = false, message = "Lỗi xác thực người dùng!" });
+
+            var review = db.Reviews.FirstOrDefault(r => r.ReviewID == req.reviewId && r.CustomerID == customer.IDCus);
+            if (review == null) 
+                return Json(new { success = false, message = "Không tìm thấy hoặc bạn không có quyền sửa đánh giá này!" });
+
+            review.Rating = req.score;
+            review.ReviewContent = req.content;
+            review.ReviewDate = System.DateTime.Now; // Cập nhật lại ngày giờ sửa
+
+            db.Entry(review).State = EntityState.Modified;
+            db.SaveChanges();
+            return Json(new { success = true, message = "Cập nhật đánh giá thành công!" });
+        }
+
+        [HttpPost]
+        public ActionResult DeleteCustomerReview([FromBody] DeleteReviewRequest req)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated) 
+                return Json(new { success = false, message = "Vui lòng đăng nhập!" });
+
+            string currentUserName = User.Identity.Name;
+            var customer = db.Customers.FirstOrDefault(c => c.NameCus == currentUserName);
+            if (customer == null) 
+                return Json(new { success = false, message = "Lỗi xác thực người dùng!" });
+
+            var review = db.Reviews.FirstOrDefault(r => r.ReviewID == req.reviewId && r.CustomerID == customer.IDCus);
+            if (review == null) 
+                return Json(new { success = false, message = "Không tìm thấy hoặc bạn không có quyền xóa đánh giá này!" });
+
+            db.Reviews.Remove(review);
+            db.SaveChanges();
+            return Json(new { success = true, message = "Đã xóa đánh giá thành công!" });
+        }
+
+        // =========================================================
+        // 2 CLASS PHỤ TRỢ (ĐỪNG XÓA MẤT 2 BẠN NÀY NHÉ)
+        // =========================================================
+        public class EditReviewRequest 
+        { 
+            public int reviewId { get; set; } 
+            public int score { get; set; } 
+            public string content { get; set; } 
+            public int proID { get; set; } 
+        }
+
+        public class DeleteReviewRequest
+        {
+            public int reviewId { get; set; }
+        }
+         // Đã xóa hàm Dispose()
+       
+
+       
+
+    
     }
 }
+    
