@@ -166,13 +166,13 @@ else
     </style>
 
     <div class="container-fluid">
-        <nav class="breadcrumb-modern container" data-aos="fade-down">
+        @* <nav class="breadcrumb-modern container" data-aos="fade-down">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
                 <li class="breadcrumb-item"><a href="@Url.Action("Index", "CustomerPro")">Sản phẩm</a></li>
                 <li class="breadcrumb-item active">@Model.Products.NamePro</li>
             </ol>
-        </nav>
+        </nav> *@
 
         <div class="Products-detail">
             @using (Html.BeginForm("AddToShowCart", "Cart", FormMethod.Post))

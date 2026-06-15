@@ -48,15 +48,61 @@
                 </div>
             </div>
 
-            @using (Html.BeginForm("Delete", "OrderPro", FormMethod.Post, new { @class = "text-center" }))
-            {
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.ID" />
+            <div class="text-center">
                 <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                    <input type="submit" value="Xác nhận hủy đơn hàng" class="btn btn-danger btn-lg px-4" />
+                    <button type="button" onclick="cancelOrder('@Model.TrackingNumber')" class="btn btn-danger btn-lg px-4" id="btnCancelOrder">
+                        <i class="fas fa-times-circle me-2"></i> Xác nhận hủy đơn hàng
+                    </button>
                     @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary btn-lg px-4 ms-md-2" })
                 </div>
-            }
+            </div>
+            
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function cancelOrder(trackingNumber) {
+            // Kiểm tra xem đơn hàng có mã vận đơn không để tránh lỗi
+            if (!trackingNumber) {
+                alert("Đơn hàng này không có mã vận đơn (Tracking Number) để hủy!");
+                return;
+            }
+
+            // Đổi text nút thành "Đang xử lý..." để chống click liên tục
+            const btn = document.getElementById('btnCancelOrder');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang xử lý...';
+            btn.disabled = true;
+
+            // Gọi API bằng Fetch
+            fetch('/OrderPro/Delete_KH', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: trackingNumber }) // Truyền TrackingNumber vào thuộc tính id của JSONOrder
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Hủy đơn hàng thành công!");
+                    // Chuyển hướng về trang danh sách đơn hàng
+                    window.location.href = '/OrderPro/Index'; 
+                } else {
+                    alert("Lỗi: " + data.message);
+                    // Phục hồi lại nút nếu có lỗi
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Đã xảy ra lỗi hệ thống khi hủy đơn hàng.");
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        }
+    </script>
+}

@@ -55,7 +55,7 @@ namespace TechStoreWeb.Core.ShippingServices{
                     Price = detail.Subtotal
                 }).ToList()
             };
-
+        try {
             //Thêm header Token vào 
             _httpClient.DefaultRequestHeaders.Add("token",provider?.ApiToken);
             // Gọi API tạo đơn hàng, tra json ve
@@ -67,7 +67,11 @@ namespace TechStoreWeb.Core.ShippingServices{
                 // Trả về mã vận đơn (Tracking code)
                 return result.Data.OrderCode; 
             }
-
+        }
+        catch
+            {
+                return "Lỗi khi gửi yêu cầu tạo đơn hàng";
+            }
             return "";
         }
     }
