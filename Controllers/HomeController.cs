@@ -164,19 +164,96 @@ namespace TechStore.Controllers
             }
         }
 
+        // [HttpGet]
+        // public ActionResult CatergoryPartial(String catergory)
+        // {
+        //         var cate = dbO.Category.Where(s => s.NameCate == catergory).FirstOrDefault();
+        //         if (cate != null)
+        //         {
+        //             var pro = dbO.Products.Where(p => p.Category == cate.IDCate).ToList();
+        //             if (pro.Count() < 1)  return View(new List<Products>()); 
+        //             return View(pro);
+        //         }
+        //         return View(new List<Products>());       
+        // }
+
         [HttpGet]
-        public ActionResult CatergoryPartial(String catergory)
+        public ActionResult CatergoryPartial(string catergory, decimal? minPrice, decimal? maxPrice, string sortOrder, int? rating)
         {
-                var cate = dbO.Category.Where(s => s.NameCate == catergory).FirstOrDefault();
-                if (cate != null)
+            var cate = dbO.Category.FirstOrDefault(s => s.NameCate == catergory);
+            if (cate != null)
+            {
+                var proQuery = dbO.Products.Where(p => p.Category == cate.IDCate).AsQueryable();
+
+                // 1. TÍNH TOÁN ĐIỂM ĐÁNH GIÁ
+                var scoreProducts = dbO.Reviews.Join(
+                    dbO.Products, rv => rv.ProductID, 
+                    pro => pro.ProductID,
+                    (rv, pro) => new { pro.ProductID, rv.Rating }
+                ).GroupBy(x => x.ProductID)
+                .Select(x => new
                 {
-                    var pro = dbO.Products.Where(p => p.Category == cate.IDCate).ToList();
-                    if (pro.Count() < 1)  return View(new List<Products>()); 
-                    return View(pro);
+                    ProductID = x.Key,
+                    midScores = x.Average(item => item.Rating),
+                    numberReviews = x.Count()
+                }).ToDictionary(x => x.ProductID, x => (x.midScores, x.numberReviews));
+
+                // 2. TÍNH TOÁN SỐ LƯỢNG ĐÃ BÁN
+                var soldItems = dbO.OrderDetails
+                    .Join(dbO.OrderPro, 
+                        od => od.IDOrder, 
+                        op => op.ID,
+                        (od, op) => new { od.IDProduct, od.Quantity })
+                    .GroupBy(x => x.IDProduct)
+                    .Select(g => new { 
+                        ProductID = g.Key, 
+                        TotalSold = g.Sum(x => x.Quantity) 
+                    }).Where(x => x.ProductID > 0)
+                    .ToDictionary(x => x.ProductID, x => x.TotalSold);
+
+               
+                // 4. BỘ LỌC GIÁ VÀ SẮP XẾP
+                if (minPrice.HasValue) proQuery = proQuery.Where(p => p.Price >= minPrice.Value);
+                if (maxPrice.HasValue) proQuery = proQuery.Where(p => p.Price <= maxPrice.Value);
+
+                switch (sortOrder)
+                {
+                    case "price_asc": proQuery = proQuery.OrderBy(p => p.Price); break;
+                    case "price_desc": proQuery = proQuery.OrderByDescending(p => p.Price); break;
+                    case "name_asc": proQuery = proQuery.OrderBy(p => p.NamePro); break;
+                    case "name_desc": proQuery = proQuery.OrderByDescending(p => p.NamePro); break;
+                    default: proQuery = proQuery.OrderByDescending(p => p.ProductID); break;
                 }
-                return View(new List<Products>());       
+
+                var proList = proQuery.ToList();
+
+                // 5. LỌC THEO ĐÁNH GIÁ
+                if (rating.HasValue)
+                {
+                    proList = proList.Where(p => scoreProducts.ContainsKey(p.ProductID) && scoreProducts[p.ProductID].midScores >= rating.Value).ToList();
+                }
+
+                // Vẫn giữ ViewBag cho các tham số form (giữ trạng thái khi người dùng bấm Lọc)
+                ViewBag.CurrentCategory = catergory;
+                ViewBag.CurrentSort = sortOrder;
+                ViewBag.MinPrice = minPrice;
+                ViewBag.MaxPrice = maxPrice;
+                ViewBag.CurrentRating = rating;
+
+                // ĐÓNG GÓI CHUẨN VÀO VIEWMODEL (TUYỆT ĐỐI KHÔNG DÙNG VIEWBAG ĐỂ CHỨA DICTIONARY)
+                var indexpros = new indexProducts // Đảm bảo class này có sẵn trong Models
+                {
+                    products = proList,
+                    soldQuantities = soldItems,
+                    scoreProducts = scoreProducts,
+                };
+
+                return View(indexpros);
             }
-      
+            
+            // Nếu không tìm thấy danh mục, trả về ViewModel rỗng
+            return View(new indexProducts { products = new List<Products>() });       
+        }
         [HttpGet]
         public JsonResult GetWishlist()
         {

@@ -1,4 +1,4 @@
-﻿@model TechStore.Models.indexProducts 
+﻿@model IEnumerable<TechStore.Models.Products>
 @{
     ViewBag.Title = "Kết quả tìm kiếm";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -24,21 +24,7 @@
         padding: 0 20px;
     }
 
-    .filter-section {
-        background: var(--bg-white);
-        border: 1px solid var(--border-light);
-        border-radius: var(--border-radius);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-    .filter-section select, .filter-section input {
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-    }
-    .filter-section select:focus, .filter-section input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-    }
-
+    /* ÉP CỨNG 4 CỘT: Dù có 1 hay 10 sản phẩm cũng không bị giãn to */
     .Products-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr); 
@@ -73,6 +59,7 @@
         background: var(--bg-light);
     }
 
+    /* TRẢ LẠI COVER: Ảnh tràn viền chuẩn xịn như Index */
     .Products-image {
         width: 100%;
         height: 100%;
@@ -113,6 +100,7 @@
         box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
     }
 
+    /* NÚT TIM Y HỆT INDEX */
     .wishlist-btn {
         position: absolute; bottom: 15px; right: 15px;
         background: rgba(255, 255, 255, 0.95); border: none;
@@ -148,18 +136,18 @@
     }
     .price-original { font-size: 1rem; color: var(--text-muted); text-decoration: line-through; font-weight: 500; }
 
-    .Products-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .Products-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .star { font-size: 14px; color: #ddd; }
     .star.filled { color: #ffd700; }
     .rating-value { font-size: 0.875rem; color: var(--text-muted); font-weight: 600; }
     .rating-count { font-size: 0.8rem; color: var(--text-muted); }
-    .sold-count { font-size: 0.85rem; font-weight: 600; color: #4facfe; background: #e0f7fa; padding: 2px 8px; border-radius: 12px; }
 
     .alert-enhanced {
         background: #fef2f2; color: #b91c1c; padding: 15px 20px; border-radius: 10px;
         margin: 0 auto 25px; border: 1px solid #fecaca; max-width: 600px; text-align: center;
     }
 
+    /* RESPONSIVE HẠ CỘT XUỐNG DẦN */
     @@media (max-width: 1024px) { .Products-grid { grid-template-columns: repeat(3, 1fr); } }
     @@media (max-width: 768px) { .Products-grid { grid-template-columns: repeat(2, 1fr); } }
     @@media (max-width: 480px) { .Products-grid { grid-template-columns: 1fr; } }
@@ -177,81 +165,17 @@
 <main class="homepage-container" style="padding-top: 120px;">
     <h2 class="section-title text-center mb-5" style="font-size: 2.2rem;">KẾT QUẢ TÌM KIẾM</h2>
     
-    <div class="filter-section mb-5 p-4">
-        <form method="get" action="@Url.Action("CatergoryPartial")" class="row g-3 align-items-end">
-            <input type="hidden" name="catergory" value="@ViewBag.CurrentCategory" />
-
-            <div class="col-md-4">
-                <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.9rem;">Khoảng giá (VNĐ)</label>
-                <div class="input-group">
-                    <input type="number" name="minPrice" class="form-control form-control-sm" placeholder="Tối thiểu..." value="@ViewBag.MinPrice" min="0">
-                    <span class="input-group-text bg-light border-start-0 border-end-0">-</span>
-                    <input type="number" name="maxPrice" class="form-control form-control-sm" placeholder="Tối đa..." value="@ViewBag.MaxPrice" min="0">
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.9rem;">Đánh giá</label>
-                <select name="rating" class="form-select form-select-sm" style="height: 38px;">
-                    <option value="">Tất cả đánh giá</option>
-                    <option value="5" selected="@(ViewBag.CurrentRating == 5 ? "selected" : null)">Từ 5 sao</option>
-                    <option value="4" selected="@(ViewBag.CurrentRating == 4 ? "selected" : null)">Từ 4 sao trở lên</option>
-                    <option value="3" selected="@(ViewBag.CurrentRating == 3 ? "selected" : null)">Từ 3 sao trở lên</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.9rem;">Sắp xếp theo</label>
-                <select name="sortOrder" class="form-select form-select-sm" style="height: 38px;">
-                    <option value="">Mặc định</option>
-                    <option value="price_asc" selected="@(ViewBag.CurrentSort == "price_asc" ? "selected" : null)">Giá: Thấp đến Cao</option>
-                    <option value="price_desc" selected="@(ViewBag.CurrentSort == "price_desc" ? "selected" : null)">Giá: Cao xuống Thấp</option>
-                    <option value="name_asc" selected="@(ViewBag.CurrentSort == "name_asc" ? "selected" : null)">Tên: A - Z</option>
-                    <option value="name_desc" selected="@(ViewBag.CurrentSort == "name_desc" ? "selected" : null)">Tên: Z - A</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <button type="submit" class="btn w-100 fw-bold text-white shadow-sm" style="background: var(--primary-gradient); border: none; height: 38px;">
-                    <i class="fas fa-filter me-2"></i> Lọc
-                </button>
-            </div>
-        </form>
-    </div>
-
     @if (ViewBag.Loi != null)
     {
         <div class="alert alert-enhanced">
             <i class="fas fa-info-circle"></i> @ViewBag.Loi
         </div>
     }
-    else if (Model == null || Model.products == null || !Model.products.Any())
-    {
-        <div class="alert alert-enhanced">
-            <i class="fas fa-box-open"></i> Hiện tại chưa có sản phẩm nào thuộc danh mục này!
-        </div>
-    }
     else
     {
         <div class="Products-grid">
-            @foreach (var item in Model.products)
+            @foreach (var item in Model)
             {
-                // BÓC TÁCH ĐIỂM TRỰC TIẾP TỪ MODEL (Không dùng ViewBag)
-                decimal avgScore = 0;
-                int numReviews = 0;
-                if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
-                {
-                    avgScore = Model.scoreProducts[item.ProductID].midScores;
-                    numReviews = Model.scoreProducts[item.ProductID].numberReviews;
-                }
-
-                // BÓC TÁCH SỐ LƯỢNG BÁN TRỰC TIẾP TỪ MODEL (Không dùng ViewBag)
-                int? soldCount = 0;
-                if (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID))
-                {
-                    soldCount = Model.soldQuantities[item.ProductID];
-                }
-
                 <article class="Products-card" onclick="window.location.href='@Url.Action("Details", "CustomerPro", new { id = item.ProductID })'">
                     
                     <div class="Products-image-wrapper">
@@ -277,15 +201,10 @@
 
                         <div class="Products-rating">
                             <div class="rating-stars">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <span class="star @(i <= Math.Round(avgScore, MidpointRounding.AwayFromZero) ? "filled" : "")">★</span>
-                                }
+                                <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
                             </div>
-                            <span class="rating-value">@(avgScore > 0 ? avgScore.ToString("0.1") : "0")</span>
-                            <span class="rating-count">(@numReviews đánh giá)</span>
-                            
-                            <span class="sold-count ms-auto">Đã bán @soldCount</span>
+                            <span class="rating-value">5.0</span>
+                            <span class="rating-count">(127 đánh giá)</span>
                         </div>
 
                         <div class="price-container">
