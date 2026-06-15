@@ -7,7 +7,7 @@
     <p>Xác thực Captcha Cloudflare để xem có phải bot hay không</p>
     <div id="turnstile-container"></div>
     <br/>
-    <button type="submit">Gửi thông tin</button>
+    @* <button type="submit">Gửi thông tin</button> *@
 </form>
 <!-- Đưa hàm onloadTurnstileCallback vào tham số URL để Cloudflare tự động gọi khi tải xong -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" defer></script>
@@ -23,12 +23,13 @@
             sitekey: "0x4AAAAAADkFbpck2PQT5u7J",
             callback: function (token) {
                 // Khi người dùng vượt qua captcha
-                isCaptchaSolved = true;
+                @* isCaptchaSolved = true; *@
                 console.log("Xác thực thành công!");
+                redirectPage();
             },
             'expired-callback': function () {
                 // Khi captcha để quá lâu bị hết hạn
-                isCaptchaSolved = false;
+                @* isCaptchaSolved = false; *@
                 console.log("Xác thực đã hết hạn Cloudflare");
                 
                 // Bạn có thể tự động reset thay vì ép họ F5 lại trang
@@ -38,9 +39,7 @@
             }
         });
     };
-
-    // 3. Xử lý khi bấm nút Submit Form
-    document.getElementById("myForm").addEventListener("submit", async function (event) {
+    async function redirectPage () {
         event.preventDefault(); // Chặn gửi form
         // Kiểm tra xem widgetId đã được tạo chưa và trạng thái có bị hết hạn ngay lúc bấm hay không
         if (widgetId !== undefined && turnstile.isExpired(widgetId)) {
@@ -50,44 +49,39 @@
         }
 
         // Kiểm tra xem đã giải captcha chưa
-        if (!isCaptchaSolved) {
-            alert("Bạn vui lòng tích chọn xác thực Cloudflare trước khi gửi!");
-        }
-        else {
-            try {
-                const responseToken = turnstile.getResponse(widgetId);                
-                if (responseToken === "" || responseToken == undefined || responseToken == null) {
-                    throw new Error();
-                }
-                const response = await fetch("/GateKeeper/SubmitEndpoint", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: responseToken })
-                });
-
-                if (response.ok) {
-                    // SỬA LỖI: Cần thêm chữ await trước response.json()
-                    const data = await response.json(); 
-                    if (data.success) {
-                        sessionStorage.setItem("IsTabHuman", "true");
-                        setTimeout(() => {window.location.href = '@Url.Action("Index", "Home")'},1000);
-                    } else {
-                        alert(data.message || "Lỗi khi gửi xác thực lên server"); 
-                        turnstile.reset(widgetId);
-
-                    }
-                } else {
-                    alert("Captcha gửi về ko hợp lệ, reset lại form!");
-                    turnstile.reset(widgetId);
-                }
-            } catch (error) {
-                console.log(error);
-                if (window.confirm("Lỗi mạng không thể kết nối!, nhấn ok để reload trang lại")) {
-                    window.location.reload();
-                }
+       
+        try {
+            const responseToken = turnstile.getResponse(widgetId);                
+            if (responseToken === "" || responseToken == undefined || responseToken == null) {
+                throw new Error();
             }
-    }
-        
+            const response = await fetch("/GateKeeper/SubmitEndpoint", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: responseToken })
+            });
 
-    });
+            if (response.ok) {
+                // SỬA LỖI: Cần thêm chữ await trước response.json()
+                const data = await response.json(); 
+                if (data.success) {
+                    sessionStorage.setItem("IsTabHuman", "true");
+                    setTimeout(() => {window.location.href = '@Url.Action("Index", "Home")'},1000);
+                } else {
+                    alert(data.message || "Lỗi khi gửi xác thực lên server"); 
+                    turnstile.reset(widgetId);
+
+                }
+            } else {
+                alert("Captcha gửi về ko hợp lệ, reset lại form!");
+                turnstile.reset(widgetId);
+            }
+        } catch (error) {
+            console.log(error);
+            if (window.confirm("Lỗi mạng không thể kết nối!, nhấn ok để reload trang lại")) {
+                window.location.reload();
+            }
+        }
+
+    }
 </script>
