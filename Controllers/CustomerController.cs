@@ -237,14 +237,14 @@ namespace TechStore.Controllers
                             //Nếu file có tên là (1),(2)
                             string fileNameOnly = Path.GetFileNameWithoutExtension(baseFilename); 
                             string extension = Path.GetExtension(data.imageURL.FileName);
-                            if (checkDuplicateImages(path, data.imageURL)) {isDuplicate = true; break;}
+                            // if (checkDuplicateImages(path, data.imageURL)) {isDuplicate = true; break;}
                             //Cập nhật filename mới
                             //Tăng số lên đuôi file nếu có file trùng lặp vaf ko trùng lặp về hash
                             Console.WriteLine("Đã phát hiện file trùng lặp có tên là" + Path.GetFileName(path));
                             path = Path.Combine(_env.WebRootPath, "Images", $"{fileNameOnly}({++count}){extension}");
                         }
-                        if (isDuplicate) return Json(new { success = false, message = "File đã tồn tại trên server và có nội dung giống nhau. Vui lòng đổi tên file hoặc chọn file khác." });
-                        else using (var stream = new FileStream(path, FileMode.Create))
+                        // if (isDuplicate) return Json(new { success = false, message = "File đã tồn tại trên server và có nội dung giống nhau. Vui lòng đổi tên file hoặc chọn file khác." });
+                        using (var stream = new FileStream(path, FileMode.Create))
                         {
                             await data.imageURL.CopyToAsync(stream);
                         }

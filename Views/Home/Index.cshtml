@@ -874,7 +874,7 @@
 
 <main class="homepage-container">
     <!-- Hero Carousel Section -->
-   <!-- <section class="hero-section" aria-label="Bannières promotionnelles">
+   <section class="hero-section" aria-label="Bannières promotionnelles">
         <div class="hero-carousel"
              onmouseover="carouselController.pause()"
              onmouseout="carouselController.resume()">
@@ -900,10 +900,10 @@
                         Khám phá ngay
                     </a>
                 </div>
-            </div>-->
+            </div>
 
             <!-- Navigation Controls -->
-          <!--  <button class="carousel-nav carousel-prev"
+          <button class="carousel-nav carousel-prev"
                     onclick="carouselController.moveSlide(-1)"
                     aria-label="Image précédente">
                 <i class="fas fa-chevron-left"></i>
@@ -912,10 +912,10 @@
                     onclick="carouselController.moveSlide(1)"
                     aria-label="Image suivante">
                 <i class="fas fa-chevron-right"></i>
-            </button>-->
+            </button>
 
             <!-- Indicators -->
-          <!--  <div class="carousel-indicators" role="tablist" aria-label="Sélection de slide">
+          <div class="carousel-indicators" role="tablist" aria-label="Sélection de slide">
                 <button class="indicator active"
                         onclick="carouselController.goToSlide(0)"
                         aria-label="Aller au slide 1"></button>
@@ -927,25 +927,25 @@
                         aria-label="Aller au slide 3"></button>
             </div>
         </div>
-    </section> -->
+    </section> 
 
     <!-- Featured Products Section -->
-    <!--<section class="section featured-section" aria-labelledby="featured-title">
+    <section class="section featured-section" aria-labelledby="featured-title">
         <div class="section-header">
             <span class="section-badge">Nổi bật</span>
             <h2 id="featured-title" class="section-title">🌟 Sản phẩm nổi bật</h2>
-            <p class="section-subtitle">Những sản phẩm được yêu thích nhất từ khách hàng</p>
+            <p class="section-subtitle">Những sản phẩm bán chạy nhất của shop chúng tôi</p>
         </div>
 
         <div class="Products-grid featured-grid">
-            <article class="Products-card featured-card"
+            @* <article class="Products-card featured-card"
                      onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = 1 })')"
                      tabindex="0"
                      role="button"
                      onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
-                <div class="Products-image-wrapper">-->
+                <div class="Products-image-wrapper">
                     <!-- Nút Yêu Thích -->
-                    <!--<button class="favorite-btn"
+                    <button class="favorite-btn"
                             onclick="event.stopPropagation(); toggleFavorite(1, this)"
                             aria-label="Thêm vào yêu thích">
                         <i class="fas fa-heart heart-icon"></i>
@@ -960,9 +960,9 @@
                         </span>
                     </div>
                 </div>
-                <div class="Products-info">-->
+                <div class="Products-info">
                     <!-- Đánh giá sao -->
-                    <!--<div class="Products-rating">
+                    <div class="Products-rating">
                         <div class="stars-container" data-rating="4.8">
                             <i class="fas fa-star star filled"></i>
                             <i class="fas fa-star star filled"></i>
@@ -987,9 +987,9 @@
                      tabindex="0"
                      role="button"
                      onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
-                <div class="Products-image-wrapper">-->
+                <div class="Products-image-wrapper">
                     <!-- Nút Yêu Thích -->
-                    <!--<button class="favorite-btn"
+                    <button class="favorite-btn"
                             onclick="event.stopPropagation(); toggleFavorite(1, this)"
                             aria-label="Thêm vào yêu thích">
                         <i class="fas fa-heart heart-icon"></i>
@@ -1004,9 +1004,9 @@
                         </span>
                     </div>
                 </div>
-                <div class="Products-info">-->
+                <div class="Products-info">
                     <!-- Đánh giá sao -->
-                    <!--<div class="Products-rating">
+                    <div class="Products-rating">
                         <div class="stars-container" data-rating="4.8">
                             <i class="fas fa-star star filled"></i>
                             <i class="fas fa-star star filled"></i>
@@ -1031,9 +1031,9 @@
                      tabindex="0"
                      role="button"
                      onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
-                <div class="Products-image-wrapper">-->
+                <div class="Products-image-wrapper">
                     <!-- Nút Yêu Thích -->
-                    <!--<button class="favorite-btn"
+                    <button class="favorite-btn"
                             onclick="event.stopPropagation(); toggleFavorite(1, this)"
                             aria-label="Thêm vào yêu thích">
                         <i class="fas fa-heart heart-icon"></i>
@@ -1048,9 +1048,9 @@
                         </span>
                     </div>
                 </div>
-                <div class="Products-info">-->
+                <div class="Products-info">
                     <!-- Đánh giá sao -->
-                    <!--<div class="Products-rating">
+                    <div class="Products-rating">
                         <div class="stars-container" data-rating="4.8">
                             <i class="fas fa-star star filled"></i>
                             <i class="fas fa-star star filled"></i>
@@ -1068,11 +1068,118 @@
                         <span class="currency">₫</span>
                     </p>
                 </div>
-            </article>
-        </div>
-    </section>-->
+            </article> *@
+        @if (Model != null && Model.bestSeller != null && Model.bestSeller.Any())
+        {
+            <div class="Products-grid">
+                @foreach (var item in Model.bestSeller)
+                {
+                    // 🌟 1. MÓC DỮ LIỆU TỪ DICTIONARY (Cực kỳ an toàn với ContainsKey)
+                    int? totalSold = (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID)) 
+                                    ? Model.soldQuantities[item.ProductID] 
+                                    : 0;
 
-    <section class="shopee-banner">
+                    decimal avgScore = 0;
+                    int totalReviews = 0;
+                    if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
+                    {
+                        avgScore = Model.scoreProducts[item.ProductID].Item1; // Điểm trung bình
+                        totalReviews = Model.scoreProducts[item.ProductID].Item2; // Số lượt đánh giá
+                    }
+
+                    <article class="Products-card"
+                            onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')"
+                            tabindex="0"
+                            role="button"
+                            onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')">
+
+                        <div class="Products-image-wrapper">
+                            @if (item.Discount > 0)
+                            {
+                                <div class="discount-badge">
+                                    <span class="discount-percent">-@item.Discount%</span>
+                                    <span class="discount-text">GIẢM GIÁ</span>
+                                </div>
+                            }
+
+                            <img src="~/Images/@item.ImagePro"
+                                alt="@item.NamePro - Sản phẩm công nghệ"
+                                class="Products-image"
+                                loading="lazy" />
+                            <div class="Products-overlay">
+                                <span class="view-details">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
+                                </span>
+                            </div>
+
+                            <button class="wishlist-btn"
+                                    onclick="event.stopPropagation(); wishlistController.toggleWishlist(@item.ProductID, this)"
+                                    aria-label="Thả tim">
+                                <i class="wishlist-icon fas fa-heart"></i>
+                                <span class="wishlist-count" id="wishlist-count-@item.ProductID">0</span>
+                            </button>
+                        </div>
+
+                        <div class="Products-info">
+                            <h3 class="Products-name">@item.NamePro</h3>
+                            
+                            <div class="Products-rating">
+                                @if (totalReviews > 0)
+                                {
+                                    <div class="rating-stars" data-rating="@avgScore.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)">
+                                        </div>
+                                    <span class="rating-value">@avgScore.ToString("0.0")</span>
+                                    <span class="rating-count">(@totalReviews đánh giá)</span>
+                                }
+                                else
+                                {
+                                    <span class="rating-count" style="font-style: italic;">Chưa có đánh giá</span>
+                                }
+                            </div>
+
+                            <div class="Products-sold">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="sold-count">Đã bán: @totalSold</span>
+                            </div>
+
+                            <div class="price-container">
+                                @if (item.Discount > 0)
+                                {
+                                    var originalPrice = item.Price / (1 - (decimal)item.Discount / 100);
+                                    <p class="Products-price">
+                                        <span class="price-original">
+                                            @((decimal)originalPrice).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
+                                        </span>
+                                        <span class="price-current">
+                                            @((decimal)item.Price).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
+                                        </span>
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="Products-price">
+                                        <span class="price-current">@(decimal.TryParse(item.Price.ToString(), out decimal price) ? price.ToString("N0") : item.Price) ₫</span>
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>Không có sản phẩm nào</h3>
+                <p>Hiện tại chúng tôi đang cập nhật sản phẩm mới. Vui lòng quay lại sau!</p>
+            </div>
+        }
+        </div> 
+    </section>
+
+    @* <section class="shopee-banner">
 
     <div class="row">
 
@@ -1144,7 +1251,7 @@
 
     </div>
 
-    </section>
+    </section> *@
 
     <!-- All Products Section -->
     <section class="section" id="Products" aria-labelledby="Products-title">

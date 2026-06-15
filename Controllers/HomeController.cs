@@ -37,6 +37,32 @@ namespace TechStore.Controllers
                 // Query để lấy số lượng đã bán từ OrderDetailss
                 if(proList.Count > 0)
                 {
+                    // 1. Tính tổng số lượng bán và lấy ra Top 3 ProductID bán chạy nhất
+                    var top3SellerInfo = dbO.OrderDetails
+                        .Join(dbO.OrderPro, 
+                            od => od.IDOrder, 
+                            op => op.ID,
+                            (od, op) => new { od.IDProduct, od.Quantity })
+                        .GroupBy(x => x.IDProduct)
+                        .Select(g => new { 
+                            ProductID = g.Key, 
+                            TotalSold = g.Sum(x => x.Quantity) 
+                        })
+                        .Where(x => x.ProductID > 0)
+                        .OrderByDescending(x => x.TotalSold) // Sắp xếp từ bán nhiều nhất đến ít nhất
+                        .Take(3) // Cắt lấy đúng 3 ông đứng đầu
+                        .ToList();
+
+                    // 2. Lấy danh sách ID của 3 ông top này
+                    var top3ProductIds = top3SellerInfo.Select(x => x.ProductID).ToList();
+
+                    // 3. Truy vấn bảng Products để lấy ra thông tin đầy đủ của 3 sản phẩm này
+                    var top3BestSellers = dbO.Products
+                        .Where(p => top3ProductIds.Contains(p.ProductID))
+                        .AsEnumerable() // Chuyển xử lý về RAM để giữ đúng thứ tự xếp hạng
+                        .OrderBy(p => top3ProductIds.IndexOf(p.ProductID)) // Giữ đúng thứ tự Top 1, 2, 3
+                        .ToList();
+
                     var soldItems = db.OrderDetails
                         .Join(db.OrderPro, 
                             od => od.IDOrder, 
@@ -48,6 +74,7 @@ namespace TechStore.Controllers
                             TotalSold = g.Sum(x => x.Quantity) 
                         }).Where(x => x.ProductID > 0)
                         .ToDictionary(x => x.ProductID, x => x.TotalSold);
+
                     //Lay diem trung binh moi san pham
                     var scoreProducts = db.Reviews.Join(
                         db.Products, rv => rv.ProductID , 
@@ -61,13 +88,15 @@ namespace TechStore.Controllers
                         scoreNumbers = x.Count()
                     }).ToDictionary(x => x.ProductID, x => (x.midScores , x.scoreNumbers))
                     ;
+                    
                     // Truyền dữ liệu số lượng đã bán, điểm  
                     var indexpros = new indexProducts
                     {
                         products = proList,
                         soldQuantities = soldItems,
                         scoreProducts = scoreProducts,
-                        banners = banners
+                        banners = banners,
+                        bestSeller = top3BestSellers
                     };
                     return View(indexpros);
                 }
