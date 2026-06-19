@@ -2,10 +2,95 @@
 @{
     ViewBag.Title = "Kết quả tìm kiếm";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // XỬ LÝ NỘI DUNG SEO CHÍNH XÁC VÀ CHI TIẾT THEO 6 DANH MỤC
+    string catName = ViewBag.CurrentCategory as string ?? "";
+    string catDesc = "";
+
+    switch (catName.ToLower())
+    {
+        case "điện thoại":
+            catDesc = @"
+                <h3 style='font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px;'>Điện thoại thông minh (Smartphone) chính hãng, giá tốt nhất</h3>
+                <p>Thị trường <strong>điện thoại thông minh</strong> hiện nay phát triển vô cùng mạnh mẽ với sự cạnh tranh từ nhiều ông lớn công nghệ. Tại TechStoreVN, chúng tôi tự hào mang đến cho khách hàng bộ sưu tập đa dạng nhất các dòng điện thoại từ mọi phân khúc:</p>
+                <ul style='margin-left: 20px; margin-bottom: 15px; color: var(--text-dark);'>
+                    <li><strong>Apple (iPhone):</strong> Đẳng cấp, sang trọng, hệ điều hành iOS mượt mà và khả năng giữ giá cực tốt. Các dòng iPhone mới nhất luôn có sẵn với đủ dung lượng và màu sắc.</li>
+                    <li><strong>Samsung:</strong> Vua của thế giới Android với các dòng Galaxy S siêu việt, Galaxy Z màn hình gập thời thượng và dòng Galaxy A/M giá rẻ đáp ứng mọi nhu cầu.</li>
+                    <li><strong>Xiaomi, OPPO, vivo:</strong> Lựa chọn hoàn hảo cho phân khúc tầm trung với camera AI làm đẹp xuất sắc, pin khủng, sạc siêu nhanh và cấu hình vượt trội trong tầm giá.</li>
+                </ul>
+                <p>Khi mua điện thoại tại TechStoreVN, quý khách hoàn toàn yên tâm với chính sách bảo hành chính hãng, chế độ 1 đổi 1 trong 30 ngày nếu có lỗi từ nhà sản xuất, cùng các chương trình hỗ trợ trả góp 0% cực kỳ linh hoạt.</p>";
+            break;
+
+        case "laptop":
+            catDesc = @"
+                <h3 style='font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px;'>Laptop - Máy tính xách tay đáp ứng mọi nhu cầu</h3>
+                <p>Dù bạn là học sinh sinh viên, dân văn phòng hay một game thủ thực thụ, TechStoreVN luôn có chiếc <strong>Laptop</strong> phù hợp dành riêng cho bạn:</p>
+                <ul style='margin-left: 20px; margin-bottom: 15px; color: var(--text-dark);'>
+                    <li><strong>Laptop Học tập - Văn phòng:</strong> Thiết kế mỏng nhẹ, thanh lịch, pin trâu để tiện di chuyển. Hiệu năng ổn định xử lý mượt mà các tác vụ Word, Excel, lướt web. (MacBook Air, Asus Zenbook, HP Pavilion...)</li>
+                    <li><strong>Laptop Gaming:</strong> Sức mạnh vượt trội với card đồ họa rời (NVIDIA RTX/GTX), màn hình tần số quét cao 144Hz/165Hz và hệ thống tản nhiệt tiên tiến, giúp bạn chinh phục mọi tựa game AAA đình đám.</li>
+                    <li><strong>Laptop Đồ họa - Kỹ thuật:</strong> Dành cho dân chuyên nghiệp với màn hình độ chuẩn màu cao (100% sRGB), vi xử lý Core i7/i9 hoặc Ryzen 7/9 mạnh mẽ để render video, thiết kế 3D.</li>
+                </ul>
+                <p>Tất cả Laptop bán ra đều được cài đặt sẵn hệ điều hành Windows bản quyền, hỗ trợ cài đặt phần mềm trọn đời và tặng kèm nhiều phần quà giá trị như chuột không dây, balo thời trang.</p>";
+            break;
+
+        case "máy tính bảng":
+            catDesc = @"
+                <h3 style='font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px;'>Máy tính bảng (Tablet) - Thiết bị giải trí và làm việc di động</h3>
+                <p>Nằm giữa ranh giới của điện thoại thông minh và máy tính xách tay, <strong>Máy tính bảng</strong> đang dần trở thành thiết bị không thể thiếu nhờ màn hình lớn trải nghiệm đã mắt nhưng lại cực kỳ gọn nhẹ.</p>
+                <ul style='margin-left: 20px; margin-bottom: 15px; color: var(--text-dark);'>
+                    <li><strong>Apple iPad:</strong> Thống trị thị trường với iPad Pro cấu hình ngang ngửa MacBook, iPad Air thời trang và iPad Gen giá tốt cho học sinh. Sự kết hợp cùng Apple Pencil biến iPad thành bảng vẽ kỹ thuật số hoàn hảo.</li>
+                    <li><strong>Samsung Galaxy Tab:</strong> Màn hình AMOLED rực rỡ, tích hợp sẵn bút S-Pen quyền năng và chế độ Samsung DeX độc quyền giúp biến tablet thành chiếc PC mini trong tích tắc.</li>
+                    <li><strong>Máy tính bảng Lenovo, Xiaomi:</strong> Lựa chọn tuyệt vời cho nhu cầu giải trí cơ bản, xem phim, đọc báo và học online cho trẻ em với mức giá vô cùng dễ tiếp cận.</li>
+                </ul>
+                <p>TechStoreVN cung cấp đa dạng phụ kiện kèm theo như bao da bàn phím, dán cường lực để bảo vệ thiết bị của bạn một cách tốt nhất.</p>";
+            break;
+
+        case "pc":
+            catDesc = @"
+                <h3 style='font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px;'>PC & Workstation - Tối ưu sức mạnh, bứt phá hiệu năng</h3>
+                <p>Nếu Laptop đề cao tính di động thì <strong>PC (Máy tính để bàn)</strong> lại là nhà vô địch về sức mạnh và khả năng nâng cấp. TechStoreVN chuyên cung cấp các giải pháp PC toàn diện:</p>
+                <ul style='margin-left: 20px; margin-bottom: 15px; color: var(--text-dark);'>
+                    <li><strong>PC Lắp ráp (Custom PC):</strong> Tự do cá nhân hóa cấu hình theo đúng nhu cầu và ngân sách. Linh kiện từ các hãng danh tiếng (Intel, AMD, Asus, Gigabyte, MSI...). Dịch vụ đi dây cáp (cable management) gọn gàng, hệ thống tản nhiệt nước và LED RGB rực rỡ.</li>
+                    <li><strong>PC Đồng bộ (All-in-One):</strong> Thiết kế tích hợp tất cả trong một màn hình, tiết kiệm không gian, phù hợp cho quầy lễ tân, văn phòng hiện đại mang tính thẩm mỹ cao.</li>
+                    <li><strong>Máy trạm (Workstation):</strong> Cấu hình siêu khủng cấp độ doanh nghiệp, hoạt động bền bỉ 24/7 để phục vụ các tác vụ tính toán phức tạp, render 3D, AI và Data Science.</li>
+                </ul>
+                <p>Chúng tôi có đội ngũ kỹ thuật viên giàu kinh nghiệm, sẵn sàng tư vấn xây dựng cấu hình tối ưu và bảo hành tận nơi để bạn an tâm sử dụng.</p>";
+            break;
+
+        case "tai nghe":
+        case "âm thanh":
+            catDesc = @"
+                <h3 style='font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px;'>Thiết bị âm thanh chính hãng - Trải nghiệm sống động</h3>
+                <p>Thế giới <strong>âm thanh</strong> tại TechStoreVN quy tụ những thương hiệu hàng đầu thế giới như Sony, Apple, JBL, Marshall, Sennheiser... mang đến cho bạn trải nghiệm thính giác tuyệt đỉnh.</p>
+                <ul style='margin-left: 20px; margin-bottom: 15px; color: var(--text-dark);'>
+                    <li><strong>Tai nghe True Wireless (TWS):</strong> Nhỏ gọn, không dây vướng víu. Các tính năng cao cấp như chống ồn chủ động (ANC), xuyên âm (Transparency) và âm thanh không gian (Spatial Audio) đang dần trở thành tiêu chuẩn.</li>
+                    <li><strong>Tai nghe Over-ear / Chụp tai:</strong> Dành cho những ai khắt khe về chất lượng âm thanh hoặc game thủ cần khả năng cách âm tuyệt đối để đắm chìm vào không gian riêng.</li>
+                    <li><strong>Loa Bluetooth di động:</strong> Khuấy động mọi bữa tiệc với âm bass mạnh mẽ, thiết kế chống nước chống bụi IP67 bền bỉ, dễ dàng mang theo trong những chuyến dã ngoại.</li>
+                </ul>
+                <p>Cam kết 100% hàng chính hãng, cho phép trải nghiệm nghe thử trực tiếp tại cửa hàng để bạn tìm được chất âm ưng ý nhất.</p>";
+            break;
+
+        case "phụ kiện":
+            catDesc = @"
+                <h3 style='font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px;'>Phụ kiện công nghệ - Tiện ích tối đa cho thiết bị của bạn</h3>
+                <p>Một thiết bị thông minh không thể phát huy hết sức mạnh nếu thiếu đi những <strong>phụ kiện</strong> đi kèm chất lượng. Chúng tôi mang đến hệ sinh thái phụ kiện cực kỳ phong phú:</p>
+                <ul style='margin-left: 20px; margin-bottom: 15px; color: var(--text-dark);'>
+                    <li><strong>Pin sạc dự phòng & Củ/Cáp sạc:</strong> Đảm bảo năng lượng dồi dào suốt ngày dài. Hỗ trợ các chuẩn sạc nhanh mới nhất (PD 20W, 45W, 65W...) an toàn, không gây chai pin thiết bị.</li>
+                    <li><strong>Phụ kiện bảo vệ:</strong> Ốp lưng chống sốc, bao da cao cấp, miếng dán cường lực màn hình bảo vệ dế yêu khỏi những va đập không đáng có.</li>
+                    <li><strong>Thiết bị ngoại vi:</strong> Chuột không dây tĩnh âm, bàn phím cơ gõ cực êm, lót chuột, giá đỡ laptop/điện thoại giúp góc làm việc thêm chuyên nghiệp và tăng hiệu suất.</li>
+                </ul>
+                <p>Sản phẩm đến từ các hãng uy tín như Anker, Baseus, Logitech, Ugreen... với chế độ bảo hành 1 đổi 1 cực kỳ yên tâm.</p>";
+            break;
+
+        default:
+            catDesc = $"Các sản phẩm thuộc ngành hàng <strong>{catName}</strong> luôn được TechStoreVN tuyển chọn kỹ lưỡng từ các thương hiệu uy tín hàng đầu. Chúng tôi cam kết chất lượng tuyệt đối, mẫu mã đa dạng, độ bền cao, đáp ứng đầy đủ tiêu chí của người dùng công nghệ hiện đại. Mọi sản phẩm đều đi kèm giấy tờ nguồn gốc rõ ràng, bảo hành chính hãng và các ưu đãi thanh toán tiện lợi nhất.";
+            break;
+    }
 }
 
 <style>
     :root {
+        /* GIỮ NGUYÊN MÀU SẮC CHỦ ĐẠO CỦA BẠN */
         --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -14,185 +99,414 @@
         --bg-light: #f8fafc;
         --bg-white: #ffffff;
         --border-light: #e2e8f0;
-        --shadow-hover: 0 20px 60px rgba(0,0,0,0.15);
+        --shadow-soft: 0 4px 15px rgba(0,0,0,0.03);
+        --shadow-hover: 0 15px 35px rgba(102, 126, 234, 0.15);
         --border-radius: 16px;
     }
 
-    .homepage-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 20px;
+    body {
+        background: var(--bg-light);
     }
 
+    .category-page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    /* ===== BANNER DANH MỤC ===== */
+    .category-banner {
+        width: 100%;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        margin-bottom: 25px;
+        box-shadow: var(--shadow-soft);
+        display: block; 
+    }
+
+    .category-banner .carousel-item img {
+        width: 100%;
+        height: 380px; 
+        object-fit: cover;
+        display: block;
+    }
+
+    .category-banner .carousel-control-prev-icon,
+    .category-banner .carousel-control-next-icon {
+        background-color: rgba(0,0,0,0.3);
+        border-radius: 50%;
+        background-size: 50%;
+        width: 2.5rem;
+        height: 2.5rem;
+        transition: all 0.3s;
+    }
+    
+    .category-banner .carousel-control-prev:hover .carousel-control-prev-icon,
+    .category-banner .carousel-control-next:hover .carousel-control-next-icon {
+        background-color: rgba(0,0,0,0.6);
+    }
+    
+    .category-banner .carousel-indicators {
+        bottom: 15px;
+    }
+
+    .category-banner .carousel-indicators [data-bs-target] {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #fff;
+        opacity: 0.5;
+        border: 1px solid rgba(0,0,0,0.1);
+        margin: 0 4px;
+        transition: all 0.3s;
+    }
+    
+    .category-banner .carousel-indicators .active {
+        opacity: 1;
+        background-color: #667eea; 
+        width: 24px;
+        border-radius: 5px;
+    }
+
+    /* ===== BỘ LỌC TÌM KIẾM ===== */
     .filter-section {
         background: var(--bg-white);
         border: 1px solid var(--border-light);
-        border-radius: var(--border-radius);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-    .filter-section select, .filter-section input {
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-    }
-    .filter-section select:focus, .filter-section input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        border-radius: var(--border-radius); 
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 30px;
+        padding: 20px 25px;
+        width: 100%;
     }
 
+    .filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+
+    .filter-group {
+        flex: 1; 
+        min-width: 220px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-group label {
+        color: var(--text-dark);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+
+    .price-inputs {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .price-inputs input,
+    .filter-group select {
+        width: 100%;
+        height: 44px; 
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 0 15px;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        transition: all 0.3s;
+        background: #fff;
+    }
+
+    .price-inputs span {
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .price-inputs input:focus,
+    .filter-group select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        outline: none;
+    }
+
+    .filter-action {
+        flex: 0 0 150px; 
+    }
+
+    .btn-filter {
+        width: 100%;
+        height: 44px;
+        background: var(--primary-gradient);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+
+    /* ===== Products GRID ===== */
     .Products-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr); 
-        gap: 30px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
         margin-bottom: 50px;
     }
 
+    /* ===== Products CARDS ===== */
     .Products-card {
         background: var(--bg-white);
         border-radius: var(--border-radius);
         overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        box-shadow: var(--shadow-soft);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
         position: relative;
         border: 1px solid var(--border-light);
         display: flex;
         flex-direction: column;
+        height: 100%;
     }
 
     .Products-card:hover {
-        transform: translateY(-10px) scale(1.02);
+        transform: translateY(-8px) scale(1.02);
         box-shadow: var(--shadow-hover);
-        border-color: transparent;
+        border-color: #667eea;
     }
 
     .Products-image-wrapper {
         position: relative;
         width: 100%;
-        height: 250px;
-        overflow: hidden;
+        height: 220px;
         background: var(--bg-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
     }
 
     .Products-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; 
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
         transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    .Products-card:hover .Products-image {
-        transform: scale(1.1);
-    }
+    .Products-card:hover .Products-image { transform: scale(1.08); }
 
     .Products-overlay {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
         display: flex; align-items: center; justify-content: center;
         opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(10px);
-        z-index: 2;
+        backdrop-filter: blur(5px); z-index: 2;
     }
-
     .Products-card:hover .Products-overlay { opacity: 1; }
-
+    
     .view-details {
-        color: white; font-weight: 700; font-size: 1.1rem;
+        color: white; font-weight: 700; font-size: 1rem;
         text-transform: uppercase; letter-spacing: 1px;
-        display: flex; align-items: center; gap: 10px;
-        transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; align-items: center; gap: 8px;
+        transform: translateY(20px); transition: transform 0.4s;
     }
-
     .Products-card:hover .view-details { transform: translateY(0); }
 
     .discount-badge {
-        position: absolute; top: 15px; left: 15px;
+        position: absolute; top: 12px; left: 12px;
         background: var(--secondary-gradient); color: white;
-        padding: 8px 12px; border-radius: 8px;
-        font-size: 0.85rem; font-weight: 700; z-index: 5;
+        padding: 4px 10px; border-radius: 8px;
+        font-size: 0.8rem; font-weight: 700; z-index: 5;
         box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
     }
 
     .wishlist-btn {
-        position: absolute; bottom: 15px; right: 15px;
+        position: absolute; bottom: 12px; right: 12px;
         background: rgba(255, 255, 255, 0.95); border: none;
-        width: 50px; height: 50px; border-radius: 50%;
+        width: 40px; height: 40px; border-radius: 50%;
         cursor: pointer; z-index: 6; display: flex; align-items: center; justify-content: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(15px); border: 2px solid rgba(255,255,255,0.8);
-        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        transition: all 0.3s; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.8);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .wishlist-btn:hover { background: #fff; transform: scale(1.15); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+    .wishlist-btn:hover { background: #fff; transform: scale(1.1); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
     .wishlist-btn.active { background: var(--secondary-gradient); border-color: rgba(245, 87, 108, 0.5); transform: scale(1.1); }
-    .wishlist-icon { font-size: 22px; transition: all 0.3s ease; color: #ff6b9d; }
+    .wishlist-icon { font-size: 18px; transition: all 0.3s ease; color: #ff6b9d; }
     .wishlist-btn.active .wishlist-icon { color: white; animation: heartBeat 0.6s ease-in-out; }
+    
     .wishlist-count {
-        position: absolute; top: -10px; right: -10px; background: var(--accent-gradient); color: white;
-        font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 15px;
-        min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+        position: absolute; top: -8px; right: -8px; background: var(--accent-gradient); color: white;
+        font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 12px;
+        min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
         border: 2px solid white;
     }
 
-    .Products-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+    .Products-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
     .Products-name {
-        font-size: 1.15rem; font-weight: 700; color: var(--text-dark);
-        margin-bottom: 15px; line-height: 1.4; height: 3.2em;
+        font-size: 1.05rem; font-weight: 700; color: var(--text-dark);
+        margin-bottom: 10px; line-height: 1.4;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    .price-container { margin-top: auto; display: flex; align-items: center; gap: 12px; }
-    .Products-price { margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
+    .meta-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .Products-rating { display: flex; align-items: center; gap: 4px; }
+    .star { font-size: 12px; color: #ddd; }
+    .star.filled { color: #ffd700; }
+    .rating-count { font-size: 0.75rem; color: var(--text-muted); }
+    
+    .Products-sold { font-size: 0.8rem; font-weight: 600; color: #4facfe; background: #e0f7fa; padding: 2px 8px; border-radius: 12px; }
+
+    .price-container { margin-top: auto; display: flex; flex-direction: column; gap: 2px; }
     .price-current {
-        font-size: 1.35rem; font-weight: 800; background: var(--primary-gradient);
+        font-size: 1.25rem; font-weight: 800; background: var(--primary-gradient);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .price-original { font-size: 1rem; color: var(--text-muted); text-decoration: line-through; font-weight: 500; }
-
-    .Products-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-    .star { font-size: 14px; color: #ddd; }
-    .star.filled { color: #ffd700; }
-    .rating-value { font-size: 0.875rem; color: var(--text-muted); font-weight: 600; }
-    .rating-count { font-size: 0.8rem; color: var(--text-muted); }
-    .sold-count { font-size: 0.85rem; font-weight: 600; color: #4facfe; background: #e0f7fa; padding: 2px 8px; border-radius: 12px; }
+    .price-original { font-size: 0.9rem; color: var(--text-muted); text-decoration: line-through; font-weight: 500; }
 
     .alert-enhanced {
-        background: #fef2f2; color: #b91c1c; padding: 15px 20px; border-radius: 10px;
-        margin: 0 auto 25px; border: 1px solid #fecaca; max-width: 600px; text-align: center;
+        background: #f8fafc; color: var(--text-dark); padding: 20px; border-radius: var(--border-radius);
+        margin: 0 auto 30px; border: 1px solid var(--border-light); text-align: center; font-weight: 500;
+        box-shadow: var(--shadow-soft); display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .alert-enhanced i { font-size: 2rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* ===== THÔNG TIN NGÀNH HÀNG (SEO CONTENT CHUYÊN NGHIỆP) ===== */
+    .seo-content-section {
+        background: var(--bg-white);
+        border: 1px solid var(--border-light);
+        border-radius: var(--border-radius);
+        padding: 30px;
+        margin-bottom: 50px;
+        box-shadow: var(--shadow-soft);
+    }
+    .seo-title {
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Vùng chứa nội dung thu gọn/mở rộng */
+    .seo-text-wrapper {
+        position: relative;
+        max-height: 160px; /* Độ cao cắt chữ khi thu gọn */
+        overflow: hidden;
+        transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--text-dark);
+        font-size: 0.95rem;
+        line-height: 1.8;
+    }
+    .seo-text-wrapper.expanded {
+        max-height: 2000px; /* Mở rộng toàn bộ nội dung */
     }
 
-    @@media (max-width: 1024px) { .Products-grid { grid-template-columns: repeat(3, 1fr); } }
-    @@media (max-width: 768px) { .Products-grid { grid-template-columns: repeat(2, 1fr); } }
-    @@media (max-width: 480px) { .Products-grid { grid-template-columns: 1fr; } }
+    /* Hiệu ứng gradient làm mờ chữ ở dưới cùng */
+    .seo-fade {
+        position: absolute;
+        bottom: 0; left: 0; width: 100%; height: 80px;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 90%);
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+    .seo-text-wrapper.expanded .seo-fade {
+        opacity: 0; /* Ẩn lớp mờ khi đã bấm Xem thêm */
+    }
+
+    /* Nút bấm Xem thêm */
+    .btn-toggle-seo {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        margin: 20px auto 0;
+        padding: 8px 25px;
+        color: #4a90e2; background: #f8fafc; border: 1px solid #4a90e2; 
+        border-radius: 20px; font-weight: 600; font-size: 0.9rem;
+        cursor: pointer; transition: all 0.3s;
+    }
+    .btn-toggle-seo:hover { background: #4a90e2; color: white; }
+    .btn-toggle-seo i { transition: transform 0.3s; }
+    .btn-toggle-seo.active i { transform: rotate(180deg); }
+
+
+    @@media (max-width: 768px) {
+        .Products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .Products-image-wrapper { height: 160px; }
+        .price-current { font-size: 1.1rem; }
+        .filter-group { flex: 1 1 100%; min-width: 100%; }
+        .filter-action { flex: 1 1 100%; }
+        .category-banner .carousel-item img { height: 200px; } 
+    }
     
-    @@keyframes heartBeat {
-        0%, 100% { transform: scale(1); } 25% { transform: scale(1.2); }
-        50% { transform: scale(1.1); } 75% { transform: scale(1.15); }
-    }
-    @@keyframes wishlistPulse {
-        0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); }
-    }
+    @@keyframes heartBeat { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.2); } 50% { transform: scale(1.1); } 75% { transform: scale(1.15); } }
     .wishlist-btn.pulse { animation: wishlistPulse 0.6s ease-in-out; }
+    @@keyframes wishlistPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 </style>
 
-<main class="homepage-container" style="padding-top: 120px;">
-    @* <h2 class="section-title text-center mb-5" style="font-size: 2.2rem;">KẾT QUẢ TÌM KIẾM</h2> *@
+<main class="category-page-container" style="padding-top: 10px;">
     
-    <div class="filter-section mb-5 p-4">
-        <form method="get" action="@Url.Action("CatergoryPartial")" class="row g-3 align-items-end">
+    @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory))
+    {
+        <div id="categoryBannerSlider" class="carousel slide category-banner" data-bs-ride="carousel" data-bs-interval="3500">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#categoryBannerSlider" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#categoryBannerSlider" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#categoryBannerSlider" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200&h=380&fit=crop" alt="Khuyến mãi 1">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&h=380&fit=crop" alt="Khuyến mãi 2">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=1200&h=380&fit=crop" alt="Khuyến mãi 3">
+                </div>
+            </div>
+            
+            <button class="carousel-control-prev" type="button" data-bs-target="#categoryBannerSlider" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#categoryBannerSlider" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    }
+
+    <div class="filter-section">
+        <form method="get" action="@Url.Action("CatergoryPartial")" class="filter-form">
             <input type="hidden" name="catergory" value="@ViewBag.CurrentCategory" />
 
-            <div class="col-md-4">
-                <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.9rem;">Khoảng giá (VNĐ)</label>
-                <div class="input-group">
-                    <input type="number" name="minPrice" class="form-control form-control-sm" placeholder="Tối thiểu..." value="@ViewBag.MinPrice" min="0">
-                    <span class="input-group-text bg-light border-start-0 border-end-0">-</span>
-                    <input type="number" name="maxPrice" class="form-control form-control-sm" placeholder="Tối đa..." value="@ViewBag.MaxPrice" min="0">
+            <div class="filter-group">
+                <label>Khoảng giá (VNĐ)</label>
+                <div class="price-inputs">
+                    <input type="number" name="minPrice" placeholder="Tối thiểu..." value="@ViewBag.MinPrice" min="0">
+                    <span>-</span>
+                    <input type="number" name="maxPrice" placeholder="Tối đa..." value="@ViewBag.MaxPrice" min="0">
                 </div>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.9rem;">Đánh giá</label>
-                <select name="rating" class="form-select form-select-sm" style="height: 38px;">
+            <div class="filter-group">
+                <label>Đánh giá</label>
+                <select name="rating">
                     <option value="">Tất cả đánh giá</option>
                     <option value="5" selected="@(ViewBag.CurrentRating == 5 ? "selected" : null)">Từ 5 sao</option>
                     <option value="4" selected="@(ViewBag.CurrentRating == 4 ? "selected" : null)">Từ 4 sao trở lên</option>
@@ -200,9 +514,9 @@
                 </select>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.9rem;">Sắp xếp theo</label>
-                <select name="sortOrder" class="form-select form-select-sm" style="height: 38px;">
+            <div class="filter-group">
+                <label>Sắp xếp theo</label>
+                <select name="sortOrder">
                     <option value="">Mặc định</option>
                     <option value="price_asc" selected="@(ViewBag.CurrentSort == "price_asc" ? "selected" : null)">Giá: Thấp đến Cao</option>
                     <option value="price_desc" selected="@(ViewBag.CurrentSort == "price_desc" ? "selected" : null)">Giá: Cao xuống Thấp</option>
@@ -211,9 +525,9 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
-                <button type="submit" class="btn w-100 fw-bold text-white shadow-sm" style="background: var(--primary-gradient); border: none; height: 38px;">
-                    <i class="fas fa-filter me-2"></i> Lọc
+            <div class="filter-action">
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-filter"></i> Lọc
                 </button>
             </div>
         </form>
@@ -221,14 +535,16 @@
 
     @if (ViewBag.Loi != null)
     {
-        <div class="alert alert-enhanced">
-            <i class="fas fa-info-circle"></i> @ViewBag.Loi
+        <div class="alert-enhanced">
+            <i class="fas fa-info-circle"></i> 
+            <span>@ViewBag.Loi</span>
         </div>
     }
     else if (Model == null || Model.products == null || !Model.products.Any())
     {
-        <div class="alert alert-enhanced">
-            <i class="fas fa-box-open"></i> Hiện tại chưa có sản phẩm nào thuộc danh mục này!
+        <div class="alert-enhanced">
+            <i class="fas fa-box-open"></i> 
+            <span>Hiện tại chưa có sản phẩm nào thuộc danh mục này!</span>
         </div>
     }
     else
@@ -236,7 +552,6 @@
         <div class="Products-grid">
             @foreach (var item in Model.products)
             {
-                // BÓC TÁCH ĐIỂM TRỰC TIẾP TỪ MODEL (Không dùng ViewBag)
                 decimal avgScore = 0;
                 int numReviews = 0;
                 if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
@@ -245,7 +560,6 @@
                     numReviews = Model.scoreProducts[item.ProductID].numberReviews;
                 }
 
-                // BÓC TÁCH SỐ LƯỢNG BÁN TRỰC TIẾP TỪ MODEL (Không dùng ViewBag)
                 int? soldCount = 0;
                 if (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID))
                 {
@@ -257,13 +571,13 @@
                     <div class="Products-image-wrapper">
                         @if (item.Discount > 0)
                         {
-                            <div class="discount-badge">-@item.Discount% OFF</div>
+                            <div class="discount-badge">-@item.Discount%</div>
                         }
 
                         <img src="~/Images/@item.ImagePro" alt="@item.NamePro" class="Products-image" loading="lazy" />
                              
                         <div class="Products-overlay">
-                            <span class="view-details"><i class="fas fa-eye"></i> Xem chi tiết</span>
+                            <span class="view-details"><i class="fas fa-eye"></i> Chi tiết</span>
                         </div>
 
                         <button class="wishlist-btn" onclick="event.stopPropagation(); wishlistController.toggleWishlist(@item.ProductID, this)" aria-label="Thả tim">
@@ -275,33 +589,29 @@
                     <div class="Products-info">
                         <h3 class="Products-name">@item.NamePro</h3>
 
-                        <div class="Products-rating">
-                            <div class="rating-stars">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <span class="star @(i <= Math.Round(avgScore, MidpointRounding.AwayFromZero) ? "filled" : "")">★</span>
-                                }
+                        <div class="meta-container">
+                            <div class="Products-rating">
+                                <div class="rating-stars">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="star @(i <= Math.Round(avgScore, MidpointRounding.AwayFromZero) ? "filled" : "")">★</span>
+                                    }
+                                </div>
+                                <span class="rating-count">(@numReviews)</span>
                             </div>
-                            <span class="rating-value">@(avgScore > 0 ? avgScore.ToString("0.1") : "0")</span>
-                            <span class="rating-count">(@numReviews đánh giá)</span>
-                            
-                            <span class="sold-count ms-auto">Đã bán @soldCount</span>
+                            <span class="Products-sold">Đã bán @soldCount</span>
                         </div>
 
                         <div class="price-container">
                             @if (item.Discount > 0)
                             {
                                 var originalPrice = item.Price / (1 - (decimal)item.Discount / 100);
-                                <p class="Products-price">
-                                    <span class="price-current">@((decimal)item.Price).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</span>
-                                    <span class="price-original">@((decimal)originalPrice).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</span>
-                                </p>
+                                <span class="price-original">@((decimal)originalPrice).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</span>
+                                <span class="price-current">@((decimal)item.Price).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</span>
                             }
                             else
                             {
-                                <p class="Products-price">
-                                    <span class="price-current">@(decimal.TryParse(item.Price.ToString(), out decimal price) ? price.ToString("N0") : item.Price) ₫</span>
-                                </p>
+                                <span class="price-current">@(decimal.TryParse(item.Price.ToString(), out decimal price) ? price.ToString("N0") : item.Price) ₫</span>
                             }
                         </div>
                     </div>
@@ -309,9 +619,41 @@
             }
         </div>
     }
+
+    @if (!string.IsNullOrEmpty(catDesc))
+    {
+        <div class="seo-content-section">
+            <h2 class="seo-title">Thông tin ngành hàng @ViewBag.CurrentCategory</h2>
+            <div class="seo-text-wrapper" id="seoTextWrapper">
+                @Html.Raw(catDesc)
+                <div class="seo-fade" id="seoFadeEffect"></div>
+            </div>
+            <button class="btn-toggle-seo" id="btnToggleSeo" onclick="toggleSeoContent()">
+                Xem thêm <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+    }
+
 </main>
 
 <script>
+    // XỬ LÝ NÚT XEM THÊM SEO VỚI HIỆU ỨNG MƯỢT MÀ
+    function toggleSeoContent() {
+        const wrapper = document.getElementById('seoTextWrapper');
+        const btn = document.getElementById('btnToggleSeo');
+        
+        if (wrapper.classList.contains('expanded')) {
+            wrapper.classList.remove('expanded');
+            btn.classList.remove('active');
+            btn.innerHTML = 'Xem thêm <i class="fas fa-chevron-down"></i>';
+        } else {
+            wrapper.classList.add('expanded');
+            btn.classList.add('active');
+            btn.innerHTML = 'Thu gọn <i class="fas fa-chevron-up"></i>';
+        }
+    }
+
+    // WISHLIST CONTROLLER
     const wishlistController = {
         likeCounts: JSON.parse(localStorage.getItem('likeCounts') || '{}'),
         likedProducts: JSON.parse(localStorage.getItem('likedProducts') || '{}'),
@@ -368,7 +710,7 @@
 
         showNotification(message, type) {
             const notif = document.createElement('div');
-            notif.style.cssText = `position: fixed; top: 100px; right: 20px; background: ${type === 'success' ? '#10b981' : '#ef4444'}; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 9999; font-weight: 600; transform: translateX(100%); transition: transform 0.3s;`;
+            notif.style.cssText = `position: fixed; top: 100px; right: 20px; background: ${type === 'success' ? 'var(--primary-gradient)' : 'var(--danger-gradient)'}; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 9999; font-weight: 600; transform: translateX(100%); transition: transform 0.3s;`;
             notif.textContent = message;
             document.body.appendChild(notif);
             requestAnimationFrame(() => notif.style.transform = 'translateX(0)');
