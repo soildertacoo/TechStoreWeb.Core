@@ -167,10 +167,16 @@ namespace TechStore.Controllers
             public string? paymentStatus{get; set;}
         }
         [HttpPost] 
-        public async Task<IActionResult> Delete_KH([FromBody] JSONOrder data)
+        /*public async Task<IActionResult> Delete_KH([FromBody] JSONOrder data)
         {
-            var item = db.OrderPro.FirstOrDefault(s => s.TrackingNumber == data.id);
-            if (item != null)
+            var item = db.OrderPro
+            .Include(o => o.OrderDetails) // Bao gồm chi tiết đơn hàng để có thể xóa chúng nếu cần
+            .FirstOrDefault(s => s.TrackingNumber == data.id);
+            if (item == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
+            }
+            else if (item != null)
             {
                 if ( item.Status.Trim() != "Đã giao") 
                 {
@@ -186,6 +192,7 @@ namespace TechStore.Controllers
                     await db.SaveChangesAsync();
                     return Json(new { success = true });
                 }
+                // Không cho hủy nếu đã giao hoặc đang giao
                 else
                 {
                     return Json(new { success = false, message = "Không hủy đơn được do đang giao hay đã giao" });
@@ -193,7 +200,44 @@ namespace TechStore.Controllers
             }
             
             return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
-        }
+        }*/
+
+        public async Task<IActionResult> Delete_KH([FromBody] JSONOrder data)
+        {
+            var item = db.OrderPro
+                .Include(o => o.OrderDetails) // Bao gồm chi tiết đơn hàng để có thể xóa chúng nếu cần
+                .FirstOrDefault(s => s.TrackingNumber == data.id);
+            
+            if (item == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
+            }
+            // Không cho hủy nếu đã giao hoặc đang giao
+            else if (item.Status.Trim() == "Đang giao" || item.Status.Trim() == "Đã giao")
+            {
+                return Json(new { success = false, message = "Không hủy đơn được do đang giao hay đã giao" });
+            }
+            // Tránh cộng kho nhiều lần
+            else if (item.Status.Trim() == "Hủy đơn")
+            {
+                return Json(new { success = false, message = "Đơn hàng đã được hủy trước đó." });
+            }
+           // Trả hàng về kho
+           foreach (var orderDetail in item.OrderDetails)
+            {
+                var inventory = db.Inventories
+                .FirstOrDefault(i => i.ProductID == orderDetail.IDProduct);
+                if (inventory != null)
+                {
+                    inventory.StockQuantity += orderDetail.Quantity ?? 0; // Cộng số lượng trả về kho
+                    inventory.LastUpdated = DateTime.Now; // Cập nhật thời gian chỉnh sửa
+                }
+            }
+            item.Status = "Hủy đơn";
+            db.Entry(item).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+            return Json(new { success = true });
+        }   
         [HttpPost]
         //Nếu FormData trong view chuyền thì FromForm ngược lại thì FromBody
         public async Task<IActionResult> exportExcel([FromForm] JSONOrder data)

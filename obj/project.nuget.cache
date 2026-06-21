@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "SygAcYqacFg=",
+  "dgSpecHash": "i+HOs3bGWVc=",
   "success": true,
-  "projectFilePath": "E:\\K29\\TMDT\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj",
+  "projectFilePath": "E:\\K29\\TMDT\\TH\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\GIGABYTE\\.nuget\\packages\\aspnetcore.healthchecks.sqlserver\\9.0.0\\aspnetcore.healthchecks.sqlserver.9.0.0.nupkg.sha512",
     "C:\\Users\\GIGABYTE\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",

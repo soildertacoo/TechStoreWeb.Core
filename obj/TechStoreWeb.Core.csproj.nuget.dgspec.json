@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\K29\\TMDT\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj": {}
+    "E:\\K29\\TMDT\\TH\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj": {}
   },
   "projects": {
-    "E:\\K29\\TMDT\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj": {
+    "E:\\K29\\TMDT\\TH\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\K29\\TMDT\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj",
+        "projectUniqueName": "E:\\K29\\TMDT\\TH\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj",
         "projectName": "TechStoreWeb.Core",
-        "projectPath": "E:\\K29\\TMDT\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj",
+        "projectPath": "E:\\K29\\TMDT\\TH\\TechStoreWeb.Core\\TechStoreWeb.Core.csproj",
         "packagesPath": "C:\\Users\\GIGABYTE\\.nuget\\packages\\",
-        "outputPath": "E:\\K29\\TMDT\\TechStoreWeb.Core\\obj\\",
+        "outputPath": "E:\\K29\\TMDT\\TH\\TechStoreWeb.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
