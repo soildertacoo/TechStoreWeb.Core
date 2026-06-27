@@ -14,6 +14,9 @@
     string memberShip = "Chưa phải là VIP";
     string progressBarColor = "vip-progress-bar-inner-bronze";
     decimal progressPercent = 0;
+    string vipTierClass = "tier-none";
+    string vipTierIcon = "fa-gem";
+    string vipTierDesc = "Mua sắm để mở khóa hạng VIP và nhận ưu đãi độc quyền";
 
     if (Model.MembershipLevel == "Đồng")
     {
@@ -21,6 +24,9 @@
         progressBarColor = "vip-progress-bar-inner-bronze";
         membershipClass = "membership-bronze";
         memberShip = "VIP Đồng";
+        vipTierClass = "tier-bronze";
+        vipTierIcon = "fa-medal";
+        vipTierDesc = "Hạng Đồng — Ưu đãi 5% cho mọi đơn hàng";
     }
     else if (Model.MembershipLevel == "Bạc")
     {
@@ -28,12 +34,18 @@
         progressBarColor = "vip-progress-bar-inner-silver"; 
         membershipClass = "membership-silver";
         memberShip = "VIP Bạc";
+        vipTierClass = "tier-silver";
+        vipTierIcon = "fa-award";
+        vipTierDesc = "Hạng Bạc — Ưu đãi 10% + giao hàng nhanh miễn phí";
     }
     else if (Model.MembershipLevel == "Vàng")
     {
         progressBarColor = "vip-progress-bar-inner-gold";
         membershipClass = "membership-gold";
         memberShip = "VIP Vàng";
+        vipTierClass = "tier-gold";
+        vipTierIcon = "fa-crown";
+        vipTierDesc = "Hạng Vàng — Ưu đãi 15% + quà tặng sinh nhật độc quyền";
     }
     
 
@@ -52,276 +64,303 @@
 }
 
 <style>
-    /* ==========================================
-       CSS GIAO DIỆN HIỆN ĐẠI (CLEAN UI)
-       ========================================== */
-    body { 
-        background-color: #f3f4f6; 
-        color: #1f2937;
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    body { background: #eef2ff; color: #1f2937; font-family: 'Inter', system-ui, sans-serif; }
+
+    .profile-page-container { width: 100%; max-width: 1200px; margin: 32px auto; padding: 0 16px; }
+
+    /* ── VIP 3D Banner ── */
+    .vip-hero-3d {
+        perspective: 1200px;
+        margin-bottom: 28px;
     }
-    
-    .profile-page-container { 
-        width: 100%; 
-        max-width: 1200px; /* Khớp với độ rộng chuẩn của Layout */
-        margin: 40px auto; 
+    .vip-card-3d {
+        position: relative;
+        border-radius: 24px;
+        padding: 36px 40px;
+        color: #fff;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        transition: transform .4s cubic-bezier(.23,1,.32,1), box-shadow .4s;
+        cursor: default;
+        min-height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+    }
+    .vip-card-3d:hover {
+        transform: rotateX(4deg) rotateY(-3deg) translateY(-6px);
     }
 
-    .profile-card { 
-        background: #ffffff; 
-        border-radius: 20px; 
-        padding: 40px 40px; 
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); 
-        border: 1px solid #e5e7eb; 
-        position: relative; 
-        animation: fadeInUp 0.6s ease-out; 
+    /* Tier: Bronze */
+    .vip-card-3d.tier-bronze {
+        background: linear-gradient(135deg, #92400e 0%, #b45309 30%, #d97706 60%, #78350f 100%);
+        box-shadow: 0 20px 60px rgba(146,64,14,.45), inset 0 1px 0 rgba(255,255,255,.15);
+    }
+    .vip-card-3d.tier-bronze::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        pointer-events: none;
+    }
+    .vip-card-3d.tier-bronze .vip-tier-icon { color: #fcd34d; text-shadow: 0 0 20px rgba(252,211,77,.6); }
+
+    /* Tier: Silver */
+    .vip-card-3d.tier-silver {
+        background: linear-gradient(135deg, #374151 0%, #6b7280 30%, #9ca3af 60%, #1f2937 100%);
+        box-shadow: 0 20px 60px rgba(107,114,128,.5), inset 0 1px 0 rgba(255,255,255,.2);
+    }
+    .vip-card-3d.tier-silver::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,.08) 50%, transparent 60%);
+        animation: silverShine 3s ease-in-out infinite;
+    }
+    @@keyframes silverShine {
+        0%,100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+    .vip-card-3d.tier-silver .vip-tier-icon { color: #e5e7eb; text-shadow: 0 0 24px rgba(229,231,235,.8); }
+
+    /* Tier: Gold */
+    .vip-card-3d.tier-gold {
+        background: linear-gradient(135deg, #78350f 0%, #b45309 20%, #fbbf24 50%, #d97706 80%, #92400e 100%);
+        box-shadow: 0 20px 60px rgba(251,191,36,.4), inset 0 1px 0 rgba(255,255,255,.25);
+    }
+    .vip-card-3d.tier-gold::after {
+        content: '';
+        position: absolute; top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,.12) 0%, transparent 60%);
+        animation: goldPulse 4s ease-in-out infinite;
+    }
+    @@keyframes goldPulse {
+        0%,100% { opacity: .5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+    }
+    .vip-card-3d.tier-gold .vip-tier-icon { color: #fef08a; text-shadow: 0 0 30px rgba(254,240,138,.9); animation: crownGlow 2s ease-in-out infinite alternate; }
+    @@keyframes crownGlow { from { filter: drop-shadow(0 0 8px rgba(251,191,36,.6)); } to { filter: drop-shadow(0 0 20px rgba(251,191,36,1)); } }
+
+    /* Tier: None */
+    .vip-card-3d.tier-none {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+        box-shadow: 0 20px 60px rgba(67,56,202,.35);
     }
 
-    /* --- AVATAR --- */
-    .avatar-wrapper {
+    .vip-card-content { position: relative; z-index: 2; }
+    .vip-card-content h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -.02em; }
+    .vip-card-content p { opacity: .8; font-size: .9rem; margin: 0; }
+    .vip-tier-icon { font-size: 4rem; position: relative; z-index: 2; transform: translateZ(30px); transition: transform .4s; }
+    .vip-card-3d:hover .vip-tier-icon { transform: translateZ(50px) scale(1.08) rotateY(-10deg); }
+
+    .vip-stats-row { display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap; }
+    .vip-stat-item { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 10px 18px; backdrop-filter: blur(8px); }
+    .vip-stat-val { font-size: 1.1rem; font-weight: 800; }
+    .vip-stat-lbl { font-size: .75rem; opacity: .7; }
+
+    /* Tier comparison cards */
+    .vip-tiers-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+    .vip-tier-mini {
+        border-radius: 16px;
+        padding: 20px 16px;
         text-align: center;
-        margin-bottom: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        position: relative;
+        transition: all .35s cubic-bezier(.23,1,.32,1);
+        transform-style: preserve-3d;
+        border: 2px solid transparent;
+        cursor: default;
+    }
+    .vip-tier-mini:hover { transform: translateY(-8px) rotateX(6deg); }
+    .vip-tier-mini.active { border-color: rgba(255,255,255,.5); transform: translateY(-4px) scale(1.03); box-shadow: 0 16px 40px rgba(0,0,0,.15); }
+    .vip-tier-mini.tier-bronze-mini { background: linear-gradient(145deg, #fef3c7, #fde68a); color: #78350f; }
+    .vip-tier-mini.tier-silver-mini { background: linear-gradient(145deg, #f3f4f6, #d1d5db); color: #374151; }
+    .vip-tier-mini.tier-gold-mini { background: linear-gradient(145deg, #fef9c3, #fbbf24); color: #78350f; }
+    .vip-tier-mini i { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+    .vip-tier-mini h4 { font-size: .95rem; font-weight: 800; margin-bottom: 4px; }
+    .vip-tier-mini p { font-size: .75rem; opacity: .75; margin: 0; }
+    .vip-tier-mini .tier-badge {
+        position: absolute; top: -8px; right: -8px;
+        background: #10b981; color: #fff;
+        font-size: .65rem; font-weight: 700;
+        padding: 3px 8px; border-radius: 99px;
     }
 
-    .avatar-container { 
-        position: relative; 
-        display: inline-block; 
-        margin-bottom: 15px; 
-        cursor: pointer;
-        border-radius: 50%;
-    }
-    
-    .avatar-img { 
-        width: 150px; 
-        height: 150px; 
-        border-radius: 50%; 
-        object-fit: cover; 
-        border: 4px solid #ffffff; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        transition: all 0.3s ease; 
-        display: block;
+    .profile-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 36px 40px;
+        box-shadow: 0 4px 6px rgba(0,0,0,.02), 0 20px 50px rgba(0,0,0,.06);
+        border: 1px solid rgba(0,0,0,.04);
+        animation: fadeInUp .6s ease-out;
     }
 
+    .avatar-wrapper { text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; }
+    .avatar-container { position: relative; display: inline-block; margin-bottom: 12px; cursor: pointer; border-radius: 50%; }
+    .avatar-img {
+        width: 130px; height: 130px; border-radius: 50%;
+        object-fit: cover; border: 4px solid #fff;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12);
+        transition: all .3s; display: block;
+    }
     .avatar-overlay {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    .avatar-container:hover .avatar-overlay {
-        opacity: 1;
-    }
-    .avatar-container:hover .avatar-img {
-        transform: scale(1.02);
-    }
-
-    /* --- NÚT ACTION ẢNH --- */
-    .action-buttons {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin-top: -5px;
-        margin-bottom: 20px;
-    }
-    .action-buttons.hidden {
-        display: none !important;
-    }
-    .btn-action {
-        width: 40px; height: 40px;
-        border-radius: 50%;
-        border: none;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,.45); border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        color: #fff; font-size: 22px; opacity: 0; transition: opacity .3s;
+    }
+    .avatar-container:hover .avatar-overlay { opacity: 1; }
+    .avatar-container:hover .avatar-img { transform: scale(1.04); }
+
+    .action-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
+    .action-buttons.hidden { display: none !important; }
+    .btn-action {
+        width: 38px; height: 38px; border-radius: 50%; border: none;
+        color: #fff; font-size: 15px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: transform .2s; box-shadow: 0 4px 8px rgba(0,0,0,.12);
     }
     .btn-action:hover { transform: translateY(-2px); }
-    .btn-save { background-color: #10b981; } /* Xanh lá */
-    .btn-delete { background-color: #ef4444; } /* Đỏ */
+    .btn-save { background: #10b981; }
+    .btn-delete { background: #ef4444; }
 
-    /* --- THÔNG TIN CƠ BẢN --- */
-    .customer-name { 
-        font-size: 2rem; 
-        font-weight: 700; 
-        color: #111827; 
-        margin-bottom: 10px; 
-    }
+    .customer-name { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -.02em; }
 
-    /* --- VIP BADGE --- */
-    .membership-level { 
-        display: inline-block; 
-        color: #fff; 
-        padding: 6px 20px; 
-        border-radius: 50px; 
-        font-weight: 600; 
-        font-size: 0.9rem; 
-        text-transform: uppercase; 
-        letter-spacing: 1px; 
-        margin-bottom: 25px; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    .membership-level {
+        display: inline-flex; align-items: center; gap: 6px;
+        color: #fff; padding: 5px 16px;
+        border-radius: 99px; font-weight: 700;
+        font-size: .8rem; text-transform: uppercase;
+        letter-spacing: .8px; margin-bottom: 20px;
     }
-    .membership-gold { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
-    .membership-silver { background: linear-gradient(135deg, #9ca3af 0%, #4b5563 100%); }
-    .membership-bronze { background: linear-gradient(135deg, #d97706 0%, #92400e 100%); }
+    .membership-gold { background: linear-gradient(135deg, #fbbf24, #d97706); box-shadow: 0 4px 14px rgba(251,191,36,.4); }
+    .membership-silver { background: linear-gradient(135deg, #9ca3af, #4b5563); box-shadow: 0 4px 14px rgba(107,114,128,.4); }
+    .membership-bronze { background: linear-gradient(135deg, #d97706, #92400e); box-shadow: 0 4px 14px rgba(217,119,6,.4); }
 
-    /* --- NÚT ĐIỀU HƯỚNG --- */
-    .action-links { 
-        display: flex; 
-        gap: 15px; 
-        justify-content: center; 
-        flex-wrap: wrap; 
-        margin-bottom: 35px; 
+    .action-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+    .btn-outline-modern {
+        padding: 10px 20px; border-radius: 12px;
+        font-weight: 600; text-decoration: none;
+        transition: all .25s; font-size: .9rem;
+        display: flex; align-items: center; gap: 8px;
+        cursor: pointer; border: 1.5px solid transparent;
     }
-    .btn-outline-modern { 
-        padding: 10px 20px; 
-        border-radius: 8px; 
-        font-weight: 600; 
-        text-decoration: none; 
-        transition: all 0.2s ease; 
-        font-size: 0.95rem; 
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        border: 1px solid transparent;
-    }
-    .btn-primary-modern { background: #eff6ff; color: #2563eb; }
-    .btn-primary-modern:hover { background: #2563eb; color: white; text-decoration: none; }
-    
-    .btn-gray-modern { background: #f3f4f6; color: #4b5563; }
-    .btn-gray-modern:hover { background: #e5e7eb; color: #1f2937; }
-    
-    .btn-danger-modern { background: #fef2f2; color: #ef4444; }
-    .btn-danger-modern:hover { background: #ef4444; color: white; text-decoration: none; }
+    .btn-primary-modern { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
+    .btn-primary-modern:hover { background: #4f46e5; color: #fff; text-decoration: none; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79,70,229,.25); }
+    .btn-gray-modern { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+    .btn-gray-modern:hover { background: #e2e8f0; color: #1e293b; }
+    .btn-danger-modern { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
+    .btn-danger-modern:hover { background: #ef4444; color: #fff; text-decoration: none; }
 
-    /* --- VIP PROGRESS BAR --- */
-    .vip-progress-container { 
-        background: #f8fafc;
-        border: 1px dashed #cbd5e1;
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 40px;
-        text-align: center; 
+    .vip-progress-container {
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1.5px solid #e2e8f0;
+        padding: 24px; border-radius: 16px;
+        margin-bottom: 32px; text-align: center;
     }
-    .progress-info { 
-        margin-bottom: 12px; 
-        font-weight: 500; 
-        color: #475569;
-    }
+    .progress-info { margin-bottom: 12px; font-weight: 500; color: #475569; font-size: .95rem; }
     .progress-info strong { color: #0f172a; font-weight: 700; }
-    
-    .vip-progress-bar-outer { 
-        width: 100%; 
-        max-width: 600px; 
-        margin: 0 auto 10px auto; 
-        background: #e2e8f0; 
-        border-radius: 20px; 
-        height: 12px; 
-        overflow: hidden;
+    .vip-progress-bar-outer {
+        width: 100%; max-width: 560px;
+        margin: 0 auto 10px; background: #e2e8f0;
+        border-radius: 99px; height: 10px; overflow: hidden;
     }
-    
-    .vip-progress-bar-inner-gold { background: linear-gradient(90deg, #fbbf24 0%, #d97706 100%); height: 100%; border-radius: 20px; transition: width 0.8s ease; }
-    .vip-progress-bar-inner-silver { background: linear-gradient(90deg, #9ca3af 0%, #4b5563 100%); height: 100%; border-radius: 20px; transition: width 0.8s ease; }
-    .vip-progress-bar-inner-bronze { background: linear-gradient(90deg, #d97706 0%, #92400e 100%); height: 100%; border-radius: 20px; transition: width 0.8s ease; }
-    
-    .progress-note { color: #64748b; font-size: 0.9rem; }
+    .vip-progress-bar-inner-gold { background: linear-gradient(90deg, #fbbf24, #f59e0b); height: 100%; border-radius: 99px; transition: width .8s ease; box-shadow: 0 0 12px rgba(251,191,36,.5); }
+    .vip-progress-bar-inner-silver { background: linear-gradient(90deg, #9ca3af, #6b7280); height: 100%; border-radius: 99px; transition: width .8s ease; box-shadow: 0 0 12px rgba(156,163,175,.5); }
+    .vip-progress-bar-inner-bronze { background: linear-gradient(90deg, #d97706, #b45309); height: 100%; border-radius: 99px; transition: width .8s ease; box-shadow: 0 0 12px rgba(217,119,6,.5); }
+    .progress-note { color: #64748b; font-size: .875rem; }
 
-    /* --- GRID THÔNG TIN --- */
-    .info-grid { 
-        display: grid; 
-        /* Ép cứng 3 cột để 6 items tạo thành 2 hàng vuông vức, không bị hụt 2 lỗ cuối */
-        grid-template-columns: repeat(3, 1fr); 
-        gap: 20px; 
-        margin-bottom: 40px; 
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px; margin-bottom: 32px;
     }
-    
-    .info-item { 
-        background: #ffffff; 
-        padding: 20px; 
-        border-radius: 12px; 
-        border: 1px solid #f3f4f6;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        display: flex;
-        align-items: flex-start;
-        gap: 15px;
-        transition: transform 0.2s;
+    .info-item {
+        background: #f8fafc; padding: 20px;
+        border-radius: 14px; border: 1px solid #e2e8f0;
+        display: flex; align-items: flex-start; gap: 14px;
+        transition: all .25s;
     }
-    .info-item:hover {
-        transform: translateY(-3px);
-        border-color: #e5e7eb;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
+    .info-item:hover { transform: translateY(-4px); border-color: #c7d2fe; box-shadow: 0 8px 20px rgba(110,106,240,.08); background: #fff; }
     .info-icon {
-        width: 40px; height: 40px;
-        border-radius: 10px;
-        background: #eff6ff;
-        color: #3b82f6;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.1rem;
-        flex-shrink: 0;
+        width: 42px; height: 42px; border-radius: 12px;
+        background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+        color: #4f46e5; display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; flex-shrink: 0;
     }
-    .info-content { flex: 1; }
-    .info-label { 
-        font-size: 0.85rem; 
-        font-weight: 600; 
-        color: #6b7280; 
-        margin-bottom: 4px; 
-        text-transform: uppercase; 
-    }
-    .info-value { 
-        font-size: 1rem; 
-        color: #1f2937; 
-        font-weight: 500; 
-        word-break: break-word;
-    }
+    .info-label { font-size: .75rem; font-weight: 700; color: #94a3b8; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .5px; }
+    .info-value { font-size: .95rem; color: #1e293b; font-weight: 600; word-break: break-word; }
 
-    /* --- LỊCH SỬ ĐƠN HÀNG --- */
-    .history-section { 
-        background: #f8fafc; 
-        padding: 30px; 
-        border-radius: 15px; 
-        text-align: center; 
-        border: 1px dashed #cbd5e1; 
+    .history-section {
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        padding: 28px; border-radius: 16px;
+        text-align: center; border: 1.5px solid #e2e8f0;
     }
-    .history-title { 
-        font-size: 1.4rem; 
-        font-weight: 700; 
-        color: #1e293b; 
-        margin-bottom: 10px; 
-    }
+    .history-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
 
-    /* --- RESPONSIVE CHO CÁC MÀN HÌNH NHỎ HƠN --- */
     @@media (max-width: 992px) {
-        /* Tablet: Chuyển sang 2 cột x 3 hàng */
         .info-grid { grid-template-columns: repeat(2, 1fr); }
+        .vip-tiers-grid { grid-template-columns: 1fr; }
+        .vip-card-3d { flex-direction: column; text-align: center; padding: 28px 24px; }
+        .vip-tier-icon { font-size: 3rem; }
     }
     @@media (max-width: 768px) {
-        /* Mobile: Chuyển sang 1 cột x 6 hàng */
-        .info-grid { grid-template-columns: 1fr; } 
-        .profile-card { padding: 30px 20px; }
+        .info-grid { grid-template-columns: 1fr; }
+        .profile-card { padding: 28px 20px; }
         .action-links { flex-direction: column; align-items: stretch; }
-        .btn-outline-modern { justify-content: center; }
     }
-    
-    @@keyframes fadeInUp { 
-        from { opacity: 0; transform: translateY(20px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
+    @@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
 <div class="profile-page-container">
+
+    <!-- VIP 3D Banner -->
+    <div class="vip-hero-3d">
+        <div class="vip-card-3d @vipTierClass" id="vipBanner3d">
+            <div class="vip-card-content">
+                <h2>@memberShip</h2>
+                <p>@vipTierDesc</p>
+                <div class="vip-stats-row">
+                    <div class="vip-stat-item">
+                        <div class="vip-stat-val">@totalOrders</div>
+                        <div class="vip-stat-lbl">Đơn hàng</div>
+                    </div>
+                    <div class="vip-stat-item">
+                        <div class="vip-stat-val">@totalSpent.ToString("n0")₫</div>
+                        <div class="vip-stat-lbl">Tổng chi tiêu</div>
+                    </div>
+                </div>
+            </div>
+            <i class="fas @vipTierIcon vip-tier-icon"></i>
+        </div>
+    </div>
+
+    <!-- Tier comparison -->
+    <div class="vip-tiers-grid">
+        <div class="vip-tier-mini tier-bronze-mini @(Model.MembershipLevel == "Đồng" ? "active" : "")">
+            @if (Model.MembershipLevel == "Đồng") { <span class="tier-badge">Hiện tại</span> }
+            <i class="fas fa-medal"></i>
+            <h4>VIP Đồng</h4>
+            <p>Chi tiêu từ 1M • Giảm 5%</p>
+        </div>
+        <div class="vip-tier-mini tier-silver-mini @(Model.MembershipLevel == "Bạc" ? "active" : "")">
+            @if (Model.MembershipLevel == "Bạc") { <span class="tier-badge">Hiện tại</span> }
+            <i class="fas fa-award"></i>
+            <h4>VIP Bạc</h4>
+            <p>Chi tiêu từ 5M • Giảm 10%</p>
+        </div>
+        <div class="vip-tier-mini tier-gold-mini @(Model.MembershipLevel == "Vàng" ? "active" : "")">
+            @if (Model.MembershipLevel == "Vàng") { <span class="tier-badge">Hiện tại</span> }
+            <i class="fas fa-crown"></i>
+            <h4>VIP Vàng</h4>
+            <p>Chi tiêu từ 50M • Giảm 15%</p>
+        </div>
+    </div>
+
     <div class="profile-card">
         
         <!-- PHẦN AVATAR VÀ TÊN -->
@@ -389,7 +428,7 @@
         <div class="info-grid">
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
-                <div class="info-content">
+                <div>
                     <div class="info-label">Số điện thoại</div>
                     <div class="info-value">@(string.IsNullOrEmpty(Model.PhoneCus) ? "Chưa cập nhật" : Model.PhoneCus)</div>
                 </div>
@@ -397,7 +436,7 @@
             
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                <div class="info-content">
+                <div>
                     <div class="info-label">Email liên hệ</div>
                     <div class="info-value">@(string.IsNullOrEmpty(Model.EmailCus) ? "Chưa cập nhật" : Model.EmailCus)</div>
                 </div>
@@ -405,7 +444,7 @@
             
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <div class="info-content">
+                <div>
                     <div class="info-label">Địa chỉ nhận hàng</div>
                     <div class="info-value">
                         @if(!string.IsNullOrEmpty(Model.StreetAddress)) {
@@ -419,7 +458,7 @@
             
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-birthday-cake"></i></div>
-                <div class="info-content">
+                <div>
                     <div class="info-label">Ngày sinh</div>
                     <div class="info-value">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</div>
                 </div>
@@ -427,7 +466,7 @@
             
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
-                <div class="info-content">
+                <div>
                     <div class="info-label">Ngày tham gia</div>
                     <div class="info-value">@(Model.RegisteredDate?.ToString("dd/MM/yyyy") ?? "Chưa rõ")</div>
                 </div>
@@ -435,7 +474,7 @@
             
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-star"></i></div>
-                <div class="info-content">
+                <div>
                     <div class="info-label">Tài khoản VIP</div>
                     <div class="info-value">@(Model.IsVIP.HasValue && Model.IsVIP.Value ? "Đã kích hoạt" : "Chưa kích hoạt")</div>
                 </div>
@@ -586,21 +625,26 @@
         }
     }
     function updateVIPInAdvance(newMembership) {
-    // 1. Cập nhật Badge VIP
     const membershipBadge = document.querySelector('.membership-level');
     if (membershipBadge) {
         membershipBadge.textContent = "VIP " + newMembership;
         membershipBadge.classList.remove('membership-bronze', 'membership-silver', 'membership-gold');
-        if (newMembership === "Đồng") {
-            membershipBadge.classList.add('membership-bronze');
-        } else if (newMembership === "Bạc") {
-            membershipBadge.classList.add('membership-silver');
-        } else if (newMembership === "Vàng" || newMembership === "VIP Vàng") {
-            membershipBadge.classList.add('membership-gold');
+        if (newMembership === "Đồng") membershipBadge.classList.add('membership-bronze');
+        else if (newMembership === "Bạc") membershipBadge.classList.add('membership-silver');
+        else if (newMembership === "Vàng" || newMembership === "VIP Vàng") membershipBadge.classList.add('membership-gold');
+    }
+
+    const vipBanner = document.getElementById('vipBanner3d');
+    if (vipBanner) {
+        vipBanner.classList.remove('tier-bronze', 'tier-silver', 'tier-gold', 'tier-none');
+        const tierMap = { "Đồng": "tier-bronze", "Bạc": "tier-silver", "Vàng": "tier-gold" };
+        vipBanner.classList.add(tierMap[newMembership] || 'tier-none');
+        const icon = vipBanner.querySelector('.vip-tier-icon');
+        if (icon) {
+            icon.className = 'fas vip-tier-icon ' + ({ "Đồng": "fa-medal", "Bạc": "fa-award", "Vàng": "fa-crown" }[newMembership] || 'fa-gem');
         }
     }
 
-    // 2. Cập nhật phần trăm tiến độ VIP
     const progressContainer = document.querySelector('.vip-progress-container');
     if (progressContainer) {
         //  dùng 'let' để dùng 'html +='
@@ -632,5 +676,19 @@
         progressContainer.innerHTML = html;
     }
 }
+
+    // 3D tilt effect for VIP banner
+    const vipBanner3d = document.getElementById('vipBanner3d');
+    if (vipBanner3d) {
+        vipBanner3d.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            this.style.transform = `rotateX(${-y * 12}deg) rotateY(${x * 12}deg) translateY(-6px)`;
+        });
+        vipBanner3d.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    }
     </script>
 }

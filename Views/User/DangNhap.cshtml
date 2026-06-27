@@ -3,587 +3,106 @@
     ViewBag.Title = "DangNhap";
     Layout = "~/Views/Shared/_LogSignLayout.cshtml";
 }
-<link rel="stylesheet" href="@Url.Content("~/Content/styleLogSign.css")" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<style>
-    /* Modern Login Page Styles - Optimized for Razor View */
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-
-    .otp-card {
-        background: rgba(255,255,255,0.98);
-        border-radius: 18px;
-        box-shadow: 0 8px 32px rgba(102,126,234,0.10);
-        padding: 40px 32px;
-        max-width: 400px;
-        margin: 0 auto;
-        text-align: center;
-        animation: fadeInUp 0.5s;
-    }
-
-    .otp-header {
-        margin-bottom: 24px;
-    }
-
-    .otp-icon {
-        font-size: 2.2rem;
-        color: #667eea;
-        margin-bottom: 8px;
-    }
-
-    .otp-header h3 {
-        font-size: 1.3rem;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: #2d3748;
-    }
-
-    .otp-header p {
-        color: #718096;
-        font-size: 0.98rem;
-        margin-bottom: 0;
-    }
-
-    .otp-qr-section {
-        margin-bottom: 24px;
-    }
-
-    .otp-qr-img {
-        width: 160px;
-        height: 160px;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(102,126,234,0.12);
-        background: #f7fafc;
-        object-fit: contain;
-        margin: 0 auto;
-        display: block;
-    }
-
-    .otp-input-section {
-        margin-bottom: 18px;
-        text-align: left;
-    }
-
-    .otp-label {
-        font-weight: 600;
-        color: #4f46e5;
-        text-align: center;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .otp-input {
-        font-size: 1.1rem;
-        letter-spacing: 2px;
-        text-align: center;
-    }
-
-    .otp-actions {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        margin-top: 18px;
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #38a169 0%, #2b6cb0 100%);
-        color: #fff;
-        border: none;
-    }
-
-    .otp-card {
-        padding: 18px 8px;
-    }
-
-    .otp-qr-img {
-        width: 120px;
-        height: 120px;
-    }
-
-    .container {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 24px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-        padding: 40px;
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.6s ease;
-    }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-        }
-
-    .header {
-        text-align: center;
-        margin-bottom: 32px;
-    }
-
-        .header h1 {
-            color: #1a202c;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            color: #718096;
-            font-size: 16px;
-        }
-
-    /* Alert Styles */
-    #alertContainer {
-        margin-bottom: 24px;
-    }
-
-    .alert {
-        padding: 16px;
-        border-radius: 12px;
-        margin-bottom: 16px;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-    }
-
-    .alert-info {
-        background: #ebf8ff;
-        color: #2a4365;
-        border: 1px solid #bee3f8;
-    }
-
-    .alert-danger {
-        background: #fed7d7;
-        color: #742a2a;
-        border: 1px solid #feb2b2;
-    }
-
-    .alert i {
-        margin-right: 8px;
-        font-size: 16px;
-    }
-
-    /* Form Styles */
-    .form-group {
-        margin-bottom: 24px;
-    }
-
-        .form-group label {
-            display: block;
-            color: #2d3748;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-    .input-wrapper {
-        position: relative;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 16px 48px 16px 16px;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        font-size: 16px;
-        transition: all 0.3s ease;
-        background: #ffffff;
-    }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-control.is-invalid {
-            border-color: #e53e3e;
-            animation: shake 0.5s ease-in-out;
-        }
-
-        .form-control.is-valid {
-            border-color: #38a169;
-        }
-
-    .input-icon {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #a0aec0;
-        transition: color 0.3s ease;
-    }
-
-    .form-control:focus + .input-icon {
-        color: #667eea;
-    }
-
-    .invalid-feedback {
-        color: #e53e3e;
-        font-size: 14px;
-        margin-top: 6px;
-        display: none;
-    }
-
-        .invalid-feedback.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-    /* Button Styles */
-    .btn {
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-    .btn i {
-        margin-right: 8px;
-    }
-
-    /* Login Links */
-    .login-link {
-        text-align: center;
-        margin-top: 32px;
-        padding-top: 24px;
-        border-top: 1px solid #e2e8f0;
-    }
-
-        .login-link p {
-            color: #718096;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-            .login-link p:last-child {
-                margin-bottom: 0;
-            }
-
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-block;
-            margin: 4px 0;
-        }
-
-            .login-link a:hover {
-                color: #764ba2;
-                transform: translateY(-1px);
-            }
-
-    /* Animations */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes shake {
-        0%, 100% {
-            transform: translateX(0);
-        }
-
-        10%, 30%, 50%, 70%, 90% {
-            transform: translateX(-5px);
-        }
-
-        20%, 40%, 60%, 80% {
-            transform: translateX(5px);
-        }
-    }
-
-    @@keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Loading State */
-    .btn.loading {
-        position: relative;
-        color: transparent;
-    }
-
-        .btn.loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid transparent;
-            border-top: 2px solid #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-    @@keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        body {
-            padding: 15px;
-        }
-
-        .container {
-            padding: 32px 24px;
-            max-width: 380px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-        }
-
-        .form-control {
-            padding: 14px 44px 14px 14px;
-            font-size: 15px;
-        }
-
-        .btn {
-            padding: 14px;
-            font-size: 15px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        body {
-            padding: 10px;
-        }
-
-        .container {
-            padding: 24px 20px;
-            border-radius: 20px;
-        }
-
-        .header h1 {
-            font-size: 22px;
-        }
-
-        .header p {
-            font-size: 14px;
-        }
-
-        .form-control {
-            padding: 12px 40px 12px 12px;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 12px;
-            font-size: 14px;
-        }
-
-        .input-icon {
-            right: 12px;
-        }
-    }
-    /* Thêm style cho alert danger */
-    .alert-danger {
-        background: #fed7d7;
-        color: #742a2a;
-        border: 1px solid #feb2b2;
-    }
-
-    /* Điều chỉnh container cho trang đăng nhập */
-    .container {
-        max-width: 400px;
-    }
-
-    /* Style cho forgot password và register links */
-    .login-link p {
-        margin-bottom: 12px;
-    }
-
-        .login-link p:last-child {
-            margin-bottom: 0;
-        }
-
-    .login-link a {
-        display: inline-block;
-        margin: 4px 0;
-    }
-
-    /* Hover effect cho button */
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    /* Focus effect cho inputs */
-    .form-control:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    /* Animation cho form */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .container {
-        animation: fadeInUp 0.6s ease;
-    }
-</style>
-
-<div class="container">
-    <div class="header">
-        <h1>Đăng nhập tài khoản</h1>
-        <p>Chào mừng bạn quay trở lại</p>
-    </div>
-
-    <div class="alert alert-danger" id="alertBox" style="display: none;" role="alert">
-        <i class="fas fa-exclamation-circle"></i>
-        <span id="errorMessage"></span>
-    </div>
-
-    <form id="logIn_form" class="form-section">
-        <div class="form-group">
-            <label for="nameCus">Tên đăng nhập</label>
-            <div class="input-wrapper">
-                <input type="text" class="form-control" id="nameCus" required placeholder="Nhập tên bạn vào" />
-                <i class="fas fa-user input-icon"></i>
+<div class="auth-page">
+    <aside class="auth-brand">
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+        <div class="auth-orb auth-orb-3"></div>
+        <div class="auth-brand-inner">
+            <div class="auth-logo">
+                <div class="auth-logo-icon"><i class="fas fa-microchip"></i></div>
+                <div class="auth-logo-text">TechStore<span>VN</span></div>
             </div>
-            <div class="invalid-feedback">Vui lòng nhập tên đăng nhập.</div>
+            <h2>Công nghệ <em>đỉnh cao</em>,<br>trải nghiệm tuyệt vời</h2>
+            <p>Đăng nhập để khám phá hàng ngàn sản phẩm công nghệ chính hãng với ưu đãi VIP độc quyền.</p>
+            <ul class="auth-features">
+                <li><i class="fas fa-shield-alt"></i> Bảo mật 2 lớp (2FA)</li>
+                <li><i class="fas fa-truck"></i> Giao hàng nhanh toàn quốc</li>
+                <li><i class="fas fa-crown"></i> Chương trình VIP 3 hạng</li>
+                <li><i class="fas fa-headset"></i> Hỗ trợ 24/7</li>
+            </ul>
         </div>
+    </aside>
 
-        <div class="form-group">
-            <label for="passCus">Mật khẩu</label>
-            <div class="input-wrapper">
-                <input type="password" class="form-control" id="passCus" required placeholder="Nhập mật khẩu bạn vào" />
-                <i class="fas fa-lock input-icon"></i>
+    <main class="auth-form-panel">
+        <div class="auth-card">
+            <div class="header">
+                <h1>Đăng nhập tài khoản</h1>
+                <p>Chào mừng bạn quay trở lại 👋</p>
             </div>
-            <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
-        </div>
-        @* //Thêm captcha vào form *@
-        <div class="g-recaptcha" data-sitekey="6LcWOR4tAAAAALNTeJa-dpcO2xt6AXG_9kpZeoBM"></div> 
-        <p style="font-size: 0.9rem; color: gray;">
-            <input type="checkbox" id="btnIsRemember" value="true" />
-            <span>Lưu phiên đăng nhập</span>
-        </p>
-        
-        <button type="submit" class="btn btn-primary" id="btnSubmitLogin">
-            <i class="fas fa-sign-in-alt"></i> Đăng nhập
-        </button>
-        @* <a href="@Url.Action("LoginWithGoogle", "User")" class="btn btn-danger">
-            Đăng nhập Google
-        </a> *@
-    </form>
 
-    <div id="2factorform" class="form-section" style="display:none;">
-        <div class="otp-card">
-            <div class="otp-header">
-                <i class="fas fa-shield-alt otp-icon"></i>
-                <h3>Xác thực hai lớp (2FA)</h3>
-                <p>Mở ứng dụng Authenticator để lấy mã 6 số</p>
+            <div class="alert alert-danger" id="alertBox" style="display: none;" role="alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorMessage"></span>
             </div>
-            
-            <div class="otp-input-section" style="margin-top: 20px;">
-                <div class="input-wrapper">
-                    <input type="text" maxlength="6" class="form-control otp-input" id="otpCode" placeholder="000000" style="letter-spacing: 5px; text-align: center; font-size: 1.5rem;" />
-                    <i class="fas fa-key input-icon"></i>
+
+            <form id="logIn_form" class="auth-login-form">
+                <div class="form-group">
+                    <label for="nameCus">Tên đăng nhập</label>
+                    <div class="input-wrapper">
+                        <input type="text" class="form-control" id="nameCus" required placeholder="Nhập tên đăng nhập" />
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
+                    <div class="invalid-feedback">Vui lòng nhập tên đăng nhập.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="passCus">Mật khẩu</label>
+                    <div class="input-wrapper">
+                        <input type="password" class="form-control" id="passCus" required placeholder="Nhập mật khẩu" />
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+                    <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
+                </div>
+
+                <div class="g-recaptcha" data-sitekey="6LcWOR4tAAAAALNTeJa-dpcO2xt6AXG_9kpZeoBM"></div>
+
+                <div class="remember-row">
+                    <input type="checkbox" id="btnIsRemember" value="true" />
+                    <label for="btnIsRemember">Lưu phiên đăng nhập</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btnSubmitLogin">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
+            </form>
+
+            <div id="2factorform" class="auth-otp-step" style="display:none;">
+                <div class="otp-card">
+                    <div class="otp-header">
+                        <i class="fas fa-shield-alt otp-icon"></i>
+                        <h3>Xác thực hai lớp (2FA)</h3>
+                        <p>Mở ứng dụng Authenticator để lấy mã 6 số</p>
+                    </div>
+                    <div class="otp-input-section">
+                        <div class="input-wrapper">
+                            <input type="text" maxlength="6" class="form-control otp-input" id="otpCode" placeholder="000000" />
+                            <i class="fas fa-key input-icon"></i>
+                        </div>
+                    </div>
+                    <div class="otp-actions">
+                        <button type="button" class="btn btn-primary" id="btnVerifyOTP">
+                            <i class="fas fa-check-circle"></i> Xác thực
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="window.location.reload()">
+                            Quay lại
+                        </button>
+                    </div>
                 </div>
             </div>
-            
-            <div class="otp-actions">
-                <button type="button" class="btn btn-primary" id="btnVerifyOTP">
-                    <i class="fas fa-check-circle"></i> Xác thực
-                </button>
-                <button type="button" class="btn" style="background: #e2e8f0; color: #4a5568;" onclick="window.location.reload()">
-                    Quay lại
-                </button>
+
+            <div class="login-link">
+                <p><a href="/User/ResetPassword">Quên mật khẩu?</a></p>
+                <p>Không có tài khoản? <a href="/User/DangKy">Đăng ký ngay</a></p>
             </div>
         </div>
-    </div>
-
-    <div class="login-link">
-        <p><a href="/User/ResetPassword">Quên mật khẩu?</a></p>
-        <p>Không có tài khoản? <a href="/User/DangKy">Đăng ký ngay</a></p>
-    </div>
+    </main>
 </div>
+
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
-
 document.addEventListener("DOMContentLoaded", function () {
-    
-    // Biến tạm để nhớ tài khoản đang đăng nhập dở dang
     let tempUsername = "";
     let tempIsRemember = false;
 
@@ -597,59 +116,43 @@ document.addEventListener("DOMContentLoaded", function () {
         alertBox.style.display = "flex";
     }
 
-    // -----------------------------------------
-    // BƯỚC 1: XỬ LÝ GỬI FORM ĐĂNG NHẬP
-    // -----------------------------------------
     logInForm.addEventListener("submit", async function (e) {
         e.preventDefault();
-        
         tempUsername = document.getElementById("nameCus").value;
         const pass = document.getElementById("passCus").value;
         tempIsRemember = document.getElementById("btnIsRemember").checked;
 
-        const responseToken = grecaptcha.getResponse(); //Kiểm tra captcha có tích vào chưa
-        // Kiểm tra xem người dùng đã tick vào ô chưa
+        const responseToken = grecaptcha.getResponse();
         if (responseToken.length === 0) {
             alert("Vui lòng tích vào ô 'Tôi không phải là người máy'!");
             return;
         }
-        else {
-            try {
-                let response = await fetch('/User/DangNhapXThuc', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ NameCus: tempUsername, PassCus: pass, isRemember: tempIsRemember })
-                });
 
-                let data = await response.json();
+        try {
+            let response = await fetch('/User/DangNhapXThuc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ NameCus: tempUsername, PassCus: pass, isRemember: tempIsRemember })
+            });
+            let data = await response.json();
 
-                if (!data.success) {
-                    showAlert(data.message); // Sai pass hoặc bị ban
-                } 
-                else if (data.need2fa) {
-                    // Thành công nhưng vướng 2FA -> Trượt sang form nhập mã
-                    alertBox.style.display = "none";
-                    logInForm.style.display = "none";
-                    factorForm.style.display = "block";
-                    document.getElementById("otpCode").focus(); // Tự trỏ chuột vào ô nhập
-                } 
-                else {
-                    // Thành công không vướng 2FA -> Chuyển vào trang chủ
-                    window.location.href = data.redirectUrl;
-                }
-            } catch (error) {
-                showAlert("Lỗi kết nối đến máy chủ!");
+            if (!data.success) {
+                showAlert(data.message);
+            } else if (data.need2fa) {
+                alertBox.style.display = "none";
+                logInForm.style.display = "none";
+                factorForm.style.display = "block";
+                document.getElementById("otpCode").focus();
+            } else {
+                window.location.href = data.redirectUrl;
             }
+        } catch (error) {
+            showAlert("Lỗi kết nối đến máy chủ!");
         }
-        
     });
 
-    // -----------------------------------------
-    // BƯỚC 2: XỬ LÝ NÚT XÁC THỰC 2FA
-    // -----------------------------------------
     document.getElementById("btnVerifyOTP").addEventListener("click", async function() {
         const otpInput = document.getElementById("otpCode").value;
-
         if (otpInput.length !== 6) {
             showAlert("Vui lòng nhập đủ 6 số!");
             return;
@@ -659,24 +162,19 @@ document.addEventListener("DOMContentLoaded", function () {
             let response = await fetch('/User/VerifyLoginOTP', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // Gửi kèm tên tài khoản để C# biết ai đang xác thực
                 body: JSON.stringify({ NameCus: tempUsername, OtpCode: otpInput, isRemember: tempIsRemember })
             });
-
             let data = await response.json();
 
             if (data.success) {
-                // Thành công -> Vào trang chủ
                 window.location.href = data.redirectUrl;
             } else {
-                // Nhập sai mã 6 số
                 showAlert(data.message);
-                document.getElementById("otpCode").value = ""; // Xóa trắng bắt nhập lại
+                document.getElementById("otpCode").value = "";
             }
         } catch (error) {
             showAlert("Lỗi kết nối mạng!");
         }
     });
-
 });
 </script>

@@ -3,580 +3,201 @@
     Layout = "~/Views/Shared/_LogSignLayout.cshtml";
 }
 
-<link rel="stylesheet" href="@Url.Content("~/Content/styleLogSign.css")" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-    .otp-card {
-    background: rgba(255,255,255,0.98);
-    border-radius: 18px;
-    box-shadow: 0 8px 32px rgba(102,126,234,0.10);
-    padding: 40px 32px;
-    max-width: 400px;
-    margin: 0 auto;
-    text-align: center;
-    animation: fadeInUp 0.5s;
-}
-.otp-header {
-    margin-bottom: 24px;
-}
-.otp-icon {
-    font-size: 2.2rem;
-    color: #667eea;
-    margin-bottom: 8px;
-}
-.otp-header h3 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #2d3748;
-}
-.otp-header p {
-    color: #718096;
-    font-size: 0.98rem;
-    margin-bottom: 0;
-}
-.otp-qr-section {
-    margin-bottom: 24px;
-}
-.otp-qr-img {
-    width: 160px;
-    height: 160px;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(102,126,234,0.12);
-    background: #f7fafc;
-    object-fit: contain;
-    margin: 0 auto;
-    display: block;
-}
-.otp-input-section {
-    margin-bottom: 18px;
-    text-align: left;
-}
-.otp-label {
-    font-weight: 600;
-    color: #4f46e5;
-    text-align:center;
-    margin-bottom: 8px;
-    display: block;
-}
-.otp-input {
-    font-size: 1.1rem;
-    letter-spacing: 2px;
-    text-align: center;
-}
-.otp-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 18px;
-}
-.btn-success {
-    background: linear-gradient(135deg, #38a169 0%, #2b6cb0 100%);
-    color: #fff;
-    border: none;
-}
-    .otp-card {
-        padding: 18px 8px;
-    }
-    .otp-qr-img {
-        width: 120px;
-        height: 120px;
-   }
-
-    .container {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 24px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 2500px;
-        padding: 150px;
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.6s ease;
-    }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-        }
-
-    .header {
-        text-align: center;
-        margin-bottom: 32px;
-    }
-
-        .header h1 {
-            color: #1a202c;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            color: #718096;
-            font-size: 16px;
-        }
-
-    .progress-bar {
-        height: 4px;
-        background: #e2e8f0;
-        border-radius: 2px;
-        margin-bottom: 32px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-        border-radius: 2px;
-        transition: width 0.3s ease;
-        width: 50%;
-    }
-
-    .form-section {
-        display: none;
-    }
-
-        .form-section.active {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
-    @@keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .form-group {
-        margin-bottom: 10px;
-        text-align: left;
-    }
-
-        .form-group label {
-            display: block;
-            color: #2d3748;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 15px;
-            padding: 0 150px;
-            text-align: left;
-            margin-left: 0;
-        }
-
-    .label-bold {
-        font-weight: bold;
-        display: flex;
-        margin-left: -4px; /* đảm bảo nằm trái */
-    }
-
-    .input-wrapper {
-        position: relative;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 16px 48px 16px 16px;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        font-size: 16px;
-        transition: all 0.3s ease;
-        background: #ffffff;
-    }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-control.is-invalid {
-            border-color: #e53e3e;
-        }
-
-        .form-control.is-valid {
-            border-color: #38a169;
-        }
-
-    .input-icon {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #a0aec0;
-        transition: color 0.3s ease;
-    }
-
-    .form-control:focus + .input-icon {
-        color: #667eea;
-    }
-
-    .invalid-feedback {
-        color: #e53e3e;
-        font-size: 14px;
-        margin-top: 6px;
-        display: none;
-    }
-
-        .invalid-feedback.show {
-            display: block;
-        }
-
-    .password-strength {
-        margin-top: 12px;
-    }
-
-    .strength-bar {
-        height: 8px;
-        background: #e2e8f0;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 8px;
-    }
-
-    .strength-fill {
-        height: 100%;
-        width: 1%;
-        background: #e53e3e;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
-
-    .strength-text {
-        font-size: 12px;
-        color: #718096;
-    }
-
-    .btn {
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 8px;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-    .btn-secondary {
-        background: #f7fafc;
-        color: #4a5568;
-        border: 2px solid #e2e8f0;
-    }
-
-        .btn-secondary:hover {
-            background: #edf2f7;
-        }
-
-    .btn-group {
-        display: flex;
-        gap: 12px;
-        margin-top: 24px;
-    }
-
-        .btn-group .btn {
-            margin-top: 0;
-        }
-
-    .alert {
-        padding: 16px;
-        border-radius: 12px;
-        margin-bottom: 24px;
-        font-size: 14px;
-    }
-
-    .alert-success {
-        background: #f0fff4;
-        color: #22543d;
-        border: 1px solid #c6f6d5;
-    }
-
-    .alert-info {
-        background: #ebf8ff;
-        color: #2a4365;
-        border: 1px solid #bee3f8;
-    }
-
-    .login-link {
-        text-align: center;
-        margin-top: 32px;
-        padding-top: 24px;
-        border-top: 1px solid #e2e8f0;
-    }
-
-        .login-link p {
-            color: #718096;
-            margin-bottom: 8px;
-        }
-
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-
-            .login-link a:hover {
-                color: #764ba2;
-            }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .container {
-            margin: 10px;
-            padding: 24px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-        }
-
-        .btn-group {
-            flex-direction: column;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        body {
-            padding: 10px;
-        }
-
-        .container {
-            padding: 20px;
-        }
-
-        .header h1 {
-            font-size: 22px;
-        }
-
-        .form-control {
-            padding: 14px 44px 14px 14px;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 14px;
-            font-size: 14px;
-        }
-        /*.label-fix {
-        display: flex;*/
-        /* width: 100%;*/
-        /*text-align: left;*/
-        /*font-weight: bold;
-        margin: 0 ;
-        padding: 0 ;*/
-        /*}*/
-    }
-</style>
-
-<div class="container">
-    <div class="header">
-        <h1>Đăng ký tài khoản</h1>
-        <p>Điền thông tin cá nhân để tiếp tục</p>
-    </div>
-
-    <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-    </div>
-
-    <div id="alertContainer">
-        <div class="alert alert-info" id="errorAlert" style="display: none;">
-            <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
-            <span id="errorMessage"></span>
+<div class="auth-page">
+    <aside class="auth-brand">
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+        <div class="auth-orb auth-orb-3"></div>
+        <div class="auth-brand-inner">
+            <div class="auth-logo">
+                <div class="auth-logo-icon"><i class="fas fa-microchip"></i></div>
+                <div class="auth-logo-text">TechStore<span>VN</span></div>
+            </div>
+            <h2>Tham gia cộng đồng <em>TechStoreVN</em></h2>
+            <p>Tạo tài khoản miễn phí và nhận ngay ưu đãi chào mừng cùng quyền lợi VIP khi mua sắm.</p>
+            <ul class="auth-features">
+                <li><i class="fas fa-gift"></i> Ưu đãi thành viên mới</li>
+                <li><i class="fas fa-star"></i> Tích điểm VIP tự động</li>
+                <li><i class="fas fa-bolt"></i> Thanh toán nhanh 1 chạm</li>
+                <li><i class="fas fa-bell"></i> Thông báo khuyến mãi sớm nhất</li>
+            </ul>
         </div>
-        <div class="alert alert-success" id="successAlert" style="display: none;">
-            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
-            <span id="successMessage"></span>
-        </div>
-    </div>
+    </aside>
 
-    <form asp-action="DangKy" asp-controller="User" method="post" class="needs-validation" novalidate>
-        
-        <div asp-validation-summary="All" class="text-danger"></div>
-
-        @if (ViewBag.Error != null)
-        {
-            <div class="alert alert-info">@ViewBag.Error</div>
-        }
-        else if (ViewBag.Success != null)
-        {
-            <div class="alert alert-success">@ViewBag.Success</div>
-        }
-
-        <div id="accountInfo" class="form-section active">
-            <label for="nameCus" style="margin-left: -4px; font-weight: bold;">Tên bạn</label>
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <input type="text" class="form-control" id="nameCus" name="NameCus" required placeholder="Nhập tên bạn vào" />
-                    <i class="fas fa-user input-icon"></i>
-                </div>
-                <div class="invalid-feedback">Vui lòng nhập tên của bạn.</div>
+    <main class="auth-form-panel">
+        <div class="auth-card register-card">
+            <div class="header">
+                <h1>Đăng ký tài khoản</h1>
+                <p>Điền thông tin cá nhân để tiếp tục</p>
             </div>
 
-            <label for="phoneCus" style="margin-left: -4px; font-weight: bold;">Số điện thoại</label>
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <input type="tel" class="form-control" id="phoneCus" name="PhoneCus" required placeholder="Nhập số điện thoại" pattern="^\d{10}$" />
-                    <i class="fas fa-phone input-icon"></i>
-                </div>
-                <div class="invalid-feedback">Số của bạn phải đủ 10 số.</div>
+            <div class="progress-steps">
+                <span id="stepLabel1" class="step-active">① Thông tin tài khoản</span>
+                <span id="stepLabel2">② Địa chỉ giao hàng</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
             </div>
 
-            <label for="emailCus" style="margin-left: -4px; font-weight: bold;">Email của bạn</label>
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <input type="email" class="form-control" id="emailCus" name="EmailCus" required placeholder="Nhập email" />
-                    <i class="fas fa-envelope input-icon"></i>
+            <div id="alertContainer">
+                <div class="alert alert-info" id="errorAlert" style="display: none;">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="errorMessage"></span>
                 </div>
-                <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                <div class="alert alert-success" id="successAlert" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="successMessage"></span>
+                </div>
             </div>
 
-            <label for="passCus" style="margin-left: -4px; font-weight: bold;">Mật khẩu</label>
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <input type="password" class="form-control" id="passCus" name="PassCus" required placeholder="Nhập mật khẩu" />
-                    <i class="fas fa-lock input-icon"></i>
-                </div>
-                <div class="invalid-feedback">Mật khẩu ít nhất 8 ký tự, gồm số và chữ.</div>
-                <div class="password-strength">
-                    <div class="strength-bar">
-                        <div class="strength-fill" id="strengthFill"></div>
+            <form asp-action="DangKy" asp-controller="User" method="post" class="needs-validation" novalidate>
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-info"><i class="fas fa-info-circle"></i> @ViewBag.Error</div>
+                }
+                else if (ViewBag.Success != null)
+                {
+                    <div class="alert alert-success"><i class="fas fa-check-circle"></i> @ViewBag.Success</div>
+                }
+
+                <div id="accountInfo" class="auth-step active">
+                    <div class="form-group">
+                        <label for="nameCus" class="field-label">Tên bạn</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-control" id="nameCus" name="NameCus" required placeholder="Nhập tên bạn vào" />
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Vui lòng nhập tên của bạn.</div>
                     </div>
-                    <div class="strength-text" id="strengthText">Độ mạnh mật khẩu</div>
-                </div>
-            </div>
 
-            <div class="form-group">
-                <label for="dateOfBirth" class="label-fix">Sinh nhật</label>
-                <div class="input-wrapper">
-                    <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth" required />
-                    <i class="fas fa-calendar input-icon"></i>
-                </div>
-            </div>
-
-            <button type="button" class="btn btn-primary" onclick="showAddressInfo()">
-                Tiếp theo <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
-            </button>
-        </div>
-
-        <div id="addressInfo" class="form-section">
-            <label for="streetAddress" style="margin-left: -4px; font-weight: bold;">Địa chỉ nhà</label>
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <input type="text" class="form-control" id="streetAddress" name="StreetAddress" required placeholder="Nhập địa chỉ nhà" />
-                    <i class="fas fa-home input-icon"></i>
-                </div>
-                <div class="invalid-feedback">Vui lòng nhập địa chỉ.</div>
-            </div>
-
-            <label for="ward" style="margin-left: -4px; font-weight: bold;">Phường, xã</label>
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <input type="text" class="form-control" id="ward" name="Ward" required placeholder="Nhập phường, xã" />
-                    <i class="fas fa-map-marker-alt input-icon"></i>
-                </div>
-                <div class="invalid-feedback">Vui lòng nhập phường, xã.</div>
-            </div>
-
-            <label for="district" style="margin-left: -4px; font-weight: bold;">Quận, huyện</label>
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <input type="text" class="form-control" id="district" name="District" required placeholder="Nhập quận, huyện" />
-                    <i class="fas fa-map-marker-alt input-icon"></i>
-                </div>
-                <div class="invalid-feedback">Vui lòng nhập quận, huyện.</div>
-            </div>
-
-            <div class="form-group">
-                <label for="city" style="margin-left: -4px; font-weight: bold;">Tỉnh, Thành phố</label>
-                <div class="input-wrapper">
-                    <input type="text" class="form-control" id="city" name="City" required placeholder="Nhập thành phố" />
-                    <i class="fas fa-city input-icon"></i>
-                </div>
-                <div class="invalid-feedback">Vui lòng nhập thành phố, tỉnh.</div>
-            </div>
-
-            <div class="btn-group">
-                <button type="button" class="btn btn-secondary" onclick="showAccountInfo()">
-                    <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Quay lại
-                </button>
-                <button type="submit" id="btnSubmit" class="btn btn-success" style="display: block;">Hoàn tất đăng ký</button>
-
-                <!--<button type="button" class="btn btn-secondary" onclick="show2Factor()">
-                    <i class="fas fa-arrow-right" style="margin-right: 8px;"></i> Tiếp theo
-                </button> -->
-            </div>
-        </div>
-
-        <div id="2factorform" class="form-section">
-            <div class="otp-card">
-                <div class="otp-header">
-                    <i class="fas fa-shield-alt otp-icon"></i>
-                    <h3>Xác thực hai lớp (2FA)</h3>
-                    <p>Dùng app Google Authencator hay Microsoft Authencator để lấy mã OTP</p>
-                </div>
-                <div class="otp-qr-section">
-                    <img id="imgQR" alt="QR Code ứng dụng" class="otp-qr-img" />
-                </div>
-                <div class="otp-input-section">
-                    <label for="otpCode" class="otp-label">Nhập mã OTP từ ứng dụng</label>
-                    <div class="input-wrapper">
-                        <input type="number" class="form-control otp-input" id="otpCode" placeholder="Nhập mã OTP" />
-                        <i class="fas fa-key input-icon"></i>
+                    <div class="form-group">
+                        <label for="phoneCus" class="field-label">Số điện thoại</label>
+                        <div class="input-wrapper">
+                            <input type="tel" class="form-control" id="phoneCus" name="PhoneCus" required placeholder="Nhập số điện thoại" pattern="^\d{10}$" />
+                            <i class="fas fa-phone input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Số của bạn phải đủ 10 số.</div>
                     </div>
-                    <div class="invalid-feedback" id="invalid-otp" style="display:none">Vui lòng nhập đủ mã OTP gồm 6 số.</div>
-                </div>
-                <div class="otp-actions">
-                    <button type="button" class="btn btn-primary" id="otpSubmit" onclick="verifyOTP()">
-                        <i class="fas fa-check-circle"></i> Xác thực OTP
+
+                    <div class="form-group">
+                        <label for="emailCus" class="field-label">Email của bạn</label>
+                        <div class="input-wrapper">
+                            <input type="email" class="form-control" id="emailCus" name="EmailCus" required placeholder="Nhập email" />
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passCus" class="field-label">Mật khẩu</label>
+                        <div class="input-wrapper">
+                            <input type="password" class="form-control" id="passCus" name="PassCus" required placeholder="Nhập mật khẩu" />
+                            <i class="fas fa-lock input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Mật khẩu ít nhất 8 ký tự, gồm số và chữ.</div>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText">Độ mạnh mật khẩu</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dateOfBirth" class="field-label">Sinh nhật</label>
+                        <div class="input-wrapper">
+                            <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth" required />
+                            <i class="fas fa-calendar input-icon"></i>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="showAddressInfo()">
+                        Tiếp theo <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
+
+                <div id="addressInfo" class="auth-step">
+                    <div class="form-group">
+                        <label for="streetAddress" class="field-label">Địa chỉ nhà</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-control" id="streetAddress" name="StreetAddress" required placeholder="Nhập địa chỉ nhà" />
+                            <i class="fas fa-home input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Vui lòng nhập địa chỉ.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ward" class="field-label">Phường, xã</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-control" id="ward" name="Ward" required placeholder="Nhập phường, xã" />
+                            <i class="fas fa-map-marker-alt input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Vui lòng nhập phường, xã.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district" class="field-label">Quận, huyện</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-control" id="district" name="District" required placeholder="Nhập quận, huyện" />
+                            <i class="fas fa-map-marker-alt input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Vui lòng nhập quận, huyện.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city" class="field-label">Tỉnh, Thành phố</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-control" id="city" name="City" required placeholder="Nhập thành phố" />
+                            <i class="fas fa-city input-icon"></i>
+                        </div>
+                        <div class="invalid-feedback">Vui lòng nhập thành phố, tỉnh.</div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" onclick="showAccountInfo()">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </button>
+                        <button type="submit" id="btnSubmit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Hoàn tất đăng ký
+                        </button>
+                    </div>
+                </div>
+
+                <div id="2factorform" class="auth-step">
+                    <div class="otp-card">
+                        <div class="otp-header">
+                            <i class="fas fa-shield-alt otp-icon"></i>
+                            <h3>Xác thực hai lớp (2FA)</h3>
+                            <p>Dùng app Google Authenticator hay Microsoft Authenticator để lấy mã OTP</p>
+                        </div>
+                        <div class="otp-qr-section">
+                            <img id="imgQR" alt="QR Code ứng dụng" class="otp-qr-img" />
+                        </div>
+                        <div class="otp-input-section">
+                            <label for="otpCode" class="otp-label">Nhập mã OTP từ ứng dụng</label>
+                            <div class="input-wrapper">
+                                <input type="number" class="form-control otp-input" id="otpCode" placeholder="Nhập mã OTP" />
+                                <i class="fas fa-key input-icon"></i>
+                            </div>
+                            <div class="invalid-feedback" id="invalid-otp" style="display:none">Vui lòng nhập đủ mã OTP gồm 6 số.</div>
+                        </div>
+                        <div class="otp-actions">
+                            <button type="button" class="btn btn-primary" id="otpSubmit" onclick="verifyOTP()">
+                                <i class="fas fa-check-circle"></i> Xác thực OTP
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="login-link">
+                <p>Đã có tài khoản?</p>
+                <a href="@Url.Action("DangNhap", "User")">Đăng nhập ngay</a>
             </div>
         </div>
-    </form>
-
-    <div class="login-link">
-        <p>Đã có tài khoản?</p>
-        <a href="@Url.Action("DangNhap", "User")">Đăng nhập ngay</a>
-    </div>
+    </main>
 </div>
 
 <script>
@@ -603,19 +224,15 @@
     function setupOTP() {
         const name = document.getElementById("nameCus").value;
         const pass = document.getElementById("passCus").value;
-        
         fetch('@Url.Action("Factor2Setup", "User")', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user: name, pass: pass })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const img = document.getElementById("imgQR");
-                img.src = "data:image/png;base64," + data.factorModel.qrCodeImage; 
+                document.getElementById("imgQR").src = "data:image/png;base64," + data.factorModel.qrCodeImage;
                 modelOTP = data.factorModel;
             }
         })
@@ -624,30 +241,22 @@
 
     function verifyOTP() {
         const feedback = document.getElementById("invalid-otp");
-        if (feedback.style.display === "block") {
-            feedback.style.display = "none"
-        }
-        
-        const input = document.getElementById("otpCode").value;
-        const regrex = /^[0-9]{6}$/ 
+        if (feedback.style.display === "block") feedback.style.display = "none";
 
-        if (regrex.test(input)) {
+        const input = document.getElementById("otpCode").value;
+        if (/^[0-9]{6}$/.test(input)) {
             fetch('@Url.Action("VerifyOTP", "User")', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ model: modelOTP, OtpCode: input })
             })
             .then(response => response.json())
             .then(data => {
-                const submit = document.getElementById("btnSubmit");
-                const otpBtn = document.getElementById("otpSubmit");
                 if (data.success) {
-                    submit.style.display = "block";
-                    otpBtn.style.display = "none"; // Ẩn nút xác thực đi sau khi thành công
+                    document.getElementById("btnSubmit").style.display = "block";
+                    document.getElementById("otpSubmit").style.display = "none";
                 } else {
-                    submit.style.display = "none";
+                    document.getElementById("btnSubmit").style.display = "none";
                     feedback.style.display = "block";
                     alert("Nhập OTP không chính xác, vui lòng nhập lại");
                 }
@@ -666,56 +275,44 @@
     }
 
     function updateProgress() {
-        const progressFill = document.getElementById("progressFill");
-        progressFill.style.width = currentStep === 1 ? "50%" : "100%";
+        document.getElementById("progressFill").style.width = currentStep === 1 ? "50%" : "100%";
+        document.getElementById("stepLabel1").classList.toggle("step-active", currentStep === 1);
+        document.getElementById("stepLabel2").classList.toggle("step-active", currentStep === 2);
     }
 
-    // Các hàm validate UI giữ nguyên
     function validateCurrentStep() {
-        const currentSection = document.getElementById("accountInfo");
-        const inputs = currentSection.querySelectorAll("input[required]");
+        const inputs = document.getElementById("accountInfo").querySelectorAll("input[required]");
         let isValid = true;
-
         inputs.forEach(input => {
             if (!input.checkValidity()) {
                 input.classList.add("is-invalid");
-                const feedback = input.parentElement.nextElementSibling;
-                if (feedback && feedback.classList.contains("invalid-feedback")) {
-                    feedback.classList.add("show");
-                }
+                const feedback = input.closest(".form-group")?.querySelector(".invalid-feedback");
+                if (feedback) feedback.classList.add("show");
                 isValid = false;
             } else {
                 input.classList.remove("is-invalid");
                 input.classList.add("is-valid");
-                const feedback = input.parentElement.nextElementSibling;
-                if (feedback && feedback.classList.contains("invalid-feedback")) {
-                    feedback.classList.remove("show");
-                }
+                const feedback = input.closest(".form-group")?.querySelector(".invalid-feedback");
+                if (feedback) feedback.classList.remove("show");
             }
         });
         return isValid;
     }
 
     function validateCurrentAdreessStep() {
-        const currentSection = document.getElementById("addressInfo");
-        const inputs = currentSection.querySelectorAll("input[required]");
+        const inputs = document.getElementById("addressInfo").querySelectorAll("input[required]");
         let isValid = true;
-
         inputs.forEach(input => {
             if (!input.checkValidity()) {
                 input.classList.add("is-invalid");
-                const feedback = input.parentElement.nextElementSibling;
-                if (feedback && feedback.classList.contains("invalid-feedback")) {
-                    feedback.classList.add("show");
-                }
+                const feedback = input.closest(".form-group")?.querySelector(".invalid-feedback");
+                if (feedback) feedback.classList.add("show");
                 isValid = false;
             } else {
                 input.classList.remove("is-invalid");
                 input.classList.add("is-valid");
-                const feedback = input.parentElement.nextElementSibling;
-                if (feedback && feedback.classList.contains("invalid-feedback")) {
-                    feedback.classList.remove("show");
-                }
+                const feedback = input.closest(".form-group")?.querySelector(".invalid-feedback");
+                if (feedback) feedback.classList.remove("show");
             }
         });
         return isValid;
@@ -723,20 +320,15 @@
 
     document.querySelectorAll("input[required]").forEach(input => {
         input.addEventListener("input", function () {
+            const feedback = this.closest(".form-group")?.querySelector(".invalid-feedback");
             if (this.checkValidity()) {
                 this.classList.remove("is-invalid");
                 this.classList.add("is-valid");
-                const feedback = this.parentElement.nextElementSibling;
-                if (feedback && feedback.classList.contains("invalid-feedback")) {
-                    feedback.classList.remove("show");
-                }
+                if (feedback) feedback.classList.remove("show");
             } else {
                 this.classList.add("is-invalid");
                 this.classList.remove("is-valid");
-                const feedback = this.parentElement.nextElementSibling;
-                if (feedback && feedback.classList.contains("invalid-feedback")) {
-                    feedback.classList.add("show");
-                }
+                if (feedback) feedback.classList.add("show");
             }
         });
     });
@@ -745,8 +337,6 @@
         const password = this.value;
         const strengthFill = document.getElementById("strengthFill");
         const strengthText = document.getElementById("strengthText");
-
-        let strength = 0;
         const checks = [
             password.length >= 8,
             /[A-Z]/.test(password),
@@ -754,21 +344,18 @@
             /[0-9]/.test(password),
             /[^A-Za-z0-9]/.test(password)
         ];
-
-        strength = checks.filter(check => check).length;
-
-        const colors = ["#e53e3e", "#ed8936", "#ecc94b", "#38a169", "#2b6cb0"];
+        const strength = checks.filter(c => c).length;
+        const colors = ["#ef4444", "#f97316", "#eab308", "#10b981", "#3b82f6"];
         const widths = ["20%", "40%", "60%", "80%", "100%"];
         const texts = ["Rất yếu", "Yếu", "Trung bình", "Mạnh", "Rất mạnh"];
 
         if (password.length === 0) {
-            strength = 0;
             strengthFill.style.width = "1%";
             strengthFill.style.backgroundColor = "#e2e8f0";
             strengthText.textContent = "Độ mạnh mật khẩu";
         } else {
             strengthFill.style.width = widths[strength - 1] || "20%";
-            strengthFill.style.backgroundColor = colors[strength - 1] || "#e53e3e";
+            strengthFill.style.backgroundColor = colors[strength - 1] || "#ef4444";
             strengthText.textContent = texts[strength - 1] || "Rất yếu";
         }
     });

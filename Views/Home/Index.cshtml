@@ -1,1894 +1,562 @@
 ﻿@model TechStore.Models.indexProducts
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "TechStoreVN – Công nghệ đỉnh cao";
+    ViewBag.FullWidth = true;
 }
 <style>
-    :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        --text-dark: #2d3748;
-        --text-light: #4a5568;
-        --text-muted: #718096;
-        --bg-light: #f8fafc;
-        --bg-white: #ffffff;
-        --border-light: #e2e8f0;
-        --shadow-soft: 0 10px 40px rgba(0,0,0,0.1);
-        --shadow-hover: 0 20px 60px rgba(0,0,0,0.15);
-        --border-radius: 16px;
-    }
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        line-height: 1.6;
-        color: var(--text-dark);
-        background: var(--bg-light);
-    }
-    /* Đã bán styling */
-    .Products-sold {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
-        color: var(--text-muted);
-        font-size: 0.85rem;
-    }
-
-        .Products-sold i {
-            color: #ff6b9d;
-            font-size: 0.9rem;
-        }
-
-    .sold-count {
-        font-weight: 600;
-    }
-
-    /* ===== MAIN CONTAINER ===== */
-    .homepage-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 20px;
-        background: transparent;
-    }
-
-    /* ===== HERO SECTION ===== */
-    .hero-section {
-        position: relative;
-        margin: 40px 0 80px 0;
-        border-radius: 24px;
-        overflow: hidden;
-        height: 500px;
-        background: var(--primary-gradient);
-        box-shadow: var(--shadow-soft);
-    }
-
-    .hero-carousel {
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-
-    .carousel-wrapper {
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-
-    .carousel-slide {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        transform: scale(1.1);
-    }
-
-        .carousel-slide.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .carousel-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-    .hero-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.6));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2;
-    }
-
-    .hero-content {
-        text-align: center;
-        color: white;
-        max-width: 600px;
-        padding: 0 20px;
-    }
-
-    .hero-title {
-        font-size: 3.5rem;
-        font-weight: 800;
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #fff, #f093fb);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .hero-subtitle {
-        font-size: 1.25rem;
-        margin-bottom: 30px;
-        opacity: 0.9;
-        font-weight: 300;
-    }
-
-    .hero-cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: rgba(255,255,255,0.15);
-        color: white;
-        padding: 15px 30px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: 600;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.2);
-        transition: all 0.3s ease;
-    }
-
-        .hero-cta:hover {
-            background: rgba(255,255,255,0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-    /* Navigation Controls */
-    .carousel-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255,255,255,0.15);
-        border: none;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        cursor: pointer;
-        z-index: 10;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.2);
-        color: white;
-        font-size: 20px;
-        transition: all 0.3s ease;
-    }
-
-        .carousel-nav:hover {
-            background: rgba(255,255,255,0.25);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-    .carousel-prev {
-        left: 30px;
-    }
-
-    .carousel-next {
-        right: 30px;
-    }
-
-    .carousel-indicators {
-        position: absolute;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 15px;
-        z-index: 10;
-    }
-
-    .indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255,255,255,0.4);
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-        .indicator.active {
-            background: white;
-            transform: scale(1.5);
-        }
-
-    /* ===== SECTIONS ===== */
-    .section {
-        margin-bottom: 80px;
-    }
-
-    .section-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-
-    .section-badge {
-        display: inline-block;
-        background: var(--accent-gradient);
-        color: white;
-        padding: 8px 20px;
-        border-radius: 50px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 15px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .section-title {
-        font-size: 2.75rem;
-        font-weight: 800;
-        color: var(--text-dark);
-        margin-bottom: 15px;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .section-subtitle {
-        font-size: 1.2rem;
-        color: var(--text-muted);
-        max-width: 600px;
-        margin: 0 auto;
-        font-weight: 300;
-    }
-
-    /* ===== Products GRID ===== */
-    .Products-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 30px;
-        margin-bottom: 50px;
-    }
-
-    .featured-grid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 40px;
-    }
-
-    /* ===== Products CARDS ===== */
-    .Products-card {
-        background: var(--bg-white);
-        border-radius: var(--border-radius);
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        position: relative;
-        border: 1px solid var(--border-light);
-    }
-
-        .Products-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: var(--shadow-hover);
-            border-color: transparent;
-        }
-
-    .featured-card {
-        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
-        border: 2px solid transparent;
-        background-clip: padding-box;
-        position: relative;
-    }
-
-        .featured-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--primary-gradient);
-            border-radius: var(--border-radius);
-            padding: 2px;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            z-index: -1;
-        }
-
-    .Products-image-wrapper {
-        position: relative;
-        width: 100%;
-        height: 250px;
-        overflow: hidden;
-        background: var(--bg-light);
-    }
-
-    .Products-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .Products-card:hover .Products-image {
-        transform: scale(1.1);
-    }
-
-    .Products-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(10px);
-    }
-
-    .Products-card:hover .Products-overlay {
-        opacity: 1;
-    }
-
-    .view-details {
-        color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transform: translateY(20px);
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .Products-card:hover .view-details {
-        transform: translateY(0);
-    }
-
-    /* Discount Badge */
-    .discount-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: var(--secondary-gradient);
-        color: white;
-        padding: 10px 15px;
-        border-radius: 25px;
-        font-size: 0.875rem;
-        font-weight: 700;
-        z-index: 5;
-        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
-        text-align: center;
-        min-width: 60px;
-    }
-
-    .discount-percent {
-        display: block;
-        font-size: 1rem;
-        line-height: 1;
-    }
-
-    .discount-text {
-        display: block;
-        font-size: 0.7rem;
-        opacity: 0.9;
-        margin-top: 2px;
-    }
-
-    /* Products Info */
-    .Products-info {
-        padding: 25px;
-    }
-
-    .Products-name {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 15px;
-        line-height: 1.4;
-    }
-
-    .price-container {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .Products-price {
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .price-current, .price-value {
-        font-size: 1.5rem;
-        font-weight: 800;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .price-original {
-        font-size: 1.1rem;
-        color: var(--text-muted);
-        text-decoration: line-through;
-        font-weight: 500;
-    }
-
-    .currency {
-        font-size: 1.2rem;
-        color: var(--text-muted);
-        font-weight: 600;
-    }
-
-    /* ===== FEATURED SECTION SPECIAL STYLING ===== */
-    .featured-section {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-        padding: 60px 0;
-        border-radius: 24px;
-        margin: 80px 0;
-    }
-
-    /* ===== EMPTY STATE ===== */
-    .empty-state {
-        text-align: center;
-        padding: 80px 20px;
-        color: var(--text-muted);
-    }
-
-    .empty-icon {
-        font-size: 5rem;
-        margin-bottom: 30px;
-        opacity: 0.6;
-    }
-
-    .empty-state h3 {
-        font-size: 1.75rem;
-        margin-bottom: 15px;
-        color: var(--text-dark);
-        font-weight: 700;
-    }
-
-    .empty-state p {
-        font-size: 1.1rem;
-        max-width: 500px;
-        margin: 0 auto;
-    }
-
-    /* ===== LOADING STATE ===== */
-    .loading-spinner {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(102, 126, 234, 0.1);
-        border-left: 4px solid #667eea;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @@keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
-    /* ===== ANIMATIONS ===== */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes slideInLeft {
-        from {
-            opacity: 0;
-            transform: translateX(-50px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    @@keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(50px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .fade-in-up {
-        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    .slide-in-left {
-        animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    .slide-in-right {
-        animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    /* ===== RESPONSIVE DESIGN ===== */
-    @@media (max-width: 1024px) {
-        .homepage-container {
-            padding: 0 15px;
-        }
-
-        .hero-title {
-            font-size: 2.75rem;
-        }
-
-        .section-title {
-            font-size: 2.25rem;
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .hero-section {
-            height: 350px;
-            margin: 20px 0 60px 0;
-        }
-
-        .hero-title {
-            font-size: 2.25rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.1rem;
-        }
-
-        .carousel-nav {
-            width: 50px;
-            height: 50px;
-            font-size: 16px;
-        }
-
-        .carousel-prev {
-            left: 15px;
-        }
-
-        .carousel-next {
-            right: 15px;
-        }
-
-        .Products-grid, .featured-grid {
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .section-title {
-            font-size: 2rem;
-        }
-
-        .Products-image-wrapper {
-            height: 220px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .hero-section {
-            height: 300px;
-        }
-
-        .hero-title {
-            font-size: 1.875rem;
-        }
-
-        .Products-grid, .featured-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .section-title {
-            font-size: 1.75rem;
-        }
-
-        .hero-cta {
-            padding: 12px 24px;
-            font-size: 0.9rem;
-        }
-    }
-
-    /* ===== ACCESSIBILITY ===== */
-    @@media (prefers-reduced-motion: reduce) {
-        .carousel-slide,
-        .Products-image,
-        .Products-card,
-        .hero-cta,
-        .carousel-nav,
-        .indicator {
-            transition: none;
-        }
-
-        .loading-spinner {
-            animation: none;
-        }
-    }
-
-    /* Focus states for accessibility */
-    .Products-card:focus,
-    .hero-cta:focus,
-    .carousel-nav:focus,
-    .indicator:focus {
-        outline: 3px solid #667eea;
-        outline-offset: 2px;
-    }
-     /* ===== WISHLIST BUTTON ===== */
-    .wishlist-btn {
-        position: absolute;
-        bottom: 15px;
-        right: 15px;
-        background: rgba(255, 255, 255, 0.95);
-        border: none;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        cursor: pointer;
-        z-index: 6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(15px);
-        border: 2px solid rgba(255,255,255,0.8);
-        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-    }
-
-        .wishlist-btn:hover {
-            background: rgba(255, 255, 255, 1);
-            transform: scale(1.15);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-        }
-
-        .wishlist-btn.active {
-            background: var(--secondary-gradient);
-            color: white;
-            border-color: rgba(245, 87, 108, 0.5);
-            transform: scale(1.1);
-            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.4);
-        }
-
-            .wishlist-btn.active:hover {
-                background: var(--secondary-gradient);
-                transform: scale(1.2);
-                box-shadow: 0 10px 35px rgba(245, 87, 108, 0.5);
-            }
-
-    .wishlist-icon {
-        font-size: 22px;
-        transition: all 0.3s ease;
-        color: #ff6b9d;
-    }
-
-    .wishlist-btn.active .wishlist-icon {
-        color: white;
-        animation: heartBeat 0.6s ease-in-out;
-    }
-
-    .wishlist-count {
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        background: var(--accent-gradient);
-        color: white;
-        font-size: 12px;
-        font-weight: 800;
-        padding: 4px 8px;
-        border-radius: 15px;
-        min-width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-        border: 2px solid white;
-        transform: scale(1);
-        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-
-    /* ===== RATING STARS ===== */
-    .Products-rating {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-    }
-
-    .rating-stars {
-        display: flex;
-        gap: 2px;
-    }
-
-    .star {
-        font-size: 14px;
-        color: #ddd;
-        transition: color 0.2s ease;
-    }
-
-        .star.filled {
-            color: #ffd700;
-        }
-
-        .star.half-filled {
-            background: linear-gradient(90deg, #ffd700 50%, #ddd 50%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-    .rating-value {
-        font-size: 0.875rem;
-        color: var(--text-muted);
-        font-weight: 600;
-    }
-
-    .rating-count {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-    }
-
-
-/* ===== ANIMATIONS ===== */
- @@keyframes heartBeat {
-    0%, 100% { transform: scale(1); }
-    25% { transform: scale(1.2); }
-    50% { transform: scale(1.1); }
-    75% { transform: scale(1.15); }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+.ts-page { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1d1d1f; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); width: 100%; overflow-x: hidden; }
+
+.ts-hero, .ts-promo-strip, .ts-catbar { width: 100%; }
+
+/* ── HERO 3D ── */
+.ts-hero {
+    min-height: 70vh; max-height: 700px;
+    display: flex; align-items: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    overflow: hidden;
+    padding: 100px 0 60px;
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+}
+.ts-hero-scene {
+    position: absolute; inset: 0;
+    perspective: 1000px;
+    pointer-events: none;
+    overflow: hidden;
+}
+.ts-hero-orb { position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; }
+.ts-hero-orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(102,126,234,.7) 0%, transparent 70%); top: -200px; left: -150px; animation: orbFloat1 20s ease-in-out infinite alternate; }
+.ts-hero-orb-2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,212,255,.6) 0%, transparent 70%); bottom: -150px; right: 5%; animation: orbFloat2 25s ease-in-out infinite alternate; }
+.ts-hero-orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(236,72,153,.5) 0%, transparent 70%); top: 30%; right: 5%; animation: orbFloat3 18s ease-in-out infinite alternate; }
+@@keyframes orbFloat1 { from { transform: translate(0,0) scale(1); } to { transform: translate(80px,100px) scale(1.15); } }
+@@keyframes orbFloat2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-100px,-80px) scale(1.2); } }
+@@keyframes orbFloat3 { from { transform: translate(0,0) scale(1); } to { transform: translate(-60px,80px) scale(.9); } }
+
+/* 3D floating shapes */
+.ts-hero-shape {
+    position: absolute;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+.ts-hero-cube {
+    width: 90px; height: 90px;
+    border: 2px solid rgba(102,126,234,.4);
+    background: rgba(102,126,234,.1);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    animation: cubeFloat 15s ease-in-out infinite;
+}
+.ts-hero-cube-1 { top: 15%; right: 10%; animation-delay: 0s; transform: rotateX(25deg) rotateY(-30deg); }
+.ts-hero-cube-2 { top: 50%; right: 20%; width: 65px; height: 65px; animation-delay: -4s; transform: rotateX(-15deg) rotateY(45deg); border-color: rgba(0,212,255,.5); background: rgba(0,212,255,.08); }
+.ts-hero-cube-3 { top: 25%; right: 3%; width: 50px; height: 50px; animation-delay: -8s; border-radius: 50%; border-color: rgba(236,72,153,.6); }
+@@keyframes cubeFloat {
+    0%,100% { transform: rotateX(25deg) rotateY(-30deg) translateY(0) translateZ(0); }
+    33% { transform: rotateX(35deg) rotateY(-10deg) translateY(-25px) translateZ(40px); }
+    66% { transform: rotateX(10deg) rotateY(-50deg) translateY(15px) translateZ(-30px); }
+}
+.ts-hero-ring {
+    width: 250px; height: 250px;
+    border: 3px solid rgba(102,126,234,.3);
+    border-radius: 50%;
+    top: 15%; right: 15%;
+    animation: ringSpin 25s linear infinite;
+    box-shadow: 0 0 50px rgba(102,126,234,.2), inset 0 0 50px rgba(102,126,234,.1);
+}
+.ts-hero-ring::before {
+    content: '';
+    position: absolute; inset: 25px;
+    border: 2px dashed rgba(0,212,255,.4);
+    border-radius: 50%;
+}
+@@keyframes ringSpin { from { transform: rotateX(60deg) rotateZ(0deg); } to { transform: rotateX(60deg) rotateZ(360deg); } }
+
+.ts-hero-grid-3d {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(102,126,234,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(102,126,234,.08) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform: perspective(700px) rotateX(60deg) scale(2.5);
+    transform-origin: center 80%;
+    animation: gridDrift 25s linear infinite;
+    opacity: .6;
+}
+@@keyframes gridDrift { from { background-position: 0 0; } to { background-position: 0 60px; } }
+
+.ts-hero-dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+.ts-hero-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 80px;
+    display: flex; flex-direction: column; align-items: flex-start;
+    position: relative; z-index: 2; width: 100%;
+    transform-style: preserve-3d;
+    transition: transform .15s ease-out;
+}
+.ts-hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: #00d4ff; background: rgba(0,212,255,.15); border: 2px solid rgba(0,212,255,.3); padding: 8px 18px; border-radius: 50px; margin-bottom: 32px; backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,212,255,.2); }
+.ts-hero-eyebrow::before { content: ''; width: 8px; height: 8px; background: #00d4ff; border-radius: 50%; animation: blink 2s ease-in-out infinite; box-shadow: 0 0 12px #00d4ff; }
+@@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.ts-hero-title { font-size: clamp(2.5rem, 4vw, 4rem); font-weight: 900; line-height: 1.05; letter-spacing: -.05em; color: #fff; margin-bottom: 24px; text-shadow: 0 8px 40px rgba(0,0,0,.4); }
+.ts-hero-title .line-muted { color: rgba(255,255,255,.5); font-weight: 800; }
+.ts-hero-title .line-gradient { background: linear-gradient(90deg, #00d4ff 0%, #667eea 50%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; background-size: 200% auto; animation: gradShift 5s linear infinite; filter: drop-shadow(0 0 30px rgba(0,212,255,.5)); }
+@@keyframes gradShift { from { background-position: 0% center; } to { background-position: 200% center; } }
+.ts-hero-sub { font-size: 18px; color: rgba(255,255,255,.7); max-width: 520px; line-height: 1.8; margin-bottom: 40px; text-shadow: 0 2px 10px rgba(0,0,0,.3); }
+.ts-hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px; }
+.ts-hero-cta { display: inline-flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 16px; font-weight: 700; padding: 18px 36px; border-radius: 50px; text-decoration: none; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 40px rgba(102,126,234,.5); position: relative; overflow: hidden; }
+.ts-hero-cta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); transform: translateX(-100%); transition: transform .6s; }
+.ts-hero-cta:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 20px 60px rgba(102,126,234,.7); color: #fff; }
+.ts-hero-cta:hover::after { transform: translateX(100%); }
+.ts-hero-cta-ghost { display: inline-flex; align-items: center; gap: 10px; color: rgba(255,255,255,.9); font-size: 16px; font-weight: 600; text-decoration: none; border: 2px solid rgba(255,255,255,.3); padding: 18px 32px; border-radius: 50px; transition: all .3s; backdrop-filter: blur(12px); background: rgba(255,255,255,.1); }
+.ts-hero-cta-ghost:hover { border-color: rgba(255,255,255,.6); color: #fff; background: rgba(255,255,255,.2); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,255,255,.2); }
+.ts-hero-stats { display: flex; gap: 40px; flex-wrap: wrap; }
+.ts-hero-stat-val { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: -.03em; line-height: 1; margin-bottom: 6px; text-shadow: 0 2px 10px rgba(0,0,0,.3); }
+.ts-hero-stat-lbl { font-size: 13px; color: rgba(255,255,255,.6); font-weight: 500; }
+</style>
+<style>
+/* ── Category bar ── */
+.ts-catbar { 
+    display: flex; align-items: center; justify-content: center; gap: 12px; 
+    padding: 24px 32px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); 
+    border-bottom: 2px solid rgba(0,0,0,.06); flex-wrap: wrap; z-index: 40; width: 100%; 
+    box-shadow: 0 4px 20px rgba(0,0,0,.04);
+}
+.ts-cat-pill { 
+    display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; 
+    border-radius: 50px; border: 2px solid #e9ecef; background: #fff; 
+    font-size: 14px; font-weight: 600; color: #333; text-decoration: none; 
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    position: relative; overflow: hidden;
+}
+.ts-cat-pill::before {
+    content: '';
+    position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102,126,234,.1), transparent);
+    transition: left .5s;
+}
+.ts-cat-pill:hover { 
+    border-color: #667eea; color: #667eea; background: linear-gradient(135deg, rgba(102,126,234,.05) 0%, rgba(118,75,162,.05) 100%); 
+    transform: translateY(-3px); box-shadow: 0 8px 25px rgba(102,126,234,.2);
+}
+.ts-cat-pill:hover::before { left: 100%; }
+.ts-cat-pill i { transition: transform .3s; }
+.ts-cat-pill:hover i { transform: scale(1.2) rotate(5deg); }
+
+/* ── Sections ── */
+.ts-section { padding: 100px 32px; max-width: 1280px; margin: 0 auto; }
+.ts-section-label { 
+    display: block; font-size: 13px; font-weight: 700; letter-spacing: .15em; 
+    text-transform: uppercase; color: #667eea; margin-bottom: 16px; 
+    background: linear-gradient(135deg, rgba(102,126,234,.1) 0%, rgba(118,75,162,.1) 100%);
+    padding: 8px 16px; border-radius: 50px; display: inline-block;
+}
+.ts-section-title { 
+    font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -.03em; 
+    color: #1d1d1f; margin-bottom: 12px; background: linear-gradient(135deg, #1d1d1f 0%, #333 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.ts-section-sub { font-size: 16px; color: #6e6e73; margin-bottom: 56px; max-width: 520px; line-height: 1.7; }
+.ts-section-header-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 48px; gap: 20px; flex-wrap: wrap; }
+.ts-link-more { 
+    font-size: 15px; font-weight: 700; color: #667eea; text-decoration: none; 
+    white-space: nowrap; display: flex; align-items: center; gap: 8px; 
+    padding: 10px 20px; border-radius: 50px; border: 2px solid #667eea;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ts-link-more:hover { 
+    background: #667eea; color: #fff; transform: translateY(-2px); 
+    box-shadow: 0 8px 25px rgba(102,126,234,.3);
 }
 
-@@keyframes wishlistPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+/* ── Best seller ── */
+.ts-bestseller-track { 
+    display: flex; gap: 24px; overflow-x: auto; padding-bottom: 20px; 
+    scroll-snap-type: x mandatory; scrollbar-width: none; 
+}
+.ts-bestseller-track::-webkit-scrollbar { display: none; }
+.ts-bs-card { 
+    flex: 0 0 320px; scroll-snap-align: start; background: #fff; 
+    border-radius: 24px; overflow: hidden; cursor: pointer; 
+    transition: all .4s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
+    border: 2px solid rgba(0,0,0,.06); box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+.ts-bs-card:hover { 
+    transform: translateY(-8px) scale(1.02); 
+    box-shadow: 0 20px 60px rgba(102,126,234,.15); 
+    border-color: rgba(102,126,234,.3);
+}
+.ts-bs-rank { 
+    position: absolute; top: 16px; left: 16px; width: 40px; height: 40px; 
+    border-radius: 50%; background: #1d1d1f; color: #fff; font-size: 14px; 
+    font-weight: 800; display: flex; align-items: center; justify-content: center; 
+    z-index: 2; box-shadow: 0 4px 12px rgba(0,0,0,.2);
+}
+.ts-bs-rank.gold   { background: linear-gradient(135deg, #f7c948, #e8a900); }
+.ts-bs-rank.silver { background: linear-gradient(135deg, #c0c0c0, #9a9a9a); }
+.ts-bs-rank.bronze { background: linear-gradient(135deg, #cd7f32, #a0522d); }
+.ts-bs-img { 
+    width: 100%; height: 240px; object-fit: cover; display: block; 
+    transition: transform .6s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+.ts-bs-card:hover .ts-bs-img { transform: scale(1.08); }
+.ts-bs-body { padding: 24px; }
+.ts-bs-name { 
+    font-size: 16px; font-weight: 700; color: #1d1d1f; margin-bottom: 8px; 
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
+    overflow: hidden; line-height: 1.5; 
+}
+.ts-bs-price { font-size: 18px; font-weight: 800; color: #dc2626; }
+.ts-bs-price-old { font-size: 14px; color: #9d9d9f; text-decoration: line-through; margin-right: 8px; }
+.ts-bs-sold { font-size: 13px; color: #6e6e73; margin-top: 6px; font-weight: 500; }
+.ts-bs-discount { 
+    display: inline-block; background: linear-gradient(135deg, #ff3b30, #dc2626); 
+    color: #fff; font-size: 12px; font-weight: 800; padding: 4px 10px; 
+    border-radius: 50px; margin-left: 8px; vertical-align: middle; 
+    box-shadow: 0 4px 12px rgba(255,59,48,.3);
 }
 
-.wishlist-btn.pulse {
-    animation: wishlistPulse 0.6s ease-in-out;
+/* ── Product grid ── */
+.ts-grid { 
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+    gap: 24px; 
+}
+.ts-card { 
+    background: #fff; border: 2px solid rgba(0,0,0,.06); border-radius: 24px; 
+    overflow: hidden; cursor: pointer; transition: all .4s cubic-bezier(0.4, 0, 0.2, 1); 
+    position: relative; box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+.ts-card:hover { 
+    transform: translateY(-8px); box-shadow: 0 20px 60px rgba(102,126,234,.15); 
+    border-color: rgba(102,126,234,.3);
+}
+.ts-card-img-wrap { 
+    position: relative; height: 220px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+    overflow: hidden; 
+}
+.ts-card-img { 
+    width: 100%; height: 100%; object-fit: cover; display: block; 
+    transition: transform .6s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+.ts-card:hover .ts-card-img { transform: scale(1.08); }
+.ts-card-discount { 
+    position: absolute; top: 16px; left: 16px; 
+    background: linear-gradient(135deg, #ff3b30, #dc2626); color: #fff; 
+    font-size: 12px; font-weight: 800; padding: 6px 12px; 
+    border-radius: 50px; z-index: 2; box-shadow: 0 4px 12px rgba(255,59,48,.3);
+}
+.ts-card-wish { 
+    position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; 
+    border-radius: 50%; background: rgba(255,255,255,.95); border: 2px solid rgba(0,0,0,.08); 
+    cursor: pointer; display: flex; align-items: center; justify-content: center; 
+    z-index: 3; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); 
+    color: #9d9d9f; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+.ts-card-wish:hover { 
+    transform: scale(1.15) rotate(10deg); color: #ff3b30; 
+    border-color: #ff3b30; box-shadow: 0 6px 20px rgba(255,59,48,.3);
+}
+.ts-card-wish.active { color: #ff3b30; border-color: #ff3b30; }
+.ts-card-body { padding: 20px; }
+.ts-card-name { 
+    font-size: 15px; font-weight: 700; color: #1d1d1f; margin-bottom: 8px; 
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
+    overflow: hidden; line-height: 1.5; 
+}
+.ts-card-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.ts-stars { display: flex; gap: 3px; }
+.ts-star { font-size: 12px; color: #d1d1d6; }
+.ts-star.on { color: #ff9f0a; }
+.ts-card-rating-txt { font-size: 13px; color: #6e6e73; font-weight: 500; }
+.ts-card-price { font-size: 18px; font-weight: 800; color: #dc2626; }
+.ts-card-price-old { font-size: 14px; color: #9d9d9f; text-decoration: line-through; margin-right: 8px; }
+.ts-card-sold { font-size: 13px; color: #6e6e73; margin-top: 6px; font-weight: 500; }
+.ts-empty { 
+    text-align: center; padding: 100px 32px; color: #6e6e73; 
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 24px; border: 2px dashed rgba(0,0,0,.1);
+}
+.ts-empty i { font-size: 56px; margin-bottom: 24px; display: block; color: #d1d1d6; }
+.ts-empty h3 { font-size: 22px; font-weight: 700; color: #1d1d1f; margin-bottom: 12px; }
+.ts-divider { height: 2px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.1), transparent); max-width: 1280px; margin: 0 auto; }
+
+/* ── Promo strip ── */
+.ts-promo-strip { 
+    background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2d 100%); color: #fff; 
+    padding: 32px 32px; width: 100vw; margin-left: calc(50% - 50vw);
+    position: relative; overflow: hidden;
+}
+.ts-promo-strip::before {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 20% 50%, rgba(102,126,234,.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(0,212,255,.15) 0%, transparent 50%);
+    pointer-events: none;
+}
+.ts-promo-inner { 
+    max-width: 1280px; margin: 0 auto; display: flex; 
+    align-items: center; justify-content: space-between; gap: 24px; 
+    flex-wrap: wrap; position: relative; z-index: 1;
+}
+.ts-promo-text { text-align: left; flex: 1; min-width: 280px; }
+.ts-promo-strip h2 { 
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem); font-weight: 800; 
+    letter-spacing: -.02em; margin-bottom: 8px; background: linear-gradient(90deg, #fff, #e0e0e0);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.ts-promo-strip p { font-size: 15px; color: #a1a1a6; margin-bottom: 0; line-height: 1.6; }
+.ts-promo-btn { 
+    display: inline-flex; align-items: center; gap: 10px; 
+    border: 2px solid rgba(255,255,255,.5); color: #fff; font-size: 14px; 
+    font-weight: 700; padding: 14px 28px; border-radius: 50px; 
+    text-decoration: none; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); 
+    white-space: nowrap; flex-shrink: 0; background: rgba(255,255,255,.1);
+    backdrop-filter: blur(10px);
+}
+.ts-promo-btn:hover { 
+    background: #fff; color: #1d1d1f; transform: translateY(-3px); 
+    box-shadow: 0 10px 30px rgba(255,255,255,.2);
 }
 
-
-/* ===== RESPONSIVE ===== */
- @@media (max-width: 768px) {
-    .wishlist-btn {
-        width: 40px;
-        height: 40px;
-    }
-
-    .wishlist-icon {
-        font-size: 16px;
-    }
-
-  }
-    /* Fix carousel indicators - Đặt ở cuối file CSS */
-    .carousel-indicators {
-        position: absolute !important;
-        bottom: 20px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        gap: 12px !important;
-        z-index: 20 !important;
-        width: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Đảm bảo các nút chấm hiển thị chính xác */
-    .indicator {
-        width: 12px !important;
-        height: 12px !important;
-        border-radius: 50% !important;
-        border: none !important;
-        background: rgba(255,255,255,0.4) !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        display: block !important;
-    }
-
-        .indicator.active {
-            background: white !important;
-            transform: scale(1.5) !important;
-        }
-
-    .shopee-banner {
-    margin: 20px 0;
+@@media(max-width:640px) {
+    .ts-promo-inner { flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+    .ts-promo-text { text-align: center; }
+    .ts-catbar { padding: 20px 16px; gap: 8px; }
+    .ts-cat-pill { padding: 10px 16px; font-size: 13px; }
 }
-
-.banner-left img,
-.banner-right img {
-    width: 100%;
-    border-radius: 10px;
-    object-fit: cover;
+@@media(max-width:768px) {
+    .ts-section { padding: 64px 20px; } .ts-hero-inner { padding: 0 32px; }
+    .ts-grid { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 16px; }
+    .ts-card-img-wrap { height: 180px; } .ts-bs-card { flex: 0 0 260px; } .ts-bs-img { height: 200px; }
+    .ts-catbar { flex-direction: row; }
 }
-
-.banner-left img {
-    height: 350px;
+@@media(max-width:480px) {
+    .ts-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
+    .ts-hero { padding: 80px 0 48px; min-height: 60vh; max-height: none; } .ts-hero-title { font-size: 2.2rem; }
+    .ts-hero-actions { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .ts-hero-cta, .ts-hero-cta-ghost { width: 100%; justify-content: center; }
+    .ts-section { padding: 48px 16px; }
 }
-
-.banner-right img {
-    height: 170px;
-}
-
-.banner-right .top-banner {
-    margin-bottom: 10px;
-}
-
-.banner-left,
-.banner-right {
-    padding: 5px;
-}
-
-.banner-hover {
-    transition: all .3s ease;
-}
-
-.banner-hover:hover {
-    transform: scale(1.02);
-}
-
 </style>
 
-<main class="homepage-container">
-    <!-- Hero Carousel Section -->
-   <section class="hero-section" aria-label="Bannières promotionnelles">
-        <div class="hero-carousel"
-             onmouseover="carouselController.pause()"
-             onmouseout="carouselController.resume()">
+<div class="ts-page">
 
-            <div class="carousel-wrapper" id="carousel-wrapper">
-                <div class="carousel-slide active">
-                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=500&fit=crop" alt="Promotion spéciale iPad" loading="lazy" />
-                </div>
-                <div class="carousel-slide">
-                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=500&fit=crop" alt="Nouveaux smartphones" loading="lazy" />
-                </div>
-                <div class="carousel-slide">
-                    <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200&h=500&fit=crop" alt="Accessoires high-tech" loading="lazy" />
-                </div>
-            </div>
-
-            <div class="hero-overlay">
-                <div class="hero-content">
-                    <h1 class="hero-title">TechStore</h1>
-                    <p class="hero-subtitle">Khám phá thế giới công nghệ tuyệt vời với những sản phẩm chất lượng cao</p>
-                    <a href="#Products" class="hero-cta">
-                        <i class="fas fa-shopping-bag"></i>
-                        Khám phá ngay
-                    </a>
-                </div>
-            </div>
-
-            <!-- Navigation Controls -->
-          <button class="carousel-nav carousel-prev"
-                    onclick="carouselController.moveSlide(-1)"
-                    aria-label="Image précédente">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="carousel-nav carousel-next"
-                    onclick="carouselController.moveSlide(1)"
-                    aria-label="Image suivante">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-
-            <!-- Indicators -->
-          <div class="carousel-indicators" role="tablist" aria-label="Sélection de slide">
-                <button class="indicator active"
-                        onclick="carouselController.goToSlide(0)"
-                        aria-label="Aller au slide 1"></button>
-                <button class="indicator"
-                        onclick="carouselController.goToSlide(1)"
-                        aria-label="Aller au slide 2"></button>
-                <button class="indicator"
-                        onclick="carouselController.goToSlide(2)"
-                        aria-label="Aller au slide 3"></button>
-            </div>
-        </div>
-    </section> 
-
-    <!-- Featured Products Section -->
-    <section class="section featured-section" aria-labelledby="featured-title">
-        <div class="section-header">
-            <span class="section-badge">Nổi bật</span>
-            <h2 id="featured-title" class="section-title">🌟 Sản phẩm nổi bật</h2>
-            <p class="section-subtitle">Những sản phẩm bán chạy nhất của shop chúng tôi</p>
-        </div>
-
-        <div class="Products-grid featured-grid">
-            @* <article class="Products-card featured-card"
-                     onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = 1 })')"
-                     tabindex="0"
-                     role="button"
-                     onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
-                <div class="Products-image-wrapper">
-                    <!-- Nút Yêu Thích -->
-                    <button class="favorite-btn"
-                            onclick="event.stopPropagation(); toggleFavorite(1, this)"
-                            aria-label="Thêm vào yêu thích">
-                        <i class="fas fa-heart heart-icon"></i>
-                        <span class="favorite-count" id="fav-count-1">0</span>
-                    </button>
-
-                    <img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop" alt="iPad Pro - Tablet cao cấp" class="Products-image" loading="lazy" />
-                    <div class="Products-overlay">
-                        <span class="view-details">
-                            <i class="fas fa-eye"></i>
-                            Xem chi tiết
-                        </span>
-                    </div>
-                </div>
-                <div class="Products-info">
-                    <!-- Đánh giá sao -->
-                    <div class="Products-rating">
-                        <div class="stars-container" data-rating="4.8">
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                        </div>
-                        <span class="rating-text">4.8</span>
-                        <span class="rating-count">(89 đánh giá)</span>
-                    </div>
-
-                    <h3 class="Products-name">iPad Pro</h3>
-                    <p class="Products-price">
-                        <span class="price-value">8.000.000</span>
-                        <span class="currency">₫</span>
-                    </p>
-                </div>
-            </article>
-
-            <article class="Products-card featured-card"
-                     onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = 1 })')"
-                     tabindex="0"
-                     role="button"
-                     onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
-                <div class="Products-image-wrapper">
-                    <!-- Nút Yêu Thích -->
-                    <button class="favorite-btn"
-                            onclick="event.stopPropagation(); toggleFavorite(1, this)"
-                            aria-label="Thêm vào yêu thích">
-                        <i class="fas fa-heart heart-icon"></i>
-                        <span class="favorite-count" id="fav-count-1">0</span>
-                    </button>
-
-                    <img src="~/Images/tainghe18.jpg" alt="iPad Pro - Tablet cao cấp" class="Products-image" loading="lazy" />
-                    <div class="Products-overlay">
-                        <span class="view-details">
-                            <i class="fas fa-eye"></i>
-                            Xem chi tiết
-                        </span>
-                    </div>
-                </div>
-                <div class="Products-info">
-                    <!-- Đánh giá sao -->
-                    <div class="Products-rating">
-                        <div class="stars-container" data-rating="4.8">
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                        </div>
-                        <span class="rating-text">4.8</span>
-                        <span class="rating-count">(89 đánh giá)</span>
-                    </div>
-
-                    <h3 class="Products-name">Tai Nghe Siêu Bass</h3>
-                    <p class="Products-price">
-                        <span class="price-value">1.000.000</span>
-                        <span class="currency">₫</span>
-                    </p>
-                </div>
-            </article>
-
-            <article class="Products-card featured-card"
-                     onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = 1 })')"
-                     tabindex="0"
-                     role="button"
-                     onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = 1 })')">
-                <div class="Products-image-wrapper">
-                    <!-- Nút Yêu Thích -->
-                    <button class="favorite-btn"
-                            onclick="event.stopPropagation(); toggleFavorite(1, this)"
-                            aria-label="Thêm vào yêu thích">
-                        <i class="fas fa-heart heart-icon"></i>
-                        <span class="favorite-count" id="fav-count-1">0</span>
-                    </button>
-
-                    <img src="~/Images/trumpphone.png" alt="iPad Pro - Tablet cao cấp" class="Products-image" loading="lazy" />
-                    <div class="Products-overlay">
-                        <span class="view-details">
-                            <i class="fas fa-eye"></i>
-                            Xem chi tiết
-                        </span>
-                    </div>
-                </div>
-                <div class="Products-info">
-                    <!-- Đánh giá sao -->
-                    <div class="Products-rating">
-                        <div class="stars-container" data-rating="4.8">
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                            <i class="fas fa-star star filled"></i>
-                        </div>
-                        <span class="rating-text">4.8</span>
-                        <span class="rating-count">(89 đánh giá)</span>
-                    </div>
-
-                    <h3 class="Products-name">Trump Phone</h3>
-                    <p class="Products-price">
-                        <span class="price-value">5.000.000</span>
-                        <span class="currency">₫</span>
-                    </p>
-                </div>
-            </article> *@
-        @if (Model != null && Model.bestSeller != null && Model.bestSeller.Any())
-        {
-            <div class="Products-grid">
-                @foreach (var item in Model.bestSeller)
-                {
-                    // 🌟 1. MÓC DỮ LIỆU TỪ DICTIONARY (Cực kỳ an toàn với ContainsKey)
-                    int? totalSold = (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID)) 
-                                    ? Model.soldQuantities[item.ProductID] 
-                                    : 0;
-
-                    decimal avgScore = 0;
-                    int totalReviews = 0;
-                    if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
-                    {
-                        avgScore = Model.scoreProducts[item.ProductID].Item1; // Điểm trung bình
-                        totalReviews = Model.scoreProducts[item.ProductID].Item2; // Số lượt đánh giá
-                    }
-
-                    <article class="Products-card"
-                            onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')"
-                            tabindex="0"
-                            role="button"
-                            onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')">
-
-                        <div class="Products-image-wrapper">
-                            @if (item.Discount > 0)
-                            {
-                                <div class="discount-badge">
-                                    <span class="discount-percent">-@item.Discount%</span>
-                                    <span class="discount-text">GIẢM GIÁ</span>
-                                </div>
-                            }
-
-                            <img src="~/Images/@item.ImagePro"
-                                alt="@item.NamePro - Sản phẩm công nghệ"
-                                class="Products-image"
-                                loading="lazy" />
-                            <div class="Products-overlay">
-                                <span class="view-details">
-                                    <i class="fas fa-eye"></i>
-                                    Xem chi tiết
-                                </span>
-                            </div>
-
-                            <button class="wishlist-btn"
-                                    onclick="event.stopPropagation(); wishlistController.toggleWishlist(@item.ProductID, this)"
-                                    aria-label="Thả tim">
-                                <i class="wishlist-icon fas fa-heart"></i>
-                                <span class="wishlist-count" id="wishlist-count-@item.ProductID">0</span>
-                            </button>
-                        </div>
-
-                        <div class="Products-info">
-                            <h3 class="Products-name">@item.NamePro</h3>
-                            
-                            <div class="Products-rating">
-                                @if (totalReviews > 0)
-                                {
-                                    <div class="rating-stars" data-rating="@avgScore.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)">
-                                        </div>
-                                    <span class="rating-value">@avgScore.ToString("0.0")</span>
-                                    <span class="rating-count">(@totalReviews đánh giá)</span>
-                                }
-                                else
-                                {
-                                    <span class="rating-count" style="font-style: italic;">Chưa có đánh giá</span>
-                                }
-                            </div>
-
-                            <div class="Products-sold">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span class="sold-count">Đã bán: @totalSold</span>
-                            </div>
-
-                            <div class="price-container">
-                                @if (item.Discount > 0)
-                                {
-                                    var originalPrice = item.Price / (1 - (decimal)item.Discount / 100);
-                                    <p class="Products-price">
-                                        <span class="price-original">
-                                            @((decimal)originalPrice).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
-                                        </span>
-                                        <span class="price-current">
-                                            @((decimal)item.Price).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
-                                        </span>
-                                    </p>
-                                }
-                                else
-                                {
-                                    <p class="Products-price">
-                                        <span class="price-current">@(decimal.TryParse(item.Price.ToString(), out decimal price) ? price.ToString("N0") : item.Price) ₫</span>
-                                    </p>
-                                }
-                            </div>
-                        </div>
-                    </article>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="empty-state">
-                <div class="empty-icon">📦</div>
-                <h3>Không có sản phẩm nào</h3>
-                <p>Hiện tại chúng tôi đang cập nhật sản phẩm mới. Vui lòng quay lại sau!</p>
-            </div>
-        }
-        </div> 
-    </section>
-
-    @* <section class="shopee-banner">
-
-    <div class="row">
-
-        <div class="col-md-8 banner-left">
-
-            <div id="mainBanner"
-                 class="carousel slide"
-                 data-bs-ride="carousel">
-
-                <<div class="carousel-inner">
-
-                @{
-                    bool first = true;
-                }
-
-        @foreach (var banner in Model.banners)
-        {
-            <div class="carousel-item @(first ? "active" : "")">
-
-                <a href="@banner.LinkUrl">
-
-                    <img src="~/Images/banner/@banner.ImageUrl"
-                         class="d-block w-100">
-
-                </a>
-
-            </div>
-
-            first = false;
-        }
-
+<!-- HERO -->
+<section class="ts-hero" id="tsHero">
+    <div class="ts-hero-scene" id="heroScene">
+        <div class="ts-hero-grid-3d"></div>
+        <div class="ts-hero-orb ts-hero-orb-1"></div>
+        <div class="ts-hero-orb ts-hero-orb-2"></div>
+        <div class="ts-hero-orb ts-hero-orb-3"></div>
+        <div class="ts-hero-shape ts-hero-ring"></div>
+        <div class="ts-hero-shape ts-hero-cube ts-hero-cube-1"></div>
+        <div class="ts-hero-shape ts-hero-cube ts-hero-cube-2"></div>
+        <div class="ts-hero-shape ts-hero-cube ts-hero-cube-3"></div>
     </div>
-
-                <button class="carousel-control-prev"
-                        type="button"
-                        data-bs-target="#mainBanner"
-                        data-bs-slide="prev">
-
-                    <span class="carousel-control-prev-icon"></span>
-
-                </button>
-
-                <button class="carousel-control-next"
-                        type="button"
-                        data-bs-target="#mainBanner"
-                        data-bs-slide="next">
-
-                    <span class="carousel-control-next-icon"></span>
-
-                </button>
-
-            </div>
-
+    <div class="ts-hero-dots"></div>
+    <div class="ts-hero-inner" id="heroInner">
+        <span class="ts-hero-eyebrow">TechStoreVN</span>
+        <h1 class="ts-hero-title">
+            <span class="line-muted">Công nghệ</span><br>
+            <span class="line-gradient">đỉnh cao.</span><br>
+            <span style="color:#fff;">Giá tốt nhất.</span>
+        </h1>
+        <p class="ts-hero-sub">Laptop, điện thoại, tai nghe và hơn thế nữa — được chọn lọc kỹ lưỡng, giao hàng nhanh toàn quốc.</p>
+        <div class="ts-hero-actions">
+            <a href="#ts-products" class="ts-hero-cta">Khám phá ngay <i class="fas fa-arrow-right" style="font-size:12px"></i></a>
+            <a href="@Url.Action("DangKy","User")" class="ts-hero-cta-ghost">Đăng ký miễn phí</a>
         </div>
+        <div class="ts-hero-stats">
+            <div><div class="ts-hero-stat-val">10K+</div><div class="ts-hero-stat-lbl">Khách hàng</div></div>
+            <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+            <div><div class="ts-hero-stat-val">500+</div><div class="ts-hero-stat-lbl">Sản phẩm</div></div>
+            <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+            <div><div class="ts-hero-stat-val">4.9★</div><div class="ts-hero-stat-lbl">Đánh giá</div></div>
+        </div>
+    </div>
+</section>
 
-        <div class="col-md-4 banner-right">
+<!-- CATEGORY BAR -->
+<nav class="ts-catbar" aria-label="Danh mục">
+    <a class="ts-cat-pill" href="@Url.Action("CatergoryPartial","Home",new{catergory="Laptop"})"><i class="fas fa-laptop"></i> Laptop</a>
+    <a class="ts-cat-pill" href="@Url.Action("CatergoryPartial","Home",new{catergory="Điện thoại"})"><i class="fas fa-mobile-alt"></i> Điện thoại</a>
+    <a class="ts-cat-pill" href="@Url.Action("CatergoryPartial","Home",new{catergory="Máy tính bảng"})"><i class="fas fa-tablet-alt"></i> Máy tính bảng</a>
+    <a class="ts-cat-pill" href="@Url.Action("CatergoryPartial","Home",new{catergory="PC"})"><i class="fas fa-desktop"></i> PC</a>
+    <a class="ts-cat-pill" href="@Url.Action("CatergoryPartial","Home",new{catergory="Tai nghe"})"><i class="fas fa-headphones"></i> Tai nghe</a>
+    <a class="ts-cat-pill" href="@Url.Action("CatergoryPartial","Home",new{catergory="Phụ kiện"})"><i class="fas fa-plug"></i> Phụ kiện</a>
+</nav>
 
-            <div class="top-banner">
-                <img src="~/Images/banner/right1.jpg"
-                     class="banner-hover">
-            </div>
-
+<!-- BEST SELLERS -->
+@if (Model != null && Model.bestSeller != null && Model.bestSeller.Any())
+{
+    <section class="ts-section">
+        <div class="ts-section-header-row">
             <div>
-                <img src="~/Images/banner/right2.jpg"
-                     class="banner-hover">
+                <span class="ts-section-label">Bán chạy</span>
+                <h2 class="ts-section-title">Top sản phẩm</h2>
+                <p class="ts-section-sub">Được khách hàng tin chọn nhiều nhất</p>
             </div>
-
+            <a href="#ts-products" class="ts-link-more">Xem tất cả <i class="fas fa-arrow-right"></i></a>
         </div>
-
-    </div>
-
-    </section> *@
-
-    <!-- All Products Section -->
-    <section class="section" id="Products" aria-labelledby="Products-title">
-        <div class="section-header">
-            <span class="section-badge">Sản phẩm</span>
-            <h2 id="Products-title" class="section-title">📱 Tất cả sản phẩm</h2>
-            <p class="section-subtitle">Khám phá bộ sưu tập công nghệ đa dạng và chất lượng cao</p>
-        </div>
-        @if (Model != null && Model.products != null && Model.products.Any())
-        {
-            <div class="Products-grid">
-                @foreach (var item in Model.products.ToList())
-                {
-                    // 🌟 1. MÓC DỮ LIỆU TỪ DICTIONARY (Cực kỳ an toàn với ContainsKey)
-                    int? totalSold = (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID)) 
-                                    ? Model.soldQuantities[item.ProductID] 
-                                    : 0;
-
-                    decimal avgScore = 0;
-                    int totalReviews = 0;
-                    if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
-                    {
-                        avgScore = Model.scoreProducts[item.ProductID].Item1; // Điểm trung bình
-                        totalReviews = Model.scoreProducts[item.ProductID].Item2; // Số lượt đánh giá
-                    }
-
-                    <article class="Products-card"
-                            onclick="navigateToProducts('@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')"
-                            tabindex="0"
-                            role="button"
-                            onkeypress="handleCardKeyPress(event, '@Url.Action("Details", "CustomerPro", new { id = item.ProductID })')">
-
-                        <div class="Products-image-wrapper">
+        <div class="ts-bestseller-track">
+            @{ int bsRank = 0; }
+            @foreach (var item in Model.bestSeller)
+            {
+                bsRank++;
+                int? sold = (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID)) ? Model.soldQuantities[item.ProductID] : 0;
+                string rankClass = bsRank == 1 ? "gold" : bsRank == 2 ? "silver" : "bronze";
+                string detailUrl = Url.Action("Details","CustomerPro", new { id = item.ProductID }) ?? "#";
+                <div class="ts-bs-card" onclick="location.href='@detailUrl'" role="button" tabindex="0">
+                    <span class="ts-bs-rank @rankClass">@bsRank</span>
+                    <img src="~/Images/@item.ImagePro" alt="@item.NamePro" class="ts-bs-img" loading="lazy" />
+                    <div class="ts-bs-body">
+                        <div class="ts-bs-name">@item.NamePro</div>
+                        <div style="margin-bottom:4px">
                             @if (item.Discount > 0)
                             {
-                                <div class="discount-badge">
-                                    <span class="discount-percent">-@item.Discount%</span>
-                                    <span class="discount-text">GIẢM GIÁ</span>
-                                </div>
+                                var orig = item.Price / (1 - (decimal)item.Discount / 100);
+                                <span class="ts-bs-price-old">@orig.ToString("N0") ₫</span>
                             }
-
-                            <img src="~/Images/@item.ImagePro"
-                                alt="@item.NamePro - Sản phẩm công nghệ"
-                                class="Products-image"
-                                loading="lazy" />
-                            <div class="Products-overlay">
-                                <span class="view-details">
-                                    <i class="fas fa-eye"></i>
-                                    Xem chi tiết
-                                </span>
-                            </div>
-
-                            <button class="wishlist-btn"
-                                    onclick="event.stopPropagation(); wishlistController.toggleWishlist(@item.ProductID, this)"
-                                    aria-label="Thả tim">
-                                <i class="wishlist-icon fas fa-heart"></i>
-                                <span class="wishlist-count" id="wishlist-count-@item.ProductID">0</span>
-                            </button>
+                            <span class="ts-bs-price">@item.Price.ToString("N0") ₫</span>
+                            @if (item.Discount > 0) { <span class="ts-bs-discount">-@item.Discount%</span> }
                         </div>
-
-                        <div class="Products-info">
-                            <h3 class="Products-name">@item.NamePro</h3>
-                            
-                            <div class="Products-rating">
-                                @if (totalReviews > 0)
-                                {
-                                    <div class="rating-stars" data-rating="@avgScore.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)">
-                                        </div>
-                                    <span class="rating-value">@avgScore.ToString("0.0")</span>
-                                    <span class="rating-count">(@totalReviews đánh giá)</span>
-                                }
-                                else
-                                {
-                                    <span class="rating-count" style="font-style: italic;">Chưa có đánh giá</span>
-                                }
-                            </div>
-
-                            <div class="Products-sold">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span class="sold-count">Đã bán: @totalSold</span>
-                            </div>
-
-                            <div class="price-container">
-                                @if (item.Discount > 0)
-                                {
-                                    var originalPrice = item.Price / (1 - (decimal)item.Discount / 100);
-                                    <p class="Products-price">
-                                        <span class="price-original">
-                                            @((decimal)originalPrice).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
-                                        </span>
-                                        <span class="price-current">
-                                            @((decimal)item.Price).ToString("n2", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
-                                        </span>
-                                    </p>
-                                }
-                                else
-                                {
-                                    <p class="Products-price">
-                                        <span class="price-current">@(decimal.TryParse(item.Price.ToString(), out decimal price) ? price.ToString("N0") : item.Price) ₫</span>
-                                    </p>
-                                }
-                            </div>
-                        </div>
-                    </article>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="empty-state">
-                <div class="empty-icon">📦</div>
-                <h3>Không có sản phẩm nào</h3>
-                <p>Hiện tại chúng tôi đang cập nhật sản phẩm mới. Vui lòng quay lại sau!</p>
-            </div>
-        }
+                        <div class="ts-bs-sold">Đã bán: @sold</div>
+                    </div>
+                </div>
+            }
+        </div>
     </section>
-</main>
+    <div class="ts-divider"></div>
+}
+
+<!-- PROMO STRIP -->
+<div class="ts-promo-strip">
+    <div class="ts-promo-inner">
+        <div class="ts-promo-text">
+            <h2>Ưu đãi dành riêng cho bạn</h2>
+            <p>Đăng ký tài khoản để nhận khuyến mãi độc quyền và thông báo sản phẩm mới</p>
+        </div>
+        <a href="@Url.Action("DangKy","User")" class="ts-promo-btn"><i class="fas fa-user-plus"></i> Tạo tài khoản miễn phí</a>
+    </div>
+</div>
+
+<!-- ALL PRODUCTS -->
+<section class="ts-section" id="ts-products">
+    <div class="ts-section-header-row">
+        <div>
+            <span class="ts-section-label">Sản phẩm</span>
+            <h2 class="ts-section-title">Tất cả sản phẩm</h2>
+            <p class="ts-section-sub">Công nghệ đa dạng, chất lượng được kiểm định</p>
+        </div>
+    </div>
+    @if (Model != null && Model.products != null && Model.products.Any())
+    {
+        <div class="ts-grid">
+            @foreach (var item in Model.products)
+            {
+                int? sold = (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID)) ? Model.soldQuantities[item.ProductID] : 0;
+                decimal avgScore = 0; int totalRev = 0;
+                if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
+                { avgScore = Model.scoreProducts[item.ProductID].Item1; totalRev = Model.scoreProducts[item.ProductID].Item2; }
+                int starFull = (int)Math.Floor((double)avgScore);
+                bool starHalf = (avgScore - starFull) >= 0.5m;
+                string detailUrl = Url.Action("Details","CustomerPro", new { id = item.ProductID }) ?? "#";
+                <div class="ts-card" onclick="location.href='@detailUrl'" role="button" tabindex="0">
+                    <div class="ts-card-img-wrap">
+                        @if (item.Discount > 0) { <span class="ts-card-discount">-@item.Discount%</span> }
+                        <img src="~/Images/@item.ImagePro" alt="@item.NamePro" class="ts-card-img" loading="lazy" />
+                        <button class="ts-card-wish" id="wish-@item.ProductID"
+                                onclick="event.stopPropagation(); toggleWish(@item.ProductID, this)" aria-label="Yêu thích">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="ts-card-body">
+                        <div class="ts-card-name">@item.NamePro</div>
+                        @if (totalRev > 0)
+                        {
+                            <div class="ts-card-rating">
+                                <div class="ts-stars">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        bool filled = s <= starFull;
+                                        bool half = !filled && s == starFull + 1 && starHalf;
+                                        <i class="@(filled ? "fas fa-star ts-star on" : half ? "fas fa-star-half-alt ts-star on" : "far fa-star ts-star")"></i>
+                                    }
+                                </div>
+                                <span class="ts-card-rating-txt">@avgScore.ToString("0.0") (@totalRev)</span>
+                            </div>
+                        }
+                        <div>
+                            @if (item.Discount > 0) { var orig = item.Price / (1 - (decimal)item.Discount / 100); <span class="ts-card-price-old">@orig.ToString("N0") ₫</span> }
+                            <span class="ts-card-price">@item.Price.ToString("N0") ₫</span>
+                        </div>
+                        <div class="ts-card-sold">Đã bán: @sold</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="ts-empty">
+            <i class="fas fa-box-open"></i>
+            <h3>Chưa có sản phẩm</h3>
+            <p>Chúng tôi đang cập nhật thêm sản phẩm. Quay lại sau nhé!</p>
+        </div>
+    }
+</section>
+
+</div>
 
 <script>
-    function navigateToProducts(url) {
-        window.location.href = url;
-    }
-    // ===== MODERN CAROUSEL CONTROLLER =====
-    const carouselController = {
-        currentIndex: 0,
-        slides: null,
-        indicators: null,
-        autoPlayInterval: null,
-        isPlaying: true,
-        touchStartX: 0,
-        touchEndX: 0,
-
-        init() {
-            this.slides = document.querySelectorAll('.carousel-slide');
-            this.indicators = document.querySelectorAll('.indicator');
-            if (this.slides.length === 0) return;
-
-            this.updateSlide();
-            this.startAutoPlay();
-            this.setupKeyboardNavigation();
-            this.setupTouchNavigation();
-            this.setupIntersectionObserver();
-            this.setupIndicatorListeners();
-            this.setupControlButtons();
-        },
-
-        updateSlide() {
-            // Update slides with smooth transition
-            this.slides.forEach((slide, index) => {
-                slide.classList.toggle('active', index === this.currentIndex);
-                slide.setAttribute('aria-hidden', index !== this.currentIndex);
-            });
-
-            // Update indicators
-            this.indicators.forEach((indicator, index) => {
-                indicator.classList.toggle('active', index === this.currentIndex);
-                indicator.setAttribute('aria-selected', index === this.currentIndex);
-            });
-
-            // Update carousel position if using transform method
-            const carousel = document.querySelector('.carousel-container');
-            if (carousel) {
-                carousel.style.transform = `translateX(-${this.currentIndex * 100}%)`;
-            }
-
-            // Dispatch custom event
-            this.dispatchSlideChange();
-        },
-
-        nextSlide() {
-            this.currentIndex = (this.currentIndex + 1) % this.slides.length;
-            this.updateSlide();
-        },
-
-        prevSlide() {
-            this.currentIndex = this.currentIndex === 0 ? this.slides.length - 1 : this.currentIndex - 1;
-            this.updateSlide();
-        },
-
-        goToSlide(index) {
-            if (index >= 0 && index < this.slides.length) {
-                this.currentIndex = index;
-                this.updateSlide();
-            }
-        },
-
-        startAutoPlay() {
-            if (this.autoPlayInterval) this.stopAutoPlay();
-            this.autoPlayInterval = setInterval(() => {
-                if (this.isPlaying) {
-                    this.nextSlide();
-                }
-            }, 5000); // 5 seconds interval
-        },
-
-        stopAutoPlay() {
-            if (this.autoPlayInterval) {
-                clearInterval(this.autoPlayInterval);
-                this.autoPlayInterval = null;
-            }
-        },
-
-        toggleAutoPlay() {
-            this.isPlaying = !this.isPlaying;
-            const playBtn = document.querySelector('.play-pause-btn');
-            if (playBtn) {
-                playBtn.textContent = this.isPlaying ? '⏸️' : '▶️';
-                playBtn.setAttribute('aria-label', this.isPlaying ? 'Pause slideshow' : 'Play slideshow');
-            }
-        },
-
-        setupKeyboardNavigation() {
-            document.addEventListener('keydown', (e) => {
-                if (e.target.closest('.carousel')) {
-                    switch (e.key) {
-                        case 'ArrowLeft':
-                            e.preventDefault();
-                            this.prevSlide();
-                            break;
-                        case 'ArrowRight':
-                            e.preventDefault();
-                            this.nextSlide();
-                            break;
-                        case ' ':
-                            e.preventDefault();
-                            this.toggleAutoPlay();
-                            break;
-                        case 'Home':
-                            e.preventDefault();
-                            this.goToSlide(0);
-                            break;
-                        case 'End':
-                            e.preventDefault();
-                            this.goToSlide(this.slides.length - 1);
-                            break;
-                    }
-                }
-            });
-        },
-
-        setupTouchNavigation() {
-            const carousel = document.querySelector('.carousel');
-            if (!carousel) return;
-
-            carousel.addEventListener('touchstart', (e) => {
-                this.touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
-
-            carousel.addEventListener('touchend', (e) => {
-                this.touchEndX = e.changedTouches[0].screenX;
-                this.handleSwipe();
-            }, { passive: true });
-
-            // Mouse drag support
-            let isMouseDown = false;
-            let startX = 0;
-
-            carousel.addEventListener('mousedown', (e) => {
-                isMouseDown = true;
-                startX = e.clientX;
-                carousel.style.cursor = 'grabbing';
-            });
-
-            carousel.addEventListener('mousemove', (e) => {
-                if (!isMouseDown) return;
-                e.preventDefault();
-            });
-
-            carousel.addEventListener('mouseup', (e) => {
-                if (!isMouseDown) return;
-                isMouseDown = false;
-                carousel.style.cursor = 'grab';
-
-                const endX = e.clientX;
-                const diff = startX - endX;
-
-                if (Math.abs(diff) > 50) {
-                    if (diff > 0) {
-                        this.nextSlide();
-                    } else {
-                        this.prevSlide();
-                    }
-                }
-            });
-
-            carousel.addEventListener('mouseleave', () => {
-                isMouseDown = false;
-                carousel.style.cursor = 'grab';
-            });
-        },
-
-        handleSwipe() {
-            const swipeThreshold = 50;
-            const diff = this.touchStartX - this.touchEndX;
-
-            if (Math.abs(diff) > swipeThreshold) {
-                if (diff > 0) {
-                    this.nextSlide();
-                } else {
-                    this.prevSlide();
-                }
-            }
-        },
-
-        setupIntersectionObserver() {
-            const carousel = document.querySelector('.carousel');
-            if (!carousel) return;
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        if (!this.isPlaying) {
-                            this.isPlaying = true;
-                            this.startAutoPlay();
-                        }
-                    } else {
-                        this.isPlaying = false;
-                        this.stopAutoPlay();
-                    }
-                });
-            }, { threshold: 0.5 });
-
-            observer.observe(carousel);
-        },
-
-        setupIndicatorListeners() {
-            this.indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    this.goToSlide(index);
-                });
-
-                indicator.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.goToSlide(index);
-                    }
-                });
-            });
-        },
-
-        setupControlButtons() {
-            const prevBtn = document.querySelector('.carousel-prev');
-            const nextBtn = document.querySelector('.carousel-next');
-            const playPauseBtn = document.querySelector('.play-pause-btn');
-
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => this.prevSlide());
-            }
-
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => this.nextSlide());
-            }
-
-            if (playPauseBtn) {
-                playPauseBtn.addEventListener('click', () => this.toggleAutoPlay());
-            }
-
-            // Pause on hover
-            const carousel = document.querySelector('.carousel');
-            if (carousel) {
-                carousel.addEventListener('mouseenter', () => {
-                    this.stopAutoPlay();
-                });
-
-                carousel.addEventListener('mouseleave', () => {
-                    if (this.isPlaying) {
-                        this.startAutoPlay();
-                    }
-                });
-            }
-        },
-
-        dispatchSlideChange() {
-            const event = new CustomEvent('slideChange', {
-                detail: {
-                    currentIndex: this.currentIndex,
-                    currentSlide: this.slides[this.currentIndex]
-                }
-            });
-            document.dispatchEvent(event);
-        },
-
-        // Public API methods
-        destroy() {
-            this.stopAutoPlay();
-
-            // Remove event listeners
-            const carousel = document.querySelector('.carousel');
-            if (carousel) {
-                carousel.replaceWith(carousel.cloneNode(true));
-            }
-
-            // Reset properties
-            this.currentIndex = 0;
-            this.slides = null;
-            this.indicators = null;
-            this.isPlaying = true;
-        },
-
-        pause() {
-            this.isPlaying = false;
-            this.stopAutoPlay();
-        },
-
-        play() {
-            this.isPlaying = true;
-            this.startAutoPlay();
-        },
-
-        getCurrentSlide() {
-            return this.slides[this.currentIndex];
-        },
-
-        getSlideCount() {
-            return this.slides.length;
-        }
-    };
-
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            carouselController.init();
+const _wishedIds = new Set();
+async function loadWishlist() {
+    try {
+        const res = await fetch('@Url.Action("GetWishlist","Home")');
+        if (!res.ok) return;
+        const data = await res.json();
+        data.forEach(x => {
+            const id = x.productID ?? x.ProductID;
+            _wishedIds.add(id);
+            const btn = document.getElementById('wish-' + id);
+            if (btn) btn.classList.add('active');
         });
-    } else {
-        carouselController.init();
-    }
-
-    // Export for module use
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = carouselController;
-    }
-    //Thêm vô đánh giá sao
-    // ===== WISHLIST FUNCTIONALITY - PHIÊN BẢN CẬP NHẬT =====
-    const wishlistController = {
-        likeCounts: JSON.parse(localStorage.getItem('likeCounts') || '{}'),
-        likedProducts: JSON.parse(localStorage.getItem('likedProducts') || '{}'), // Thêm mới: theo dõi sản phẩm đã like
-
-        init() {
-            this.updateAllWishlistUI();
-            this.initializeRatings();
-        },
-
-        // HÀM MỚI: Toggle wishlist thay vì chỉ thêm
-        toggleWishlist(ProductID, buttonElement) {
-            const isCurrentlyLiked = this.likedProducts[ProductID] || false;
-
-            if (isCurrentlyLiked) {
-                // Nếu đã like thì bỏ like (giảm xuống)
-                this.removeFromWishlist(ProductID, buttonElement);
-            } else {
-                // Nếu chưa like thì thêm like (tăng lên)
-                this.addToWishlist(ProductID, buttonElement);
-            }
-        },
-
-        addToWishlist(ProductID, buttonElement) {
-            // Đánh dấu sản phẩm đã được like
-            this.likedProducts[ProductID] = true;
-
-            // Tăng số lượng like
-            if (!this.likeCounts[ProductID]) {
-                this.likeCounts[ProductID] = 0;
-            }
-            this.likeCounts[ProductID]++;
-
-            // Animation effect khi thêm
-            buttonElement.classList.add('pulse');
-            setTimeout(() => {
-                buttonElement.classList.remove('pulse');
-            }, 600);
-
-            // Cập nhật UI
-            this.updateWishlistUI(ProductID, buttonElement);
-            this.saveLikeCounts();
-
-            // Show notification
-            this.showNotification(`Đã thả tim! ❤️ (${this.likeCounts[ProductID]} lượt thích)`, 'success');
-        },
-
-        // HÀM MỚI: Xóa khỏi wishlist
-        removeFromWishlist(ProductID, buttonElement) {
-            // Bỏ đánh dấu sản phẩm đã like
-            this.likedProducts[ProductID] = false;
-
-            // Giảm số lượng like (không cho xuống dưới 0)
-            if (this.likeCounts[ProductID] && this.likeCounts[ProductID] > 0) {
-                this.likeCounts[ProductID]--;
-            }
-
-            // Animation effect khi xóa
-            buttonElement.classList.add('pulse');
-            setTimeout(() => {
-                buttonElement.classList.remove('pulse');
-            }, 600);
-
-            // Cập nhật UI
-            this.updateWishlistUI(ProductID, buttonElement);
-            this.saveLikeCounts();
-
-            // Show notification
-            this.showNotification(`Đã bỏ tim! 💔 (${this.likeCounts[ProductID]} lượt thích)`, 'info');
-        },
-
-        updateWishlistUI(ProductID, buttonElement) {
-            const countElement = buttonElement.querySelector('.wishlist-count');
-            const currentCount = this.likeCounts[ProductID] || 0;
-            const isLiked = this.likedProducts[ProductID] || false;
-
-            // Cập nhật số lượng hiển thị
-            countElement.textContent = currentCount;
-
-            // Cập nhật trạng thái nút dựa trên việc user đã like hay chưa
-            if (isLiked) {
-                buttonElement.classList.add('active');
-                buttonElement.setAttribute('aria-label', `Đã thích - ${currentCount} lượt thích`);
-            } else {
-                buttonElement.classList.remove('active');
-                buttonElement.setAttribute('aria-label', `Thả tim - ${currentCount} lượt thích`);
-            }
-
-            // Hiển thị số đếm nếu > 0
-            if (currentCount > 0) {
-                countElement.style.display = 'flex';
-            } else {
-                countElement.style.display = 'none';
-            }
-        },
-
-        updateAllWishlistUI() {
-            // Cập nhật tất cả các nút wishlist khi tải trang
-            document.querySelectorAll('[id^="wishlist-count-"]').forEach(countElement => {
-                const ProductID = countElement.id.replace('wishlist-count-', '');
-                const buttonElement = countElement.closest('.wishlist-btn');
-                const currentCount = this.likeCounts[ProductID] || 0;
-                const isLiked = this.likedProducts[ProductID] || false;
-
-                countElement.textContent = currentCount;
-
-                // Cập nhật trạng thái nút
-                if (isLiked) {
-                    buttonElement.classList.add('active');
-                    buttonElement.setAttribute('aria-label', `Đã thích - ${currentCount} lượt thích`);
-                } else {
-                    buttonElement.classList.remove('active');
-                    buttonElement.setAttribute('aria-label', `Thả tim - ${currentCount} lượt thích`);
-                }
-
-                // Hiển thị số đếm
-                if (currentCount > 0) {
-                    countElement.style.display = 'flex';
-                } else {
-                    countElement.style.display = 'none';
-                }
-            });
-        },
-
-        saveLikeCounts() {
-            localStorage.setItem('likeCounts', JSON.stringify(this.likeCounts));
-            localStorage.setItem('likedProducts', JSON.stringify(this.likedProducts)); // Lưu trạng thái like
-        },
-
-        initializeRatings() {
-            document.querySelectorAll('.rating-stars').forEach(container => {
-                const rating = parseFloat(container.dataset.rating);
-                this.renderStars(container, rating);
-            });
-        },
-
-        renderStars(container, rating) {
-            const stars = container.querySelectorAll('.star');
-            const fullStars = Math.floor(rating);
-            const hasHalfStar = rating % 1 !== 0;
-
-            stars.forEach((star, index) => {
-                star.classList.remove('filled', 'half-filled');
-
-                if (index < fullStars) {
-                    star.classList.add('filled');
-                } else if (index === fullStars && hasHalfStar) {
-                    star.classList.add('half-filled');
-                }
-            });
-        },
-
-        showNotification(message, type = 'info') {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
-            notification.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: ${type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444'};
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 1000;
-            font-weight: 600;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        `;
-            notification.textContent = message;
-
-            document.body.appendChild(notification);
-
-            // Show notification
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-
-            // Hide notification
-            setTimeout(() => {
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
+    } catch {}
+}
+async function toggleWish(id, btn) {
+    const isActive = _wishedIds.has(id);
+    const url = isActive ? '@Url.Action("RemoveFromWishlist","Home")' : '@Url.Action("AddToWishlist","Home")';
+    try {
+        const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(isActive ? {ProductID:id} : {ProductID:id,ProductsName:''}) });
+        const data = await res.json();
+        if (data.success !== false) {
+            if (isActive) { _wishedIds.delete(id); btn.classList.remove('active'); }
+            else { _wishedIds.add(id); btn.classList.add('active'); }
         }
-    };
-
-    // HÀM GLOBAL MỚI: Sử dụng toggle thay vì add
-    function addToWishlist(ProductID, buttonElement) {
-        if (isUserLogged()) {
-            wishlistController.toggleWishlist(ProductID, buttonElement);
-        }
-        else {
-            window.location.href='@Url.Action("DangNhap","User")'
-        }
-
-    }
-    //Kiểm tra phần đăng nhập
-    function isUserLogged() {
-        return window.userIsLoggedIn = @(Context.Session.GetString("DaDangNhap") != null ? "true" : "false");
-    }
-    // Initialize wishlist when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-        wishlistController.init();
+    } catch {}
+}
+document.addEventListener('DOMContentLoaded', () => {
+    loadWishlist();
+    document.querySelector('.ts-hero-cta')?.addEventListener('click', e => {
+        const t = document.querySelector('#ts-products');
+        if (t) { e.preventDefault(); t.scrollIntoView({behavior:'smooth'}); }
     });
+
+    // 3D parallax hero
+    const hero = document.getElementById('tsHero');
+    const heroInner = document.getElementById('heroInner');
+    const scene = document.getElementById('heroScene');
+    if (hero && heroInner) {
+        hero.addEventListener('mousemove', e => {
+            const rect = hero.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            heroInner.style.transform = `rotateY(${x * 6}deg) rotateX(${-y * 4}deg) translateZ(20px)`;
+            if (scene) scene.style.transform = `translate(${x * -20}px, ${y * -15}px)`;
+        });
+        hero.addEventListener('mouseleave', () => {
+            heroInner.style.transform = '';
+            if (scene) scene.style.transform = '';
+        });
+    }
+});
 </script>
