@@ -217,8 +217,13 @@ namespace TechStore.Controllers
                     ViewBag.Error = "Không tìm thấy thông tin khách hàng.";
                     return RedirectToAction("DangNhap");
                 default:
-                    ViewBag.SoDonHang = dbO_Cus.OrderPro.Where(s => s.IDCus == customer.IDCus).Count();
-                    ViewBag.TongTien = dbO_Cus.OrderPro.Where(s => s.IDCus == customer.IDCus).Sum(s => s.TotalAmount);
+                    // SỬA DÒNG 138 và 139 THÀNH:
+                    ViewBag.SoDonHang = dbO_Cus.OrderPro
+                        .Count(s => s.IDCus == customer.IDCus && s.Status != "Đã hủy" && s.Status != "Hủy đơn");
+
+                    ViewBag.TongTien = dbO_Cus.OrderPro
+                        .Where(s => s.IDCus == customer.IDCus && s.Status != "Đã hủy" && s.Status != "Hủy đơn")
+                        .Sum(s => (decimal?)s.TotalAmount) ?? 0;
                     break;
             }
             //Nếu không chưa có mua gì hết

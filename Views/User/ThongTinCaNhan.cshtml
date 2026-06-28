@@ -625,57 +625,96 @@
         }
     }
     function updateVIPInAdvance(newMembership) {
-    const membershipBadge = document.querySelector('.membership-level');
-    if (membershipBadge) {
-        membershipBadge.textContent = "VIP " + newMembership;
-        membershipBadge.classList.remove('membership-bronze', 'membership-silver', 'membership-gold');
-        if (newMembership === "Đồng") membershipBadge.classList.add('membership-bronze');
-        else if (newMembership === "Bạc") membershipBadge.classList.add('membership-silver');
-        else if (newMembership === "Vàng" || newMembership === "VIP Vàng") membershipBadge.classList.add('membership-gold');
-    }
-
-    const vipBanner = document.getElementById('vipBanner3d');
-    if (vipBanner) {
-        vipBanner.classList.remove('tier-bronze', 'tier-silver', 'tier-gold', 'tier-none');
-        const tierMap = { "Đồng": "tier-bronze", "Bạc": "tier-silver", "Vàng": "tier-gold" };
-        vipBanner.classList.add(tierMap[newMembership] || 'tier-none');
-        const icon = vipBanner.querySelector('.vip-tier-icon');
-        if (icon) {
-            icon.className = 'fas vip-tier-icon ' + ({ "Đồng": "fa-medal", "Bạc": "fa-award", "Vàng": "fa-crown" }[newMembership] || 'fa-gem');
+        // 1. Cập nhật Badge VIP (Nút nhỏ dưới Tên Khách hàng)
+        const membershipBadge = document.querySelector('.membership-level');
+        if (membershipBadge) {
+            membershipBadge.textContent = "VIP " + newMembership;
+            membershipBadge.classList.remove('membership-bronze', 'membership-silver', 'membership-gold');
+            if (newMembership === "Đồng") membershipBadge.classList.add('membership-bronze');
+            else if (newMembership === "Bạc") membershipBadge.classList.add('membership-silver');
+            else if (newMembership === "Vàng" || newMembership === "VIP Vàng") membershipBadge.classList.add('membership-gold');
         }
-    }
 
-    const progressContainer = document.querySelector('.vip-progress-container');
-    if (progressContainer) {
-        //  dùng 'let' để dùng 'html +='
-        let html = `<div class="progress-info">
-                Tổng đơn: <strong>@Html.Raw(totalOrders.ToString("n0"))</strong> &middot; Đã chi: <strong>@Html.Raw(totalSpent.ToString("n0"))₫</strong>
-            </div>`;
-
-        if (newMembership === "Vàng" || newMembership === "VIP Vàng") {
-            html += ` <div class="progress-note" style="color: #10b981; font-weight: 600;">
-                <i class="fas fa-crown" style="color: #fbbf24;"></i> Chúc mừng! Bạn đã đạt mức VIP cao nhất.
-            </div>`;
-        }
-        else {
-            let className = "";
-            if (newMembership === "Đồng") {
-                className = "vip-progress-bar-inner-bronze";
+        // 2. Cập nhật 3D Banner lớn
+        const vipBanner = document.getElementById('vipBanner3d');
+        if (vipBanner) {
+            vipBanner.classList.remove('tier-bronze', 'tier-silver', 'tier-gold', 'tier-none');
+            const tierMap = { "Đồng": "tier-bronze", "Bạc": "tier-silver", "Vàng": "tier-gold" };
+            vipBanner.classList.add(tierMap[newMembership] || 'tier-none');
+            
+            // Đổi icon
+            const icon = vipBanner.querySelector('.vip-tier-icon');
+            if (icon) {
+                icon.className = 'fas vip-tier-icon ' + ({ "Đồng": "fa-medal", "Bạc": "fa-award", "Vàng": "fa-crown" }[newMembership] || 'fa-gem');
             }
-            else {
-                className = "vip-progress-bar-inner-silver";
+            // Đổi chữ hiển thị
+            const title = vipBanner.querySelector('h2');
+            if (title) title.innerText = "VIP " + newMembership;
+        }
+
+        // 3. Cập nhật 3 thẻ Grid (Dời chữ "Hiện tại" sang thẻ mới)
+        document.querySelectorAll('.vip-tier-mini').forEach(el => {
+            el.classList.remove('active');
+            const badge = el.querySelector('.tier-badge');
+            if (badge) badge.remove();
+        });
+        
+        let targetGridClass = "";
+        if (newMembership === "Đồng") targetGridClass = ".tier-bronze-mini";
+        else if (newMembership === "Bạc") targetGridClass = ".tier-silver-mini";
+        else if (newMembership === "Vàng" || newMembership === "VIP Vàng") targetGridClass = ".tier-gold-mini";
+        
+        if (targetGridClass) {
+            const activeGrid = document.querySelector(targetGridClass);
+            if (activeGrid) {
+                activeGrid.classList.add('active');
+                activeGrid.insertAdjacentHTML('afterbegin', '<span class="tier-badge">Hiện tại</span>');
+            }
+        }
+
+        // 4. Tính toán và vẽ lại Thanh tiến độ BẰNG JAVASCRIPT (Khắc phục lỗi kẹt số liệu)
+        const progressContainer = document.querySelector('.vip-progress-container');
+        if (progressContainer) {
+            // Lấy lại tổng chi tiêu từ C# xuống JS
+            var totalSpent = parseFloat('@Html.Raw(totalSpent.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))');
+            var totalOrders = parseInt('@Html.Raw(totalOrders)');
+            
+            let nextMucToiDa = 0;
+            let progressBarClass = "";
+            
+            if (newMembership === "Đồng") { 
+                nextMucToiDa = 5000000; // Mốc tiếp theo là 5M
+                progressBarClass = "vip-progress-bar-inner-bronze"; 
+            }
+            else if (newMembership === "Bạc") { 
+                nextMucToiDa = 50000000; // Mốc tiếp theo là 50M
+                progressBarClass = "vip-progress-bar-inner-silver"; 
             }
             
-            html += `<div class="vip-progress-bar-outer">
-                        <div class="${className}" style="width:${@Html.Raw(progressPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))}%"></div>
-                     </div>
-                     <div class="progress-note">
-                        Hoàn thành <strong>@Html.Raw(progressPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%</strong> để lên hạng VIP kế tiếp (@Html.Raw(muctoida.ToString("n0"))₫)
-                     </div>`;
+            let html = `<div class="progress-info">
+                    Tổng đơn: <strong>${totalOrders.toLocaleString('vi-VN')}</strong> &middot; Đã chi: <strong>${totalSpent.toLocaleString('vi-VN')}₫</strong>
+                </div>`;
+
+            if (newMembership === "Vàng" || newMembership === "VIP Vàng") {
+                html += `<div class="progress-note" style="color: #10b981; font-weight: 600;">
+                    <i class="fas fa-crown" style="color: #fbbf24;"></i> Chúc mừng! Bạn đã đạt mức VIP cao nhất.
+                </div>`;
+            }
+            else {
+                // Tự tính % mới thay vì lấy từ Razor
+                let newProgressPercent = (totalSpent / nextMucToiDa) * 100;
+                if (newProgressPercent > 100) newProgressPercent = 100;
+                
+                html += `<div class="vip-progress-bar-outer">
+                            <div class="${progressBarClass}" style="width:${newProgressPercent.toFixed(1)}%"></div>
+                         </div>
+                         <div class="progress-note">
+                            Hoàn thành <strong>${newProgressPercent.toFixed(1)}%</strong> để lên hạng VIP kế tiếp (${nextMucToiDa.toLocaleString('vi-VN')}₫)
+                         </div>`;
+            }
+            progressContainer.innerHTML = html;
         }
-        progressContainer.innerHTML = html;
     }
-}
 
     // 3D tilt effect for VIP banner
     const vipBanner3d = document.getElementById('vipBanner3d');
