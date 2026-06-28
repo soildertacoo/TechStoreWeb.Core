@@ -403,13 +403,44 @@
             {
                 bsRank++;
                 int? sold = (Model.soldQuantities != null && Model.soldQuantities.ContainsKey(item.ProductID)) ? Model.soldQuantities[item.ProductID] : 0;
+                
+                // --- LOGIC TÍNH TOÁN SAO ĐÁNH GIÁ (Copy từ dưới lên) ---
+                decimal avgScore = 0; int totalRev = 0;
+                if (Model.scoreProducts != null && Model.scoreProducts.ContainsKey(item.ProductID))
+                { 
+                    avgScore = Model.scoreProducts[item.ProductID].Item1; 
+                    totalRev = Model.scoreProducts[item.ProductID].Item2; 
+                }
+                int starFull = (int)Math.Floor((double)avgScore);
+                bool starHalf = (avgScore - starFull) >= 0.5m;
+                // --------------------------------------------------------
+
                 string rankClass = bsRank == 1 ? "gold" : bsRank == 2 ? "silver" : "bronze";
                 string detailUrl = Url.Action("Details","CustomerPro", new { id = item.ProductID }) ?? "#";
+                
                 <div class="ts-bs-card" onclick="location.href='@detailUrl'" role="button" tabindex="0">
                     <span class="ts-bs-rank @rankClass">@bsRank</span>
                     <img src="~/Images/@item.ImagePro" alt="@item.NamePro" class="ts-bs-img" loading="lazy" />
                     <div class="ts-bs-body">
                         <div class="ts-bs-name">@item.NamePro</div>
+                        
+                        <!-- --- HIỂN THỊ SAO ĐÁNH GIÁ --- -->
+                        @if (totalRev > 0) /* Hiển thị nếu có đánh giá */
+                        {
+                            <div class="ts-card-rating">
+                                <div class="ts-stars">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        bool filled = s <= starFull;
+                                        bool half = !filled && s == starFull + 1 && starHalf;
+                                        <i class="@(filled ? "fas fa-star ts-star on" : half ? "fas fa-star-half-alt ts-star on" : "far fa-star ts-star")"></i>
+                                    }
+                                </div>
+                                <span class="ts-card-rating-txt">@avgScore.ToString("0.0") (@totalRev)</span>
+                            </div>
+                        }
+                        <!-- ---------------------------- -->
+
                         <div style="margin-bottom:4px">
                             @if (item.Discount > 0)
                             {

@@ -2,6 +2,81 @@
     ViewBag.Title = "DangKy";
     Layout = "~/Views/Shared/_LogSignLayout.cshtml";
 }
+<!-- THÊM ĐOẠN STYLE NÀY VÀO -->
+<style>
+    /* 1. SỬA LỖI HIỂN THỊ DỒN BƯỚC (QUAN TRỌNG NHẤT) */
+    .auth-step {
+        display: none; /* Ẩn tất cả các bước theo mặc định */
+    }
+    
+    .auth-step.active {
+        display: block; /* Chỉ hiển thị bước đang được active */
+        animation: stepFadeIn 0.4s ease forwards;
+    }
+
+    @@keyframes stepFadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 2. SỬA LỖI VỠ GIAO DIỆN PHẦN XÁC THỰC 2FA (Hình 2) */
+    .otp-card {
+        text-align: center;
+        padding: 10px 0;
+    }
+    .otp-header .otp-icon {
+        font-size: 48px;
+        color: #667eea;
+        margin-bottom: 16px;
+        display: block;
+    }
+    .otp-header h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 8px;
+    }
+    .otp-header p {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 24px;
+    }
+    .otp-qr-section {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+    }
+    .otp-qr-img {
+        max-width: 180px;
+        min-height: 180px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+    }
+    .otp-input-section {
+        text-align: left;
+        margin-bottom: 24px;
+    }
+    .otp-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .btn-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    .btn-group .btn {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
 
 <div class="auth-page">
     <aside class="auth-brand">
