@@ -157,8 +157,8 @@ namespace TechStore.Controllers
             if (!myCart.Any()) return RedirectToAction("ShowCart");
 
             
-            //var providers =  db.ShippingProvider.Where(item => item.IsActive).ToList();
-            var providers = new List<ShippingProvider>();
+            //var providers =  db.ShippingProviders.Where(item => item.IsActive).ToList();
+            var providers = new List<ShippingProviders>();
             ViewBag.Total = TotalMoney();
             var checkout = new Payment
             {
@@ -287,14 +287,14 @@ namespace TechStore.Controllers
                         return VnPayCheckout(trackingNumber);
                     }
 
-                    // //Khi thanh toán qua nhận hàng COD 
-                    // try {
-                    //     createOrderProvider(order);
-                    // }
-                    // catch(Exception ex)
-                    // {
-                    //     Console.WriteLine("6736: Có lỗi khi gửi từ server đvvc " + ex); 
-                    // }
+                    // //Khi thanh toán qua nhận hàng COD , catch khi bao loi truc tiep tren ham create order 
+                    try {
+                        createOrderProvider(order);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("6736: Có lỗi khi gửi từ server đvvc " + ex); 
+                    }
                     return View("PaymentSuccess", new { RspCode = "00", Message = "Confirm Success" }); //Thanh toan bang tien mat
                 }
                 catch (Exception ex)
@@ -368,7 +368,7 @@ namespace TechStore.Controllers
                     {
                         // Kiểm tra số tiền có khớp không
                         // Ép kiểu thành long(Convert.ToInt64 * 100) nếu TotalAmount của bạn là decimal/double
-                        long amount = Convert.ToInt64((order.TotalAmount - order.ShippingCost) * 100);
+                        long amount = Convert.ToInt64(order.TotalAmount * 100);
                         if (amount == vnp_Amount) 
                         {
                             // Kiểm tra trạng thái đơn hàng (Chỉ cập nhật nếu đơn đang là "Chưa thanh toán")
@@ -383,13 +383,13 @@ namespace TechStore.Controllers
                                     Console.WriteLine($"[IPN] Thanh toán thành công đơn {orderId}");
                                     rspCode = "00"; message="";
                                     // //Tao don GHN , GHTK , ...
-                                    // try {
-                                    //     createOrderProvider(order);
-                                    // }
-                                    // catch(Exception ex)
-                                    // {
-                                    //     Console.WriteLine("3005: Có lỗi khi gửi từ server đvvc " + ex); 
-                                    // }
+                                    try {
+                                        createOrderProvider(order);
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        Console.WriteLine("3005: Có lỗi khi gửi từ server đvvc " + ex); 
+                                    }
 
                                 }
                                 else
@@ -437,12 +437,12 @@ namespace TechStore.Controllers
         {
             using (var httpClient = new HttpClient())
             {
-                string shipping = "";
+                string shipping = "GHN";
                 switch (shipping)
                 {
                     case "GHN": 
                         var ghnHelper = new GhnShippingService(httpClient);
-                        var provider = db.ShippingProvider.FirstOrDefault(provider => provider.ProviderCode == shipping);
+                        var provider = db.ShippingProviders.FirstOrDefault(provider => provider.ProviderCode == shipping);
                         //Tao don ghn gui len server 
                         order.ShippingCode = await ghnHelper.CreateGHN(order, provider) ?? "";
                         break;
@@ -472,7 +472,7 @@ namespace TechStore.Controllers
             vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode ?? "");
-            vnpay.AddRequestData("vnp_Amount", Convert.ToInt64(TotalMoney() * 100).ToString()); //Số tiền thanh toán. Số tiền không mang các ký tự phân tách thập phân, phần nghìn, ký tự tiền tệ. Để gửi số tiền thanh toán là 100,000 VND (một trăm nghìn VNĐ) thì merchant cần chuyển số tiền sang định dạng long và nhân nó thêm 100 lần (khử phần thập phân), sau đó gửi sang VNPAY là: 10000000
+            vnpay.AddRequestData("vnp_Amount", Convert.ToInt64(TotalMoney() * 100).ToString()); //Số tiền thanh toán, gửi số tiền thanh toán là 100,000 VND (một trăm nghìn VNĐ) thì merchant cần chuyển số tiền sang định dạng long và nhân nó thêm 100 lần (khử phần thập phân), sau đó gửi sang VNPAY là: 10000000
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(HttpContext));

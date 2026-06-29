@@ -397,7 +397,8 @@
                         </label>
                     </div>
                 </div>
-                <div class="setting-row" id="form2FA" style="display: @(User.HasClaim("TrangThaiAuth","True") ? "flex" : "none");">
+                <!-- style="display: @(User.HasClaim("TrangThaiAuth","True") ? "flex" : "none");" -->
+                <div class="setting-row" id="form2FA" style="display: none">
                     <div class="setting-info">
                         <strong>Xác thực hai lớp (2FA)</strong>
                         <p>Dùng app Google Authenticator hoặc Microsoft Authenticator để quét mã và lấy OTP.</p>

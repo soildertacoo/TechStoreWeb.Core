@@ -6,7 +6,37 @@ namespace TechStore.Models.ModelShipping
 {
     public class ghnOrder
     {
-        
+        [Required]
+        [JsonPropertyName("token")]
+        public string? Token;
+
+        [Required]
+        [JsonPropertyName("shop_id")]
+        public int? ShopID;
+
+        [Required]
+        [MaxLength(1024)]
+        [JsonPropertyName("from_name")]
+        public string? FromName {get;set;}
+
+        [Required]
+        [JsonPropertyName("from_phone")]
+        public string?  FromPhone { get; set; }
+
+        [Required]
+        [MaxLength(1024)]
+        [JsonPropertyName("from_address")]
+        public string? FromAddress {get;set;}
+        [Required]
+        [JsonPropertyName("from_ward_name")]
+        public string? FromWardName {get;set;}
+        [Required]
+        [JsonPropertyName("from_district_name")]
+        public string? FromDistrictName {get;set;}
+        [Required]
+        [JsonPropertyName("from_province_name")]
+        public string? FromProvinceName {get;set;}
+      
         [Required]
         [MaxLength(1024)]
         [JsonPropertyName("to_name")]
@@ -22,12 +52,26 @@ namespace TechStore.Models.ModelShipping
         public string?  ToAddress { get; set; }
 
         [Required]
+        [JsonPropertyName("to_ward_name")]
+        public string? ToWardName { get; set; }
+
+        [Required]
         [JsonPropertyName("to_ward_code")]
         public string? ToWardCode { get; set; }
 
         [Required]
-        [JsonPropertyName("to_district_id")]
-        public int ToDistrictId { get; set; }
+        [JsonPropertyName("to_district_name")]
+        public string? ToDistrictName { get; set; }
+        [Required]
+        [JsonPropertyName("to_province_name")]
+        public string? ToProvinceName { get; set; }
+
+        [Required]
+        [JsonPropertyName("is_new_to_address")]
+        public bool? IsNewToAddress { get; set; }
+        [Required]
+        [JsonPropertyName("is_new_from_address")]
+        public bool? IsNewFromAddress { get; set; }
 
         [JsonPropertyName("return_phone")]
         public string? ReturnPhone { get; set; }
@@ -179,7 +223,7 @@ namespace TechStore.Models.ModelShipping
     public class GhnOrderData
     {
         [JsonPropertyName("order_code")]
-        public string OrderCode { get; set; }
+        public string? OrderCode { get; set; }
 
         [JsonPropertyName("sort_code")]
         public string? SortCode { get; set; }
@@ -198,10 +242,67 @@ namespace TechStore.Models.ModelShipping
 
         // Lưu ý: Trong JSON bạn gửi, total_fee đang là chuỗi ("33000") chứ không phải số
         [JsonPropertyName("total_fee")]
-        public string? TotalFee { get; set; } 
+        public int? TotalFee { get; set; } 
 
         [JsonPropertyName("expected_delivery_time")]
         public DateTime ExpectedDeliveryTime { get; set; }
+    }
+
+    public class GHNProvinceWard
+    {
+        [JsonPropertyName("_id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("extension_names")]
+        public List<string> ExtensionNames { get; set; }
+
+        [JsonPropertyName("type")]
+        public string? Type { get; set; }
+
+        [JsonPropertyName("parent_id")]
+        public int ParentId { get; set; }
+
+        [JsonPropertyName("status")]
+        public int Status { get; set; }
+
+        [JsonPropertyName("updated_ip")]
+        public string? UpdatedIp { get; set; }
+
+        [JsonPropertyName("updated_employee")]
+        public int UpdatedEmployee { get; set; }
+
+        [JsonPropertyName("updated_source")]
+        public string? UpdatedSource { get; set; }
+
+        [JsonPropertyName("updated_date")]
+        public DateTime UpdatedDate { get; set; }
+
+        [JsonPropertyName("created_ip")]
+        public string? CreatedIp { get; set; }
+
+        [JsonPropertyName("created_employee")]
+        public int CreatedEmployee { get; set; }
+
+        [JsonPropertyName("created_source")]
+        public string? CreatedSource { get; set; }
+
+        [JsonPropertyName("created_date")]
+        public DateTime CreatedDate { get; set; }
+    }
+
+    public class Root
+    {
+        [JsonPropertyName("code")]
+        public int Code { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
+
+        [JsonPropertyName("data")]
+        public List<GHNProvinceWard> Data { get; set; }
     }
 
     // 3. Lớp chứa chi tiết các loại phí
@@ -230,5 +331,16 @@ namespace TechStore.Models.ModelShipping
 
         [JsonPropertyName("cod_failed_fee")]
         public int CodFailedFee { get; set; }
+    }
+    public class dataRawGHN()
+    {
+        [JsonPropertyName("province_id")]
+        public int ProvinceID {get;set;}
+
+        [JsonPropertyName("offset")]
+        public int Offset {get;set;} = 0;
+        [JsonPropertyName("limit")]
+        public int Limit {get;set;} = 200;
+
     }
 }

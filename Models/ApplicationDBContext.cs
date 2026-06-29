@@ -16,7 +16,7 @@ namespace TechStore.Models
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<OrderDetails> OrderDetails { get; set; }
-        public virtual DbSet<ShippingProvider> ShippingProvider { get; set; }
+        public virtual DbSet<ShippingProviders> ShippingProviders { get; set; }
         public virtual DbSet<OrderPro> OrderPro { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<Review> Reviews { get; set; }

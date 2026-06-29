@@ -8,7 +8,7 @@ namespace TechStore.Models
         public OrderPro? Order { get; set; }
         public Customer? Customers { get; set; }
         public List<CartItem>? mycart { get; set; }
-        public List<ShippingProvider>? Providers {get;set;}
+        public List<ShippingProviders>? Providers {get;set;}
 
     }
 }

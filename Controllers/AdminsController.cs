@@ -38,7 +38,7 @@ namespace TechStore.Controllers
         [HttpGet]
         public ActionResult shippingManagement()
         {
-            var provider = dBO.ShippingProvider.ToList();
+            var provider = dBO.ShippingProviders.ToList();
             if (provider == null) return NotFound();
             return View(provider);
         }
@@ -49,8 +49,8 @@ namespace TechStore.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Tham số nhận vào chính là Model ShippingProvider
-        public ActionResult createProvider(ShippingProvider provider)
+        // Tham số nhận vào chính là Model ShippingProviders
+        public ActionResult createProvider(ShippingProviders provider)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace TechStore.Controllers
                 {
                     // 2. Kiểm tra xem Mã Code (Khóa chính) đã bị trùng trong CSDL chưa
                     // Lưu ý: Đổi chữ 'dbO' thành tên biến DbContext thực tế của bạn
-                    var checkExist = dBO.ShippingProvider.FirstOrDefault(p => p.ProviderCode == provider.ProviderCode);
+                    var checkExist = dBO.ShippingProviders.FirstOrDefault(p => p.ProviderCode == provider.ProviderCode);
                     
                     if (checkExist != null)
                     {
@@ -72,7 +72,7 @@ namespace TechStore.Controllers
                     provider.IsActive = true; 
 
                     // 4. Thêm đối tượng vào Bảng và Lưu lại
-                    dBO.ShippingProvider.Add(provider);
+                    dBO.ShippingProviders.Add(provider);
                     dBO.SaveChanges();
 
                     // 5. 🌟 Áp dụng bài học lúc nãy: Lưu XONG thì dùng RedirectToAction 
@@ -93,20 +93,20 @@ namespace TechStore.Controllers
         [HttpGet]
         public ActionResult editProvider(string code)
         {
-            var thisProvider = dBO.ShippingProvider.FirstOrDefault(provider => provider.ProviderCode == code);
+            var thisProvider = dBO.ShippingProviders.FirstOrDefault(provider => provider.ProviderCode == code);
             if (thisProvider == null) return RedirectToAction("shippingManagement","Admins");
             return View("~/Views/Admins/Shipping/editProvider.cshtml",thisProvider);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult editProvider(ShippingProvider provider)
+        public ActionResult editProvider(ShippingProviders provider)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     // Tìm dòng dữ liệu cũ trong Database dựa theo Mã Code
-                    var existingProvider = dBO.ShippingProvider.FirstOrDefault(p => p.ProviderCode == provider.ProviderCode);
+                    var existingProvider = dBO.ShippingProviders.FirstOrDefault(p => p.ProviderCode == provider.ProviderCode);
                     
                     if (existingProvider == null)
                     {
@@ -148,13 +148,13 @@ namespace TechStore.Controllers
         {
             try
             {
-                var thisProvider = dBO.ShippingProvider.FirstOrDefault(id => id.ProviderCode == data.ProviderCode);
+                var thisProvider = dBO.ShippingProviders.FirstOrDefault(id => id.ProviderCode == data.ProviderCode);
                 if (thisProvider == null) throw new Exception ("Lỗi khi xử lý dữ liệu");
                 //Xóa mã đơn
-                dBO.ShippingProvider.Remove(thisProvider);
+                dBO.ShippingProviders.Remove(thisProvider);
                 await dBO.SaveChangesAsync();
                 //Reload du lieu
-                var provider = dBO.ShippingProvider.ToList();
+                var provider = dBO.ShippingProviders.ToList();
                 return Json(new {success = true, providerData = provider ,message = "Xoa thanh cong"});
 
             }
