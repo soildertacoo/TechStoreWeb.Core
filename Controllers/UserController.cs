@@ -199,39 +199,57 @@ namespace TechStore.Controllers
         }
         public ActionResult ThongTinCaNhan()
         {
-            string ? session = HttpContext.Session.GetString("DaDangNhap") != null ?  
+            string? session = HttpContext.Session.GetString("DaDangNhap") != null ?  
             HttpContext.Session.GetString("DaDangNhap") : User.Identity.Name;
 
-            if (session== null)
+            if (session == null)
             {
                 return RedirectToAction("DangNhap");
             }
+            
             string name = session;
             ViewBag.Error = (string?)TempData["Loi"];
-            var customer = dbO_Cus.Customers.FirstOrDefault(s => s.NameCus == name);
-            //Đếm số đơn hàng của khách hàng
+            var customer = dbO_Cus.Customers.FirstOrDefault(s => s.NameCus == name);            
             
-           switch (customer)
+            switch (customer)
             {
                 case null:
                     ViewBag.Error = "Không tìm thấy thông tin khách hàng.";
                     return RedirectToAction("DangNhap");
                 default:
-                    // SỬA DÒNG 138 và 139 THÀNH:
+                    // 1. Tính số đơn hàng và tổng tiền
                     ViewBag.SoDonHang = dbO_Cus.OrderPro
                         .Count(s => s.IDCus == customer.IDCus && s.Status != "Đã hủy" && s.Status != "Hủy đơn");
 
                     ViewBag.TongTien = dbO_Cus.OrderPro
-                        .Where(s => s.IDCus == customer.IDCus && s.Status != "Đã hủy" && s.Status != "Hủy đơn")
+                        .Where(s => s.IDCus == customer.IDCus && s.Status != "Đã hủy" && s.Status != "Hủy đơn" &&
+                        s.PaymentStatus.Trim().ToLower() == "đã thanh toán")
                         .Sum(s => (decimal?)s.TotalAmount) ?? 0;
+
+                    // 2. [THÊM MỚI] Lấy thông tin VIP của khách hàng
+                    var vipInfo = dbO_Cus.VIPCustomers.FirstOrDefault(v => v.IDCus == customer.IDCus);
+                    
+                    if (vipInfo != null)
+                    {
+                        ViewBag.HangVip = vipInfo.VipTier;
+                        ViewBag.NgayHetHanVip = vipInfo.ExpireVIPDate;
+                    }
+                    else
+                    {
+                        // Nếu khách hàng mới, chưa có dữ liệu trong bảng VIPCustomer thì để mặc định
+                        ViewBag.HangVip = "Thành viên";
+                        ViewBag.NgayHetHanVip = null;
+                    }
                     break;
             }
+
             //Nếu không chưa có mua gì hết
             if ((int)ViewBag.SoDonHang == 0 || ViewBag.SoDonHang == null)
             {
                 ViewBag.SoDonHang = 0;
                 ViewBag.TongTien = 0;
             }
+            
             return View(customer);
         }
         [HttpGet]
@@ -242,7 +260,7 @@ namespace TechStore.Controllers
             if (customer != null)
             {
                 customer.IsVIP = true;
-                customer.MembershipLevel = membership ;
+                customer.MembershipLevel = membership.Trim().ToLower() != "no vip" ? membership : null;
                 await dbO_Cus.SaveChangesAsync();
                 success_bool = true;
                 return Json(new { success = success_bool });

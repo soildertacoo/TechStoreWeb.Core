@@ -68,10 +68,10 @@ namespace TechStore.Models.ModelShipping
 
         [Required]
         [JsonPropertyName("is_new_to_address")]
-        public bool? IsNewToAddress { get; set; }
+        public bool IsNewToAddress { get; set; }
         [Required]
         [JsonPropertyName("is_new_from_address")]
-        public bool? IsNewFromAddress { get; set; }
+        public bool IsNewFromAddress { get; set; }
 
         [JsonPropertyName("return_phone")]
         public string? ReturnPhone { get; set; }
@@ -293,7 +293,7 @@ namespace TechStore.Models.ModelShipping
         public DateTime CreatedDate { get; set; }
     }
 
-    public class Root
+    public class Root <T>
     {
         [JsonPropertyName("code")]
         public int Code { get; set; }
@@ -302,9 +302,17 @@ namespace TechStore.Models.ModelShipping
         public string? Message { get; set; }
 
         [JsonPropertyName("data")]
-        public List<GHNProvinceWard> Data { get; set; }
+        public List <T>? Data { get; set; }
     }
+    public class GHNHuyDon {
+        [JsonPropertyName("order_code")]
+        public string? OrderCode { get; set; }
+        [JsonPropertyName("result")]
+        public bool Result { get; set; }
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
 
+    }
     // 3. Lớp chứa chi tiết các loại phí
     public class GhnFee
     {

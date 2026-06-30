@@ -728,7 +728,7 @@ body { font-family: 'Inter', sans-serif; }
                                 <span class="dp-qty-label">Số lượng</span>
                                 <div class="dp-stepper">
                                     <button type="button" id="qtyMinus">−</button>
-                                    <input type="number" name="quantity" id="quantityInput" value="1" min="1" max="@Model.StockQuantity" @(inStock ? "" : "disabled")/>
+                                    <input type="text" name="quantity" id="quantityInput" value="1" min="1" max="@Model.StockQuantity" @(inStock ? "" : "disabled")/>
                                     <button type="button" id="qtyPlus">+</button>
                                 </div>
                             </div>

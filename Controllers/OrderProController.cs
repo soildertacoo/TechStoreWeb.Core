@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http; // Bắt buộc phải có cho Session
 using TechStore.Models;
 using ClosedXML.Excel;
-using System.Data;using  System.Globalization;
+using System.Data;
+using  System.Globalization;
 using System.Text;
 using System.Text.Json;
 using TechStoreWeb.Core.PayModel;
+using TechStoreWeb.Core.ShippingServices;
 namespace TechStore.Controllers
 {
     public class OrderProController : Controller
@@ -47,7 +49,7 @@ namespace TechStore.Controllers
             
             var order = db.OrderPro
                 .Include(o => o.Customer)
-                .Include(o => o.OrderDetails).ThenInclude(od => od.Products) 
+                .Include(o => o.OrderDetails).ThenInclude(od => od.Products).AsEnumerable().OrderByDescending(o => o.DateOrder)
                 .FirstOrDefault(o => o.ID == id);
 
             if (order == null) return NotFound(); 
@@ -154,7 +156,7 @@ namespace TechStore.Controllers
             {
                 ViewBag.Error = (string)TempData["Error"];
             }
-            var list = db.OrderPro.Include(o => o.Customer).Where(s => s.IDCus == id).ToList();
+            var list = db.OrderPro.Include(o => o.Customer).Where(s => s.IDCus == id).OrderByDescending(o => o.ID).ToList();
             return View(list);
         }
         public class JSONOrder()
@@ -204,38 +206,55 @@ namespace TechStore.Controllers
 
         public async Task<IActionResult> Delete_KH([FromBody] JSONOrder data)
         {
-            var item = db.OrderPro
-                .Include(o => o.OrderDetails) // Bao gồm chi tiết đơn hàng để có thể xóa chúng nếu cần
-                .FirstOrDefault(s => s.TrackingNumber == data.id);
-            
-            if (item == null)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
-            }
-            // Không cho hủy nếu đã giao hoặc đang giao
-            else if (item.Status.Trim() == "Đang giao" || item.Status.Trim() == "Đã giao")
-            {
-                return Json(new { success = false, message = "Không hủy đơn được do đang giao hay đã giao" });
-            }
-            // Tránh cộng kho nhiều lần
-            else if (item.Status.Trim() == "Hủy đơn")
-            {
-                return Json(new { success = false, message = "Đơn hàng đã được hủy trước đó." });
-            }
-           // Trả hàng về kho
-           foreach (var orderDetail in item.OrderDetails)
-            {
-                var inventory = db.Inventories
-                .FirstOrDefault(i => i.ProductID == orderDetail.IDProduct);
-                if (inventory != null)
+                try
                 {
-                    inventory.StockQuantity += orderDetail.Quantity ?? 0; // Cộng số lượng trả về kho
-                    inventory.LastUpdated = DateTime.Now; // Cập nhật thời gian chỉnh sửa
+                    var item = db.OrderPro
+                    .Include(o => o.OrderDetails) // Bao gồm chi tiết đơn hàng để có thể xóa chúng nếu cần
+                    .FirstOrDefault(s => s.TrackingNumber == data.id);
+                
+                    if (item == null)
+                    {
+                        throw new Exception("Không tìm thấy đơn hàng.");
+                    }
+                    // Không cho hủy nếu đã giao hoặc đang giao
+                    else if (item.Status.Trim().ToLower() == "đang giao" || item.Status.Trim().ToLower() == "đã giao")
+                    {
+                        throw new Exception("Không hủy đơn được do đang giao hay đã giao" );
+                    }
+                    // Tránh cộng kho nhiều lần
+                    else if (item.Status.Trim().ToLower() == "hủy đơn")
+                    {
+                        throw new Exception("Đơn hàng đã được hủy trước đó.");
+                    }
+                    // Trả hàng về kho
+                    foreach (var orderDetail in item.OrderDetails)
+                    {
+                        var inventory = db.Inventories
+                        .FirstOrDefault(i => i.ProductID == orderDetail.IDProduct);
+                        if (inventory != null)
+                        {
+                            inventory.StockQuantity += orderDetail.Quantity ?? 0; // Cộng số lượng trả về kho
+                            inventory.LastUpdated = DateTime.Now; // Cập nhật thời gian chỉnh sửa
+                        }
+                    }
+                    item.Status = "Hủy đơn";
+                    db.Entry(item).State = EntityState.Modified;
+                    //Huy don tren GHN truc tiep hoac la don vi gi khac trong tuong lai                    
+                    GhnShippingService ghn = new GhnShippingService(new HttpClient());
+                    var provider = await db.ShippingProviders.FirstOrDefaultAsync(ship => ship.ProviderCode.Trim().ToLower() == "ghn");
+                    await ghn.cancelDVVC(item.ShippingCode, provider);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch(Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    Console.WriteLine("36636_Hủy đơn ko thành công do " + ex.Message);
+                    return Json(new { success = false, message = ex.Message });
                 }
             }
-            item.Status = "Hủy đơn";
-            db.Entry(item).State = EntityState.Modified;
-            await db.SaveChangesAsync();
             return Json(new { success = true });
         }   
         [HttpPost]

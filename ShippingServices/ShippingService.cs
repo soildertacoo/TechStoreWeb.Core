@@ -7,24 +7,26 @@ using TechStore.Models.ModelShipping;
 using System.Net.Http.Headers;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using System.Text.Json.Serialization;
 
 namespace TechStoreWeb.Core.ShippingServices{
     public interface IShippingService
     {
         Task<string> CreateGHN(OrderPro order,ShippingProviders? provider);
+        Task cancelDVVC(string shippingCode,ShippingProviders? provider);
     }
 
     public class GhnShippingService: IShippingService
     {
         private readonly HttpClient _httpClient;
-        public string token = "";
+        public string? token = "";
 
         public GhnShippingService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-    public async Task<string> CreateGHN(OrderPro order, ShippingProviders? provider)
+        public async Task<string> CreateGHN(OrderPro order, ShippingProviders? provider)
     {
         try 
         {
@@ -37,16 +39,9 @@ namespace TechStoreWeb.Core.ShippingServices{
             {
                 throw new Exception("Dữ liệu ĐVVC (provider) truyền vào bị null.");
             }
-
-
             // 2. DÙNG TOÁN TỬ ?. VÀ ?? ĐỂ "BỌC THÉP" DỮ LIỆU
             string [] addresssDivided = order.AddressDeliverry.Split(',');
-            //Debug 
-            foreach (string i in addresssDivided)
-                {
-                    Console.WriteLine("Dia chi duoc cat ra 36" + i.Trim());
-                }
-            token = provider.ApiToken;
+            token = provider.ApiToken ?? null;
             ghnOrder request = new ghnOrder 
             {
                 PaymentTypeId = 2,
@@ -69,7 +64,7 @@ namespace TechStoreWeb.Core.ShippingServices{
                 // ToDistrictName = addresssDivided.Length >= 3 ? addresssDivided[1].Trim() : "Không có huyện quận",
                 ToProvinceName = addresssDivided.Length >= 3 ? addresssDivided[2].Trim() : "Khong có tỉnh thành phố",
                 ToWardCode = addresssDivided.Length >= 3 ? await getWardCode(addresssDivided[1].Trim(), addresssDivided[2].Trim()): "",
-                CodAmount = 200000,
+                CodAmount = (int)(order.ShippingCost ?? 0),
                 Content = $"Don hang dummy co ma la {order.TrackingNumber} duoc dat vao ngay {order.DeliveryDate}, day la don hang dummy,test kiem thu app nen la shipper ko toi lay hang",
                 Weight = 200,
                 Length = 1,
@@ -77,7 +72,7 @@ namespace TechStoreWeb.Core.ShippingServices{
                 Height = 10,
                 CodFailedAmount = 2000,
                 // PickStationId = 1444,
-                InsuranceValue = 10000000, 
+                InsuranceValue = (int)(order.TotalAmount - order.ShippingCost ?? 0), 
                 ServiceTypeId = 2,
                 Coupon = null,
                 PickShift = new List<int> { 2 },
@@ -95,7 +90,7 @@ namespace TechStoreWeb.Core.ShippingServices{
 
             // // 3. XÓA HEADER CŨ TRƯỚC KHI THÊM MỚI (Cực kỳ quan trọng để tránh lỗi Duplicate Header)
             _httpClient.DefaultRequestHeaders.Remove("Token");            
-            if (!string.IsNullOrEmpty(provider.ApiToken))
+            if (!string.IsNullOrEmpty(token))
             {
                 _httpClient.DefaultRequestHeaders.Add("Token", provider.ApiToken);
                 _httpClient.DefaultRequestHeaders.Add("ShopId", "200501");
@@ -121,7 +116,7 @@ namespace TechStoreWeb.Core.ShippingServices{
             if (result?.Code == 200 && result.Data != null)
             {
                 // Trả về mã vận đơn (Tracking code)
-                return "TS_" + provider.ProviderCode + "_" + result.Data.OrderCode; 
+                return result.Data.OrderCode; 
             }
             else
             {          
@@ -135,6 +130,38 @@ namespace TechStoreWeb.Core.ShippingServices{
             Console.WriteLine(ex.ToString());
             return ""; 
         }
+        }
+        public async Task cancelDVVC(string shippingCode, ShippingProviders? provider){
+            
+            if (shippingCode.IsNullOrEmpty()) throw new Exception("Mã code DVVC bị rỗng.");
+
+            _httpClient.DefaultRequestHeaders.Remove("Token");            
+            if (!string.IsNullOrEmpty(provider?.ApiToken))
+            {
+                _httpClient.DefaultRequestHeaders.Add("Token", provider.ApiToken);
+                _httpClient.DefaultRequestHeaders.Add("ShopId", "200501");
+            }
+            else
+            {
+                throw new Exception("Token của provider bị rỗng.");
+            }
+            
+            var content = new miniBaseClass
+            {
+                OrderCodes = new List<string>{shippingCode}
+            };
+
+            var response = await _httpClient.PostAsJsonAsync(provider.ApiCancelOrder,content);
+            if(!response.IsSuccessStatusCode){
+                // Đọc thẳng câu báo lỗi chi tiết từ GHN
+                string errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"GHN TỪ CHỐI HỦY ĐƠN HÀNG (Lỗi {response.StatusCode}): {errorContent}");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Root<GHNHuyDon>>();
+            if (result?.Code == 200 && result.Data != null &&result.Data[0].OrderCode == shippingCode) return; 
+            else throw new Exception($"API GHN trả về lỗi dù đã gửi yêu cầu hủy đơn lên hệ thống thành công. Code: {result?.Code}, Message: {result?.Message}");
+            
         }
         public async Task<string> getWardCode(string ward, string province)
         {
@@ -165,7 +192,7 @@ namespace TechStoreWeb.Core.ShippingServices{
                     throw new Exception($"API GHN trả về lỗi khi lay ma tinh (Lỗi {response.StatusCode}): {errorContent}");
                 }
                 
-                var result = await response.Content.ReadFromJsonAsync<Root>();
+                var result = await response.Content.ReadFromJsonAsync<Root<GHNProvinceWard>>();
                 if (result?.Code == 200 && !result.Data.IsNullOrEmpty())
                 {
                     foreach (GHNProvinceWard pro in result.Data)
@@ -219,7 +246,7 @@ namespace TechStoreWeb.Core.ShippingServices{
                     string errorContent = await response.Content.ReadAsStringAsync();
                     throw new Exception($"Co loi khi ma phuong ve (Lỗi {response.StatusCode}): {errorContent}");
                 }
-                var result = await response.Content.ReadFromJsonAsync<Root>();
+                var result = await response.Content.ReadFromJsonAsync<Root<GHNProvinceWard>>();
                 if (result?.Code == 200 && !result.Data.IsNullOrEmpty())
                 {
                     //In ra noi dung 
@@ -245,5 +272,11 @@ namespace TechStoreWeb.Core.ShippingServices{
             }
             return "";
         }
+    }
+    public class miniBaseClass
+    {
+        [JsonPropertyName("order_codes")]
+        public List<string>? OrderCodes {get;set;}
+
     }
     }

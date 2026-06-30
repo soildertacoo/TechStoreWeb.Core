@@ -251,50 +251,72 @@
             </div>
         }
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Add some interactive effects
         document.addEventListener('DOMContentLoaded', function () {
             const cancelBtn = document.querySelectorAll('.btn-cancel');
             //Nếu là dạng danh sách và id giống nhau cho mỗi phần tử thì
-            cancelBtn.forEach( button => {
-                button.addEventListener('click', async function () { // 1. Sửa 'change' thành 'click'
+            cancelBtn.forEach(button => {
+                button.addEventListener('click', async function () { 
                     const trackingNumber = this.getAttribute('data-tracking');
-                    if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?: ' + trackingNumber)) {
+                    
+                    // 1. Dùng await cho Swal, code sẽ dừng ở đây chờ user chọn
+                    const result = await Swal.fire({
+                        title: "Xác nhận hủy đơn hàng: " + trackingNumber,
+                        text: "Hành động này không thể hoàn tác!",
+                        icon: "question", 
+                        showDenyButton: true,
+                        confirmButtonText: "Hủy đơn ư?",
+                        denyButtonText: "Không muốn hủy đâu!"
+                    });
+
+                    // 2. Xử lý sau khi user nhấn xác nhận
+                    if (result.isConfirmed) {
                         try {
-                            // Tạm thời tắt nút để tránh spam
-                            this.style.pointerEvents = 'none';
+                            // Tạm thời tắt nút để tránh spam (dùng biến button lấy từ vòng lặp cho an toàn)
+                            button.style.pointerEvents = 'none';
+                            
                             const response = await fetch('@Url.Action("Delete_KH", "OrderPro")', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
-                                body: JSON.stringify({ id: trackingNumber })
+                                // Đảm bảo Controller của bạn có [FromBody] để nhận chuỗi JSON này
+                                body: JSON.stringify({ id: trackingNumber }) 
                             });
                             
                             const data = await response.json(); 
                             
                             if (data.success) {
-                                if (confirm('Đã hủy thành công, nhấn ok để reset trang lại')) {
-                                    window.location.reload(); // Thêm lệnh reload trang
-                                }
-                            } else {
-                                if (confirm('Hủy đơn không thành công, nhấn ok để reload lại trang và hủy lại')) {
-                                    window.location.reload(); 
-                                } else {
-                                    this.style.pointerEvents = 'auto';
-                                }
+                                await Swal.fire({
+                                    title: "Đã hủy đơn!",
+                                    text: "Đơn hàng của bạn đã được hủy thành công.",
+                                    icon: "success",
+                                    confirmButtonText: "Ok"
+                                });
+                                window.location.reload();
+                            } else {                                          
+                                await Swal.fire({
+                                    title: "Hủy đơn thất bại!",
+                                    text: "Không thể hủy đơn lúc này.",
+                                    icon: "error",
+                                    confirmButtonText: "Ok",
+                                    footer: "<a href=\"#\">Nếu hủy đơn không được nhiều lần, hãy liên hệ với CHKH</a>"                                
+                                });
+                                // Bật lại nút nếu lỗi logic
+                                button.style.pointerEvents = 'auto'; 
                             }
                         } catch (error) {
                             console.error('Lỗi khi fetch dữ liệu:', error);
-                            alert('Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau.');
+                            Swal.fire("Lỗi hệ thống!", "Không thể kết nối đến máy chủ.", "error");
                             
-                            // Khôi phục lại nút nếu xảy ra lỗi mạng/server
-                            this.style.pointerEvents = 'auto';
+                            // Khôi phục lại nút nếu xảy ra lỗi mạng
+                            button.style.pointerEvents = 'auto';
                         }
                     }
                 });
-            });
-            
+            });      
            
             // Smooth horizontal scroll for table
             const tableContainer = document.querySelector('.table-responsive');

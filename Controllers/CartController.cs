@@ -224,7 +224,7 @@ namespace TechStore.Controllers
                 return View(checkout);
             }
 
-
+            
             //Xử lý thanh toán tiền mặt, vnPay
             string trackingNumber = GenerateTrackingNumber();
             bool isCardPayment = model.Order?.PaymentMethod == "1";
@@ -236,6 +236,18 @@ namespace TechStore.Controllers
                 {
                     decimal? shippingCost = TotalMoney() * 0.05m;
                     int idCus = cus.IDCus;
+                     //Tạo đối tượng VIP mới có sẵn 
+                    if (db.VIPCustomers.FirstOrDefault(s => s.IDCus == idCus) == null)
+                    {
+                        VIPCustomer vipCus = new VIPCustomer
+                        {
+                        IDCus = idCus,
+                        NameCus = cus.NameCus
+                        };
+                        db.VIPCustomers.Add(vipCus);
+                        await db.SaveChangesAsync(); 
+                    }
+                    
                     var order = new OrderPro
                     {
                         IDCus = idCus,
@@ -251,8 +263,8 @@ namespace TechStore.Controllers
                     };
 
                     db.OrderPro.Add(order);
-                    db.SaveChanges(); 
-
+                    await db.SaveChangesAsync(); 
+                   
                     //Convert nguyên list (lưu có tùy chọn) để lưu thẳng vào sql
                     var orderDetailsList = myCart.Select(item => new OrderDetails
                     {
@@ -262,10 +274,7 @@ namespace TechStore.Controllers
                         UnitPrice = (double)item.Price,
                         Note = "Đơn hàng đang chờ xử lý"
                     }).ToList();
-
                     db.OrderDetails.AddRange(orderDetailsList); //Nếu lưu nguyên list vào sql
-                    db.SaveChanges(); 
-
                     foreach (var item in myCart)
                     {
                         // Giảm tồn kho
@@ -278,31 +287,26 @@ namespace TechStore.Controllers
                         }
                         inventory.StockQuantity -= item.Number;
                     }
+                    //Lưu giá tiền trước khi bị xóa khỏi giỏ hàng
+                    decimal? cartSUM = order.TotalAmount;
                     db.CartItems.RemoveRange(myCart);
-                    db.SaveChanges();
-                    // Xác nhận toàn bộ quá trình thành công
+                    await createOrderProvider(order);
+                    await db.SaveChangesAsync(); 
                     transaction.Commit();
+
                     if (isCardPayment){ 
                         //Chạy thanh toán vnpay
-                        return VnPayCheckout(trackingNumber);
+                        return VnPayCheckout(trackingNumber,cartSUM);
                     }
 
-                    // //Khi thanh toán qua nhận hàng COD , catch khi bao loi truc tiep tren ham create order 
-                    try {
-                        createOrderProvider(order);
-                    }
-                    catch(Exception ex)
-                    {
-                        Console.WriteLine("6736: Có lỗi khi gửi từ server đvvc " + ex); 
-                    }
                     return View("PaymentSuccess", new { RspCode = "00", Message = "Confirm Success" }); //Thanh toan bang tien mat
                 }
                 catch (Exception ex)
                 {
                     // Nếu có lỗi ở bất kỳ dòng nào, quay ngược (Rollback) toàn bộ dữ liệu, không tạo Đơn hàng ma
                     transaction.Rollback();
-                    Console.WriteLine("DB_ERROR_CART:" + ex);
-                    ViewBag.Error = "Đặt hàng không thành công: Vui lòng thử lại sau."; // Ẩn ex.Message với người dùng thực tế
+                    Console.WriteLine("DB_ERROR_CART:" + ex.Message);
+                    ViewBag.ErrorPayment = "Đặt hàng không thành công: Vui lòng thử lại sau."; // Ẩn ex.Message với người dùng thực tế
                     model.mycart = myCart;
                     model.Customers = cus;
                     ViewBag.Total = TotalMoney();
@@ -314,25 +318,29 @@ namespace TechStore.Controllers
         [HttpGet]
         public async Task<IActionResult> PaymentSuccess()
         {
-            //Lấy sau dấu ? của đường link có giá trị được gắn sẵn đưa vào trong hàm
-            //Gọi IPN giả lập, dùng Task để gọi song song và chạy thêm hàm 
-
+            string rspCode = "";
+            string message = "";
+            
             if (Request.Query.Count > 0)
             {
-                string queryString = Request.QueryString.ToString(); // ?giastri=bien&&giatri2=bien => queryString
+                // TẠM THỜI COMMENT ĐOẠN IPN GIẢ LẬP NÀY LẠI ĐỂ TRÁNH XUNG ĐỘT DB (RACE CONDITION)
+                /*
+                string queryString = Request.QueryString.ToString(); 
                 string ipnUrl = $"{Request.Scheme}://{Request.Host}/Cart/VnPayIPN{queryString}";
                 
                 _= Task.Run( async () => {
                     using(var httpClient = new HttpClient())
                     {
-                        try {await httpClient.GetAsync(ipnUrl);
-                        Console.WriteLine("Đang chạy IPN");}
-                        catch
-                        {
+                        try {
+                            await httpClient.GetAsync(ipnUrl);
+                            Console.WriteLine("Đang chạy IPN");
+                        }
+                        catch {
                             Console.WriteLine("Bị lỗi khi gọi IPN"); return;
                         }
                     }
                 });
+                */
                 
                 // 1. Lấy Secret Key từ appsettings.json
                 string? vnp_HashSecret = _configuration["PayAPI:vnPay:vnp_HashSecret"] ?? "";
@@ -356,7 +364,7 @@ namespace TechStore.Controllers
                 string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
                 string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
                 string vnp_SecureHash = Request.Query["vnp_SecureHash"].ToString();
-
+                
                 // 3. Kiểm tra chữ ký
                 bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
                 if (checkSignature)
@@ -366,74 +374,70 @@ namespace TechStore.Controllers
                     
                     if (order != null)
                     {
-                        // Kiểm tra số tiền có khớp không
-                        // Ép kiểu thành long(Convert.ToInt64 * 100) nếu TotalAmount của bạn là decimal/double
+                        // Ép kiểu thành long(Convert.ToInt64 * 100)
                         long amount = Convert.ToInt64(order.TotalAmount * 100);
                         if (amount == vnp_Amount) 
                         {
-                            // Kiểm tra trạng thái đơn hàng (Chỉ cập nhật nếu đơn đang là "Chưa thanh toán")
+                            // Kiểm tra trạng thái đơn hàng
                             if (order.PaymentStatus == "Chưa thanh toán")
                             {
-                                string rspCode = "";
-                                string message = "";
                                 if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
                                 {
                                     // Thanh toán thành công
                                     order.PaymentStatus = "Đã thanh toán";
-                                    Console.WriteLine($"[IPN] Thanh toán thành công đơn {orderId}");
-                                    rspCode = "00"; message="";
-                                    // //Tao don GHN , GHTK , ...
-                                    try {
-                                        createOrderProvider(order);
-                                    }
-                                    catch(Exception ex)
-                                    {
-                                        Console.WriteLine("3005: Có lỗi khi gửi từ server đvvc " + ex); 
-                                    }
-
+                                    Console.WriteLine($"[IPN/Return] Thanh toán thành công đơn {orderId}");
+                                    rspCode = "00"; 
+                                    message = "Thanh toán thành công"; // Đã thêm message thành công rõ ràng
                                 }
                                 else
                                 {
                                     // Thanh toán thất bại
                                     order.PaymentStatus = "Chưa thanh toán";
-                                    Console.WriteLine($"[IPN] Thanh toán lỗi đơn {orderId}. Mã: {vnp_ResponseCode}");
-                                    rspCode = "99"; message="Checkout failed";
+                                    Console.WriteLine($"[IPN/Return] Thanh toán lỗi đơn {orderId}. Mã: {vnp_ResponseCode}");
+                                    rspCode = "99"; 
+                                    message = "Checkout failed";
                                 }
 
-                                // LƯU DATABASE
-                                db.Entry(order).State = EntityState.Modified;
-                                db.SaveChanges();
-
-                                // trả về view
-                                return View(new { RspCode = rspCode, Message = message });
+                                // Đã xóa dòng State = Modified bị dư thừa
+                                db.SaveChanges();                                
                             }
                             else
                             {
-                                return View(new { RspCode = "02", Message = "Order already confirmed" });
+                                rspCode = "02"; 
+                                message = "Order already confirmed";
                             }
                         }
                         else
                         {
-                            Console.WriteLine("Gía tiền có vấn đề : " + amount);
-                            return View(new { RspCode = "04", Message = "Invalid amount" });
+                            Console.WriteLine("Gía tiền có vấn đề hay là bị hủy đơn: " + amount);
+                            rspCode = "04"; 
+                            message = "Invalid amount or cancelled";
                         }
                     }
                     else
                     {
-                        return View(new { RspCode = "01", Message = "Order not found" });
+                        rspCode = "01"; 
+                        message = "Order not found";
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"[IPN] Lỗi sai chữ ký: {Request.Path}{Request.QueryString}");
-                    return View(new { RspCode = "97", Message = "Invalid signature" });
+                    Console.WriteLine($"[IPN/Return] Lỗi sai chữ ký: {Request.Path}{Request.QueryString}");
+                    rspCode = "97"; 
+                    message = "Invalid signature";
                 }
             }
+            else 
+            {
+                // ĐÃ SỬA: Đóng ngoặc khối else đàng hoàng
+                rspCode = "99"; 
+                message = "Thanh toán chưa được thực hiện";
+            }
 
-            return View(new { RspCode = "99", Message = "Thanh toán chưa được thực hiện" });
-           
+            return View(new { RspCode = rspCode, Message = message });
         }
-        public async void createOrderProvider(OrderPro order)
+            
+        public async Task createOrderProvider(OrderPro order)
         {
             using (var httpClient = new HttpClient())
             {
@@ -452,7 +456,7 @@ namespace TechStore.Controllers
                 }
             }
         }
-        private IActionResult VnPayCheckout(string trackingNumber)
+        private IActionResult VnPayCheckout(string trackingNumber, decimal? cartSUM)
         {
             //Get Config Info
             //Dùng QueryHelper để ghép link truy cập tới controller trong trình duyệt một cách chính xác
@@ -472,7 +476,8 @@ namespace TechStore.Controllers
             vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode ?? "");
-            vnpay.AddRequestData("vnp_Amount", Convert.ToInt64(TotalMoney() * 100).ToString()); //Số tiền thanh toán, gửi số tiền thanh toán là 100,000 VND (một trăm nghìn VNĐ) thì merchant cần chuyển số tiền sang định dạng long và nhân nó thêm 100 lần (khử phần thập phân), sau đó gửi sang VNPAY là: 10000000
+            vnpay.AddRequestData("vnp_Amount", Convert.ToInt64(cartSUM * 100).ToString()); //Số tiền thanh toán, gửi số tiền thanh toán là 100,000 VND (một trăm nghìn VNĐ) thì merchant cần chuyển số tiền sang định dạng long và nhân nó thêm 100 lần (khử phần thập phân), sau đó gửi sang VNPAY là: 10000000
+            // vnpay.AddRequestData("vnp_Amount", "1000000"); //Số tiền thanh toán, gửi số tiền thanh toán là 100,000 VND (một trăm nghìn VNĐ) thì merchant cần chuyển số tiền sang định dạng long và nhân nó thêm 100 lần (khử phần thập phân), sau đó gửi sang VNPAY là: 10000000
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(HttpContext));
@@ -491,93 +496,93 @@ namespace TechStore.Controllers
         }
         //Hàm IPN để xử lý dữ liệu tra rveef 
        
-        [HttpGet]
-        public async Task<IActionResult> VnPayIPN()
-        {
-            if (Request.Query.Count > 0)
-            {
-                // 1. Lấy Secret Key từ appsettings.json
-                string? vnp_HashSecret = _configuration["VnpayConfig:vnp_HashSecret"];
+        // [HttpGet]
+        // public async Task<IActionResult> VnPayIPN()
+        // {
+        //     if (Request.Query.Count > 0)
+        //     {
+        //         // 1. Lấy Secret Key từ appsettings.json
+        //         string? vnp_HashSecret = _configuration["VnpayConfig:vnp_HashSecret"];
                 
-                var vnpayData = Request.Query;
-                VnPayLibrary vnpay = new VnPayLibrary();
+        //         var vnpayData = Request.Query;
+        //         VnPayLibrary vnpay = new VnPayLibrary();
 
-                // Nạp data vào thư viện
-                foreach (var (key, value) in vnpayData)
-                {
-                    if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
-                    {
-                        vnpay.AddResponseData(key, value.ToString());
-                    }
-                }
+        //         // Nạp data vào thư viện
+        //         foreach (var (key, value) in vnpayData)
+        //         {
+        //             if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+        //             {
+        //                 vnpay.AddResponseData(key, value.ToString());
+        //             }
+        //         }
 
-                // 2. Trích xuất dữ liệu
-                string orderId = vnpay.GetResponseData("vnp_TxnRef");
-                long vnp_Amount = Convert.ToInt64(vnpay.GetResponseData("vnp_Amount")); 
-                long vnpayTranId = Convert.ToInt64(vnpay.GetResponseData("vnp_TransactionNo"));
-                string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
-                string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
-                string vnp_SecureHash = Request.Query["vnp_SecureHash"].ToString();
+        //         // 2. Trích xuất dữ liệu
+        //         string orderId = vnpay.GetResponseData("vnp_TxnRef");
+        //         long vnp_Amount = Convert.ToInt64(vnpay.GetResponseData("vnp_Amount")); 
+        //         long vnpayTranId = Convert.ToInt64(vnpay.GetResponseData("vnp_TransactionNo"));
+        //         string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
+        //         string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
+        //         string vnp_SecureHash = Request.Query["vnp_SecureHash"].ToString();
 
-                // 3. Kiểm tra chữ ký
-                bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
-                if (checkSignature)
-                {
-                    // 4. Lấy đơn hàng thật từ Database của bạn
-                    var order = db.OrderPro.FirstOrDefault(o => o.TrackingNumber == orderId);
+        //         // 3. Kiểm tra chữ ký
+        //         bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+        //         if (checkSignature)
+        //         {
+        //             // 4. Lấy đơn hàng thật từ Database của bạn
+        //             var order = db.OrderPro.FirstOrDefault(o => o.TrackingNumber == orderId);
                     
-                    if (order != null)
-                    {
-                        // Kiểm tra số tiền có khớp không (Tránh hacker sửa số tiền thành 1 VNĐ)
-                        // Ép kiểu về long nếu TotalAmount của bạn là decimal/double
-                        if (order.TotalAmount == vnp_Amount) 
-                        {
-                            // Kiểm tra trạng thái đơn hàng (Chỉ cập nhật nếu đơn đang là "Chưa thanh toán")
-                            if (order.PaymentStatus == "Chưa thanh toán")
-                            {
-                                if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
-                                {
-                                    // Thanh toán thành công
-                                    order.PaymentStatus = "Đã thanh toán";
-                                    Console.WriteLine($"[IPN] Thanh toán thành công đơn {orderId}");
-                                }
-                                else
-                                {
-                                    // Thanh toán thất bại
-                                    order.PaymentStatus = "Thanh toán lỗi";
-                                    Console.WriteLine($"[IPN] Thanh toán lỗi đơn {orderId}. Mã: {vnp_ResponseCode}");
-                                }
+        //             if (order != null)
+        //             {
+        //                 // Kiểm tra số tiền có khớp không (Tránh hacker sửa số tiền thành 1 VNĐ)
+        //                 // Ép kiểu về long nếu TotalAmount của bạn là decimal/double
+        //                 if (order.TotalAmount == vnp_Amount) 
+        //                 {
+        //                     // Kiểm tra trạng thái đơn hàng (Chỉ cập nhật nếu đơn đang là "Chưa thanh toán")
+        //                     if (order.PaymentStatus == "Chưa thanh toán")
+        //                     {
+        //                         if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
+        //                         {
+        //                             // Thanh toán thành công
+        //                             order.PaymentStatus = "Đã thanh toán";
+        //                             Console.WriteLine($"[IPN] Thanh toán thành công đơn {orderId}");
+        //                         }
+        //                         else
+        //                         {
+        //                             // Thanh toán thất bại
+        //                             order.PaymentStatus = "Thanh toán lỗi";
+        //                             Console.WriteLine($"[IPN] Thanh toán lỗi đơn {orderId}. Mã: {vnp_ResponseCode}");
+        //                         }
 
-                                // LƯU DATABASE
-                                db.SaveChanges();
+        //                         // LƯU DATABASE
+        //                         db.SaveChanges();
 
-                                // Trong .NET Core, dùng return Ok() để trả về JSON cho VNPay, KHÔNG dùng Response.Write
-                                return View(new { RspCode = "00", Message = "Confirm Success" });
-                            }
-                            else
-                            {
-                                return View(new { RspCode = "02", Message = "Order already confirmed" });
-                            }
-                        }
-                        else
-                        {
-                            return View(new { RspCode = "04", Message = "Invalid amount" });
-                        }
-                    }
-                    else
-                    {
-                        return View(new { RspCode = "01", Message = "Order not found" });
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"[IPN] Lỗi sai chữ ký: {Request.Path}{Request.QueryString}");
-                    return View(new { RspCode = "97", Message = "Invalid signature" });
-                }
-            }
+        //                         // Trong .NET Core, dùng return Ok() để trả về JSON cho VNPay, KHÔNG dùng Response.Write
+        //                         return View(new { RspCode = "00", Message = "Confirm Success" });
+        //                     }
+        //                     else
+        //                     {
+        //                         return View(new { RspCode = "02", Message = "Order already confirmed" });
+        //                     }
+        //                 }
+        //                 else
+        //                 {
+        //                     return View(new { RspCode = "04", Message = "Invalid amount" });
+        //                 }
+        //             }
+        //             else
+        //             {
+        //                 return View(new { RspCode = "01", Message = "Order not found" });
+        //             }
+        //         }
+        //         else
+        //         {
+        //             Console.WriteLine($"[IPN] Lỗi sai chữ ký: {Request.Path}{Request.QueryString}");
+        //             return View(new { RspCode = "97", Message = "Invalid signature" });
+        //         }
+        //     }
 
-            return View(new { RspCode = "99", Message = "Input data required" });
-        }
+        //     return View(new { RspCode = "99", Message = "Input data required" });
+        // }
         #endregion
 
         //Tuple
@@ -761,6 +766,12 @@ namespace TechStore.Controllers
         public decimal TotalMoney()
         {
             return GetCart().Sum(item => item.FinalPrice()); 
+        }
+        public decimal TotalMoney(string message)
+        {
+            decimal sum = GetCart().Sum(item => item.FinalPrice());
+            Console.WriteLine("6336_sumcART"+ message + ":" + sum);
+            return sum;
         }
 
         public int TotalQuantity()

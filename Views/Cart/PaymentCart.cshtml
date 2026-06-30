@@ -327,7 +327,8 @@
             </div>
         </div>
 
-        @using (Html.BeginForm("PaymentCart", "Cart", FormMethod.Post))
+        <!-- ĐÃ SỬA: Thêm id="checkoutForm" vào Html.BeginForm -->
+        @using (Html.BeginForm("PaymentCart", "Cart", FormMethod.Post, new { id = "checkoutForm" }))
         {
             @Html.AntiForgeryToken()
             @Html.ValidationSummary(true, "", new { @class = "text-danger", style = "text-align:center; margin-bottom:20px; font-weight:600;" })
@@ -476,6 +477,21 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
     
+    @if (ViewBag.ErrorPayment != null)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'Thất bại!',
+                    text: '@Html.Raw(ViewBag.ErrorPayment)',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Đã hiểu'
+                });
+            });
+        </script>
+    }
+    
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
             
@@ -487,9 +503,32 @@
                 minDate: "01-01-1936",
                 maxDate: "31-12-2099",
             });
+
+            // ==========================================
+            // ĐÃ SỬA: Bắt sự kiện 'submit' của Form thay vì 'click' của nút
+            // ==========================================
+            const form = document.getElementById("checkoutForm");
+            const btn_submit = document.querySelector('.btn-submit-order');
             
+            if (form && btn_submit) {
+                form.addEventListener('submit', function (e) {
+                    
+                    // Kiểm tra tính hợp lệ của Form (Nếu có trường bắt buộc chưa nhập thì dừng lại)
+                    if (!form.checkValidity()) {
+                        return;
+                    }
+
+                    // Khóa nút an toàn sau khi dữ liệu đã qua vòng kiểm tra
+                    btn_submit.disabled = true;
+                    btn_submit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý đơn hàng...';
+                    btn_submit.style.cursor = 'not-allowed';
+                    btn_submit.style.opacity = '0.7';
+                });
+            }
+
             // 2. KHỞI CHẠY API ĐỊA CHỈ
             await loadAddressData();
+
         });
 
         async function loadAddressData() {
