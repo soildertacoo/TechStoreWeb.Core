@@ -537,7 +537,7 @@ namespace TechStoreWeb.Core.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("TechStore.Models.ShippingProvider", b =>
+            modelBuilder.Entity("TechStore.Models.ShippingProviders", b =>
                 {
                     b.Property<string>("ProviderCode")
                         .HasColumnType("nvarchar(450)");
@@ -580,7 +580,7 @@ namespace TechStoreWeb.Core.Migrations
 
                     b.HasKey("ProviderCode");
 
-                    b.ToTable("ShippingProvider");
+                    b.ToTable("ShippingProviders");
                 });
 
             modelBuilder.Entity("TechStore.Models.ChatMessage", b =>

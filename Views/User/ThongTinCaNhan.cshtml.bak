@@ -14,6 +14,9 @@
     string memberShip = "Chưa phải là VIP";
     string progressBarColor = "vip-progress-bar-inner-bronze";
     decimal progressPercent = 0;
+    string vipTierClass = "tier-none";
+    string vipTierIcon = "fa-gem";
+    string vipTierDesc = "Mua sắm để mở khóa hạng VIP và nhận ưu đãi độc quyền";
 
     if (Model.MembershipLevel == "Đồng")
     {
@@ -21,24 +24,30 @@
         progressBarColor = "vip-progress-bar-inner-bronze";
         membershipClass = "membership-bronze";
         memberShip = "VIP Đồng";
+        vipTierClass = "tier-bronze";
+        vipTierIcon = "fa-medal";
+        vipTierDesc = "Hạng Đồng — Ưu đãi 5% cho mọi đơn hàng";
     }
     else if (Model.MembershipLevel == "Bạc")
     {
         muctoida = 50000000m; // 50 triệu
-        progressBarColor = "vip-progress-bar-inner-silver"; // Fix lỗi chính tả sliver -> silver
+        progressBarColor = "vip-progress-bar-inner-silver"; 
         membershipClass = "membership-silver";
         memberShip = "VIP Bạc";
+        vipTierClass = "tier-silver";
+        vipTierIcon = "fa-award";
+        vipTierDesc = "Hạng Bạc — Ưu đãi 10% + giao hàng nhanh miễn phí";
     }
     else if (Model.MembershipLevel == "Vàng")
     {
         progressBarColor = "vip-progress-bar-inner-gold";
         membershipClass = "membership-gold";
         memberShip = "VIP Vàng";
+        vipTierClass = "tier-gold";
+        vipTierIcon = "fa-crown";
+        vipTierDesc = "Hạng Vàng — Ưu đãi 15% + quà tặng sinh nhật độc quyền";
     }
-    else
-    {
-        muctoida = 1000000m; // 1 triệu để lên hạng Đồng
-    }
+    
 
     // Tính phần trăm
     if (memberShip != "VIP Vàng" && muctoida > 0)
@@ -49,329 +58,681 @@
 
 @if (ViewBag.Error != null)
 {
-    <div class="alert alert-info">
+    <div class="alert alert-info" style="border-radius: 10px; margin: 20px auto; max-width: 1200px;">
         @ViewBag.Error
     </div>
 }
 
 <style>
-    /* ==========================================
-       2. CSS ĐÃ ĐƯỢC DỌN DẸP
-       ========================================== */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; }
-    
-    .vip-progress-container { margin: 1rem 0; text-align: center; }
-    .progress-info { margin-bottom: 0.5rem; font-weight: 500; }
-    .vip-progress-bar-outer { width: 80%; max-width: 400px; margin: 0 auto; background: rgb(189, 186, 186); border-radius: 8px; overflow: hidden; height: 15px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); }
-    
-    .vip-progress-bar-inner-gold { background: linear-gradient(90deg, #FFFACD 0%, #FFD700 40%, #FFA500 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.15); height: 100%; transition: width 0.4s ease; }
-    .vip-progress-bar-inner-silver { background: linear-gradient(90deg, #f8f9fa 0%, #C0C0C0 50%, #808080 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(192, 192, 192, 0.15); height: 100%; transition: width 0.4s ease; }
-    .vip-progress-bar-inner-bronze { background: linear-gradient(90deg, #fff4e0 0%, #CD7F32 50%, #B8860B 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(205, 127, 50, 0.15); height: 100%; transition: width 0.4s ease; }
+    body { background: #eef2ff; color: #1f2937; font-family: 'Inter', system-ui, sans-serif; }
 
-    .main-container { max-width: 1200px; margin: 2rem auto; padding: 0 20px; position: relative; }
-    .profile-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 25px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); position: relative; overflow: hidden; animation: fadeInUp 0.8s ease-out; }
-    .profile-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #fcc468); background-size: 300% 100%; animation: gradient 3s ease infinite; }
-    
-    @@keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    .action-buttons-options { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
-    .avatar-section { text-align: center; margin-bottom: 2rem; position: relative; }
-    .avatar-container { 
-        position: relative; 
-        display: inline-block; 
-        margin-bottom: 1.5rem; 
+    .profile-page-container { width: 100%; max-width: 1200px; margin: 32px auto; padding: 0 16px; }
+
+    /* ── VIP 3D Banner ── */
+    .vip-hero-3d {
+        perspective: 1200px;
+        margin-bottom: 28px;
     }
-    /* KHUNG CHỨA 2 NÚT BO TRÒN (NẰM TRÊN CẠNH VIỀN) */
-    .action-buttons {
-        position: absolute;
-        /* CHÌA KHÓA LÀ 2 DÒNG NÀY: Chỉnh số để di chuyển cụm nút dọc theo viền tròn */
-        bottom: -19px;   
-        right: -17px;  /* Kéo lệch ra ngoài viền một chút cho đẹp */
-        transform: rotate(-46deg);
-        display: flex; 
-        gap: 5px;      /* Khoảng cách 2 nút sát lại */
-        
-        /* Tạo hiệu ứng khung nền trắng ôm lấy 2 nút */
-        padding: 4px;
-        border-radius: 30px; /* Bo tròn nguyên cụm thành hình viên thuốc */
-        @* Đè lên một element *@
-        z-index: 10; 
-      
-    }
-
-    /* Hiển thị khi hover vào avatar */
-    
-
-    /* ĐỊNH DẠNG TỪNG NÚT NHỎ HƠN MỘT CHÚT */
-    .btn-action {
-        width: 32px;  /* Nhỏ lại chút để gắn lên viền không bị thô */
-        height: 32px;
-        border-radius: 50%;
-        border: none;
-        font-size: 14px;
-        cursor: pointer;
+    .vip-card-3d {
+        position: relative;
+        border-radius: 24px;
+        padding: 36px 40px;
+        color: #fff;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        transition: transform .4s cubic-bezier(.23,1,.32,1), box-shadow .4s;
+        cursor: default;
+        min-height: 180px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: background-color 0.2s;
-         @* //Xoay icon *@
-        transform: rotate(45deg); 
+        justify-content: space-between;
+        gap: 24px;
     }
-    .hidden {
-        display: none !important;
+    .vip-card-3d:hover {
+        transform: rotateX(4deg) rotateY(-3deg) translateY(-6px);
     }
 
-    /* MÀU SẮC RIÊNG CHO TỪNG NÚT */
-    .btn-save {
-        background-color: #28a745; 
+    /* Tier: Bronze */
+    .vip-card-3d.tier-bronze {
+        background: linear-gradient(135deg, #92400e 0%, #b45309 30%, #d97706 60%, #78350f 100%);
+        box-shadow: 0 20px 60px rgba(146,64,14,.45), inset 0 1px 0 rgba(255,255,255,.15);
     }
-    .btn-save:hover { background-color: #218838; } /* Đậm hơn khi di chuột vào nút */
-
-    .btn-delete {
-        background-color: #dc3545; 
+    .vip-card-3d.tier-bronze::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        pointer-events: none;
     }
-   
-    .btn-delete:hover { background-color: #c82333; }    
-    .avatar-img { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: all 0.3s ease; position: relative; z-index: 1; }
-    .avatar-container::before { content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border-radius: 50%; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); animation: rotate 3s linear infinite; z-index: 0; }
-    @@keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .avatar-img:hover { transform: scale(1.05); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+    .vip-card-3d.tier-bronze .vip-tier-icon { color: #fcd34d; text-shadow: 0 0 20px rgba(252,211,77,.6); }
 
-    .customer-name { font-size: 2.5rem; font-weight: 700; background: linear-gradient(45deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+    /* Tier: Silver */
+    .vip-card-3d.tier-silver {
+        background: linear-gradient(135deg, #374151 0%, #6b7280 30%, #9ca3af 60%, #1f2937 100%);
+        box-shadow: 0 20px 60px rgba(107,114,128,.5), inset 0 1px 0 rgba(255,255,255,.2);
+    }
+    .vip-card-3d.tier-silver::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,.08) 50%, transparent 60%);
+        animation: silverShine 3s ease-in-out infinite;
+    }
+    @@keyframes silverShine {
+        0%,100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+    .vip-card-3d.tier-silver .vip-tier-icon { color: #e5e7eb; text-shadow: 0 0 24px rgba(229,231,235,.8); }
 
-    .membership-level { display: inline-block; color: #fff; padding: 0.7rem 2rem; border-radius: 30px; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1.5rem; position: relative; overflow: hidden; transition: all 0.3s ease; text-shadow: 0 2px 4px rgba(0,0,0,0.3); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
-    .membership-gold { background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4); }
-    .membership-silver { background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 50%, #808080 100%); box-shadow: 0 6px 20px rgba(192, 192, 192, 0.4); }
-    .membership-bronze { background: linear-gradient(135deg, #CD7F32 0%, #B8860B 50%, #8B4513 100%); box-shadow: 0 6px 20px rgba(205, 127, 50, 0.4); }
+    /* Tier: Gold */
+    .vip-card-3d.tier-gold {
+        background: linear-gradient(135deg, #78350f 0%, #b45309 20%, #fbbf24 50%, #d97706 80%, #92400e 100%);
+        box-shadow: 0 20px 60px rgba(251,191,36,.4), inset 0 1px 0 rgba(255,255,255,.25);
+    }
+    .vip-card-3d.tier-gold::after {
+        content: '';
+        position: absolute; top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,.12) 0%, transparent 60%);
+        animation: goldPulse 4s ease-in-out infinite;
+    }
+    @@keyframes goldPulse {
+        0%,100% { opacity: .5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+    }
+    .vip-card-3d.tier-gold .vip-tier-icon { color: #fef08a; text-shadow: 0 0 30px rgba(254,240,138,.9); animation: crownGlow 2s ease-in-out infinite alternate; }
+    @@keyframes crownGlow { from { filter: drop-shadow(0 0 8px rgba(251,191,36,.6)); } to { filter: drop-shadow(0 0 20px rgba(251,191,36,1)); } }
 
-    .action-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
-    .btn-modern { padding: 0.8rem 2rem; border: none; border-radius: 25px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
-    .btn-primary-modern { background: linear-gradient(45deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
-    .btn-danger-modern { background: linear-gradient(45deg, #ff6b6b, #ee5a52); color: white; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); }
-    .btn-info-modern { background: linear-gradient(45deg, #4ecdc4, #44a08d); color: white; box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4); }
-    .btn-modern:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); color: white; }
+    /* Tier: None */
+    .vip-card-3d.tier-none {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+        box-shadow: 0 20px 60px rgba(67,56,202,.35);
+    }
 
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-    .info-item { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); padding: 1.5rem; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease; animation: fadeInUp 0.8s ease-out; }
-    .info-item:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .info-label { font-size: 0.9rem; font-weight: 600; color: #667eea; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-    .info-value { font-size: 1.1rem; color: #333; font-weight: 500; }
+    .vip-card-content { position: relative; z-index: 2; }
+    .vip-card-content h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -.02em; }
+    .vip-card-content p { opacity: .8; font-size: .9rem; margin: 0; }
+    .vip-tier-icon { font-size: 4rem; position: relative; z-index: 2; transform: translateZ(30px); transition: transform .4s; }
+    .vip-card-3d:hover .vip-tier-icon { transform: translateZ(50px) scale(1.08) rotateY(-10deg); }
 
-    .history-section { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); padding: 2rem; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
-    .history-title { font-size: 1.8rem; font-weight: 700; color: #667eea; margin-bottom: 1rem; }
+    .vip-stats-row { display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap; }
+    .vip-stat-item { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 10px 18px; backdrop-filter: blur(8px); }
+    .vip-stat-val { font-size: 1.1rem; font-weight: 800; }
+    .vip-stat-lbl { font-size: .75rem; opacity: .7; }
 
+    /* Tier comparison cards */
+    .vip-tiers-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+    .vip-tier-mini {
+        border-radius: 16px;
+        padding: 20px 16px;
+        text-align: center;
+        position: relative;
+        transition: all .35s cubic-bezier(.23,1,.32,1);
+        transform-style: preserve-3d;
+        border: 2px solid transparent;
+        cursor: default;
+    }
+    .vip-tier-mini:hover { transform: translateY(-8px) rotateX(6deg); }
+    .vip-tier-mini.active { border-color: rgba(255,255,255,.5); transform: translateY(-4px) scale(1.03); box-shadow: 0 16px 40px rgba(0,0,0,.15); }
+    .vip-tier-mini.tier-bronze-mini { background: linear-gradient(145deg, #fef3c7, #fde68a); color: #78350f; }
+    .vip-tier-mini.tier-silver-mini { background: linear-gradient(145deg, #f3f4f6, #d1d5db); color: #374151; }
+    .vip-tier-mini.tier-gold-mini { background: linear-gradient(145deg, #fef9c3, #fbbf24); color: #78350f; }
+    .vip-tier-mini i { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+    .vip-tier-mini h4 { font-size: .95rem; font-weight: 800; margin-bottom: 4px; }
+    .vip-tier-mini p { font-size: .75rem; opacity: .75; margin: 0; }
+    .vip-tier-mini .tier-badge {
+        position: absolute; top: -8px; right: -8px;
+        background: #10b981; color: #fff;
+        font-size: .65rem; font-weight: 700;
+        padding: 3px 8px; border-radius: 99px;
+    }
+
+    .profile-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 36px 40px;
+        box-shadow: 0 4px 6px rgba(0,0,0,.02), 0 20px 50px rgba(0,0,0,.06);
+        border: 1px solid rgba(0,0,0,.04);
+        animation: fadeInUp .6s ease-out;
+    }
+
+    .avatar-wrapper { text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; }
+    .avatar-container { position: relative; display: inline-block; margin-bottom: 12px; cursor: pointer; border-radius: 50%; }
+    .avatar-img {
+        width: 130px; height: 130px; border-radius: 50%;
+        object-fit: cover; border: 4px solid #fff;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12);
+        transition: all .3s; display: block;
+    }
+    .avatar-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,.45); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 22px; opacity: 0; transition: opacity .3s;
+    }
+    .avatar-container:hover .avatar-overlay { opacity: 1; }
+    .avatar-container:hover .avatar-img { transform: scale(1.04); }
+
+    .action-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
+    .action-buttons.hidden { display: none !important; }
+    .btn-action {
+        width: 38px; height: 38px; border-radius: 50%; border: none;
+        color: #fff; font-size: 15px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: transform .2s; box-shadow: 0 4px 8px rgba(0,0,0,.12);
+    }
+    .btn-action:hover { transform: translateY(-2px); }
+    .btn-save { background: #10b981; }
+    .btn-delete { background: #ef4444; }
+
+    .customer-name { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -.02em; }
+
+    .membership-level {
+        display: inline-flex; align-items: center; gap: 6px;
+        color: #fff; padding: 5px 16px;
+        border-radius: 99px; font-weight: 700;
+        font-size: .8rem; text-transform: uppercase;
+        letter-spacing: .8px; margin-bottom: 20px;
+    }
+    .membership-gold { background: linear-gradient(135deg, #fbbf24, #d97706); box-shadow: 0 4px 14px rgba(251,191,36,.4); }
+    .membership-silver { background: linear-gradient(135deg, #9ca3af, #4b5563); box-shadow: 0 4px 14px rgba(107,114,128,.4); }
+    .membership-bronze { background: linear-gradient(135deg, #d97706, #92400e); box-shadow: 0 4px 14px rgba(217,119,6,.4); }
+
+    .action-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+    .btn-outline-modern {
+        padding: 10px 20px; border-radius: 12px;
+        font-weight: 600; text-decoration: none;
+        transition: all .25s; font-size: .9rem;
+        display: flex; align-items: center; gap: 8px;
+        cursor: pointer; border: 1.5px solid transparent;
+    }
+    .btn-primary-modern { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
+    .btn-primary-modern:hover { background: #4f46e5; color: #fff; text-decoration: none; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79,70,229,.25); }
+    .btn-gray-modern { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+    .btn-gray-modern:hover { background: #e2e8f0; color: #1e293b; }
+    .btn-danger-modern { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
+    .btn-danger-modern:hover { background: #ef4444; color: #fff; text-decoration: none; }
+
+    .vip-progress-container {
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1.5px solid #e2e8f0;
+        padding: 24px; border-radius: 16px;
+        margin-bottom: 32px; text-align: center;
+    }
+    .progress-info { margin-bottom: 12px; font-weight: 500; color: #475569; font-size: .95rem; }
+    .progress-info strong { color: #0f172a; font-weight: 700; }
+    .vip-progress-bar-outer {
+        width: 100%; max-width: 560px;
+        margin: 0 auto 10px; background: #e2e8f0;
+        border-radius: 99px; height: 10px; overflow: hidden;
+    }
+    .vip-progress-bar-inner-gold { background: linear-gradient(90deg, #fbbf24, #f59e0b); height: 100%; border-radius: 99px; transition: width .8s ease; box-shadow: 0 0 12px rgba(251,191,36,.5); }
+    .vip-progress-bar-inner-silver { background: linear-gradient(90deg, #9ca3af, #6b7280); height: 100%; border-radius: 99px; transition: width .8s ease; box-shadow: 0 0 12px rgba(156,163,175,.5); }
+    .vip-progress-bar-inner-bronze { background: linear-gradient(90deg, #d97706, #b45309); height: 100%; border-radius: 99px; transition: width .8s ease; box-shadow: 0 0 12px rgba(217,119,6,.5); }
+    .progress-note { color: #64748b; font-size: .875rem; }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px; margin-bottom: 32px;
+    }
+    .info-item {
+        background: #f8fafc; padding: 20px;
+        border-radius: 14px; border: 1px solid #e2e8f0;
+        display: flex; align-items: flex-start; gap: 14px;
+        transition: all .25s;
+    }
+    .info-item:hover { transform: translateY(-4px); border-color: #c7d2fe; box-shadow: 0 8px 20px rgba(110,106,240,.08); background: #fff; }
+    .info-icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+        color: #4f46e5; display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; flex-shrink: 0;
+    }
+    .info-label { font-size: .75rem; font-weight: 700; color: #94a3b8; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .5px; }
+    .info-value { font-size: .95rem; color: #1e293b; font-weight: 600; word-break: break-word; }
+
+    .history-section {
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        padding: 28px; border-radius: 16px;
+        text-align: center; border: 1.5px solid #e2e8f0;
+    }
+    .history-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+
+    @@media (max-width: 992px) {
+        .info-grid { grid-template-columns: repeat(2, 1fr); }
+        .vip-tiers-grid { grid-template-columns: 1fr; }
+        .vip-card-3d { flex-direction: column; text-align: center; padding: 28px 24px; }
+        .vip-tier-icon { font-size: 3rem; }
+    }
     @@media (max-width: 768px) {
-        .customer-name { font-size: 2rem; }
-        .action-buttons { flex-direction: column; align-items: center; }
         .info-grid { grid-template-columns: 1fr; }
+        .profile-card { padding: 28px 20px; }
+        .action-links { flex-direction: column; align-items: stretch; }
     }
-    @@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
-<div class="main-container">
+<div class="profile-page-container">
+
+    <!-- VIP 3D Banner -->
+    <div class="vip-hero-3d">
+        <div class="vip-card-3d @vipTierClass" id="vipBanner3d">
+            <div class="vip-card-content">
+                <h2>@memberShip</h2>
+                <p>@vipTierDesc</p>
+                <div class="vip-stats-row">
+                    <div class="vip-stat-item">
+                        <div class="vip-stat-val">@totalOrders</div>
+                        <div class="vip-stat-lbl">Đơn hàng</div>
+                    </div>
+                    <div class="vip-stat-item">
+                        <div class="vip-stat-val">@totalSpent.ToString("n0")₫</div>
+                        <div class="vip-stat-lbl">Tổng chi tiêu</div>
+                    </div>
+                </div>
+            </div>
+            <i class="fas @vipTierIcon vip-tier-icon"></i>
+        </div>
+    </div>
+
+    <!-- Tier comparison -->
+    <div class="vip-tiers-grid">
+        <div class="vip-tier-mini tier-bronze-mini @(Model.MembershipLevel == "Đồng" ? "active" : "")">
+            @if (Model.MembershipLevel == "Đồng") { <span class="tier-badge">Hiện tại</span> }
+            <i class="fas fa-medal"></i>
+            <h4>VIP Đồng</h4>
+            <p>Chi tiêu từ 1M • Giảm 5%</p>
+        </div>
+        <div class="vip-tier-mini tier-silver-mini @(Model.MembershipLevel == "Bạc" ? "active" : "")">
+            @if (Model.MembershipLevel == "Bạc") { <span class="tier-badge">Hiện tại</span> }
+            <i class="fas fa-award"></i>
+            <h4>VIP Bạc</h4>
+            <p>Chi tiêu từ 5M • Giảm 10%</p>
+        </div>
+        <div class="vip-tier-mini tier-gold-mini @(Model.MembershipLevel == "Vàng" ? "active" : "")">
+            @if (Model.MembershipLevel == "Vàng") { <span class="tier-badge">Hiện tại</span> }
+            <i class="fas fa-crown"></i>
+            <h4>VIP Vàng</h4>
+            <p>Chi tiêu từ 50M • Giảm 15%</p>
+        </div>
+    </div>
 
     <div class="profile-card">
-        @* thêm onclick để nhấn vào -> mở expoloer lên để lựa hình  *@
-        <div class="avatar-section">
+        
+        <!-- PHẦN AVATAR VÀ TÊN -->
+        <div class="avatar-wrapper">
             <div class="avatar-container" onclick="document.getElementById('AvatarBtn').click()">
-            <div class="action-buttons hidden" >
+                <!-- Ảnh đại diện -->
+                <img src="@(Url.Content($"~/Images/{Model.ImagePro ?? "Donald_Trump.jpg"}"))" alt="Avatar" class="avatar-img" id="mainAvatar">
+                <div class="avatar-overlay">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="AvatarBtn" name="AvatarFile" accept="image/*" style="display: none;" />
+            </div>
+
+            <!-- Nút Lưu / Hủy (Hiện khi chọn ảnh mới) -->
+            <div class="action-buttons hidden">
                 <button type="button" class="btn-action btn-save" title="Lưu ảnh">
                     <i class="fas fa-check"></i>
                 </button>
-                <button type="button" class="btn-action btn-delete" title="Xóa ảnh">
-                    <i class="fas fa-trash"></i>
+                <button type="button" class="btn-action btn-delete" title="Hủy ảnh">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-            @* //Nếu ko hình thì dùng ảnh mặc định , dùng Url.Content *@
-            <img src="@(Url.Content($"~/Images/{Model.ImagePro ?? "Donald_Trump.jpg"}"))" alt="Avatar" class="avatar-img" id="mainAvatar">
-            <input type="file" id="i" name="AvatarFile" accept="image/*" style="display: none;" />
-        </div>
+
             <h1 class="customer-name">@Model.NameCus</h1>
-
             <div class="membership-level @membershipClass">@memberShip</div>
-            
-            <div class="action-buttons-options">
-                @Html.ActionLink("Chỉnh sửa thông tin", "Edit_KH", "Customer", new { id = Model.IDCus }, htmlAttributes: new { @class = "btn-modern btn-primary-modern" })
-                <button onclick="openSettingsModal()" class="btn-modern btn-info-modern">
-                    <i class="fas fa-cog"></i> Mở Cài đặt
-                </button>
-                <a href="@Url.Action("DangXuat", "User")" class="btn-modern btn-danger-modern">Đăng xuất</a>
-            </div>
-
-            <div class="voip-progress-container">
-                <div class="progress-info">
-                    Tổng đơn: <strong>@totalOrders</strong> &middot; Đã chi: <strong>@totalSpent.ToString("n0")₫</strong>
-                </div>
-                
-                @if (memberShip == "VIP Vàng")
-                {
-                    <small style="color: #44a08d; font-weight: bold;">🎉 Bạn đã đạt đến mức VIP cao nhất!</small>
-                }
-                else
-                {
-                    <div class="vip-progress-bar-outer">
-                        <div class="@progressBarColor" style="width:@progressPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)%"></div>
-                    </div>
-                    <small>@progressPercent.ToString("0.0")% đến mức VIP kế tiếp (@muctoida.ToString("n0")₫)</small>
-                }
-            </div>
         </div>
 
+        <!-- CÁC NÚT THAO TÁC CƠ BẢN -->
+        <div class="action-links">
+            <a href="@Url.Action("Edit_KH", "Customer", new { id = Model.IDCus })" class="btn-outline-modern btn-primary-modern">
+                <i class="fas fa-edit"></i> Chỉnh sửa thông tin
+            </a>
+            <button onclick="openSettingsModal()" class="btn-outline-modern btn-gray-modern">
+                <i class="fas fa-cog"></i> Cài đặt bảo mật
+            </button>
+            <a href="@Url.Action("DangXuat", "User")" class="btn-outline-modern btn-danger-modern">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </a>
+        </div>
+
+        <!-- THANH TIẾN ĐỘ VIP -->
+        <div class="vip-progress-container">
+            <div class="progress-info">
+                Tổng đơn: <strong>@totalOrders</strong> &middot; Đã chi: <strong>@totalSpent.ToString("n0")₫</strong>
+            </div>
+            
+            @if (memberShip == "VIP Vàng")
+            {
+                <div class="progress-note" style="color: #10b981; font-weight: 600;">
+                    <i class="fas fa-crown" style="color: #fbbf24;"></i> Chúc mừng! Bạn đã đạt mức VIP cao nhất.
+                </div>
+            }
+            else
+            {
+                <div class="vip-progress-bar-outer">
+                    <div class="@progressBarColor" style="width:@progressPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                </div>
+                <div class="progress-note">
+                    Hoàn thành <strong>@progressPercent.ToString("0.0")%</strong> để lên hạng VIP kế tiếp (@muctoida.ToString("n0")₫)
+                </div>
+            }
+        </div>
+
+        <!-- LƯỚI THÔNG TIN CHI TIẾT -->
         <div class="info-grid">
             <div class="info-item">
-                <div class="info-label">Số điện thoại</div>
-                <div class="info-value">@Model.PhoneCus</div>
+                <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+                <div>
+                    <div class="info-label">Số điện thoại</div>
+                    <div class="info-value">@(string.IsNullOrEmpty(Model.PhoneCus) ? "Chưa cập nhật" : Model.PhoneCus)</div>
+                </div>
             </div>
-            <div class="info-item">
-                <div class="info-label">Email</div>
-                <div class="info-value">@Model.EmailCus</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Địa chỉ</div>
-                <div class="info-value">@Model.StreetAddress, @Model.Ward, @Model.City</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Ngày sinh</div>
-                <div class="info-value">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Ngày đăng ký</div>
-                <div class="info-value">@(Model.RegisteredDate?.ToString("dd/MM/yyyy") ?? "Chưa rõ")</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Thành viên VIP</div>
-                <div class="info-value">@(Model.IsVIP.HasValue && Model.IsVIP.Value ? "Có" : "Không")</div>
-            </div>
-        </div>
-
-        <div class="history-section">
-            <h3 class="history-title">Lịch sử đơn hàng</h3>
-            <p style="margin-bottom: 20px; color: #666;">Xem tất cả các đơn hàng bạn đã đặt tại TechStore</p>
-            <a href="@Url.Action("Index_KH", "OrderPro", new { id = Model.IDCus })" class="btn-modern btn-info-modern">Xem lịch sử đơn hàng</a>
-        </div>
-    </div>
-</div> @await Html.PartialAsync("~/Views/User/_SettingsPartial.cshtml")
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    
-    // 1. Chạy hàm cập nhật VIP
-    updateVIP();
-
-    const avatarInput = document.getElementById('AvatarBtn');
-    const mainAvatar = document.getElementById('mainAvatar');
-    const btnSave = document.querySelector('.btn-save');
-    const btnDelete = document.querySelector('.btn-delete');
-    let imageURL = "";
-    let originalURL = mainAvatar.src; //Lưu hình cũ vào để reset lại
-    if (avatarInput && mainAvatar) {
-        //Khi bấm đổi hình hiện Explorer
-        avatarInput.addEventListener("change", function(event) {
-            const file = event.target.files[0]; //Lấy file hình đã có
-            if (!file) return;
             
-            if (!file.type.startsWith("image/")) {
-                Swal.fire({
-                    icon: "error", title: "Oops...", text: "Đã có lỗi, không tải ảnh lên được!",
-                    footer: "Vui lòng chỉ chọn file định dạng hình ảnh (.jpg, .png)"
+            <div class="info-item">
+                <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                <div>
+                    <div class="info-label">Email liên hệ</div>
+                    <div class="info-value">@(string.IsNullOrEmpty(Model.EmailCus) ? "Chưa cập nhật" : Model.EmailCus)</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div>
+                    <div class="info-label">Địa chỉ nhận hàng</div>
+                    <div class="info-value">
+                        @if(!string.IsNullOrEmpty(Model.StreetAddress)) {
+                            <span>@Model.StreetAddress, @Model.Ward, @Model.City</span>
+                        } else {
+                            <span>Chưa cập nhật</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon"><i class="fas fa-birthday-cake"></i></div>
+                <div>
+                    <div class="info-label">Ngày sinh</div>
+                    <div class="info-value">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div>
+                    <div class="info-label">Ngày tham gia</div>
+                    <div class="info-value">@(Model.RegisteredDate?.ToString("dd/MM/yyyy") ?? "Chưa rõ")</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon"><i class="fas fa-star"></i></div>
+                <div>
+                    <div class="info-label">Tài khoản VIP</div>
+                    <div class="info-value">@(Model.IsVIP.HasValue && Model.IsVIP.Value ? "Đã kích hoạt" : "Chưa kích hoạt")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LỊCH SỬ ĐƠN HÀNG -->
+        <div class="history-section">
+            <h3 class="history-title">Quản lý Đơn hàng</h3>
+            <p style="margin-bottom: 20px; color: #64748b;">Xem lại tất cả sản phẩm và trạng thái đơn hàng của bạn.</p>
+            <a href="@Url.Action("Index_KH", "OrderPro", new { id = Model.IDCus })" class="btn-outline-modern btn-primary-modern" style="display: inline-flex; width: auto;">
+                <i class="fas fa-receipt"></i> Lịch sử mua hàng
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/User/_SettingsPartial.cshtml")
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+        
+        // 1. Chạy hàm cập nhật VIP
+        @* await updateVIP(); *@
+
+        const avatarInput = document.getElementById('AvatarBtn');
+        const mainAvatar = document.getElementById('mainAvatar');
+        const btnSave = document.querySelector('.btn-save');
+        const btnDelete = document.querySelector('.btn-delete');
+        const actionButtons = document.querySelector('.action-buttons');
+        
+        let originalURL = mainAvatar.src; 
+        
+        if (avatarInput && mainAvatar) {
+            avatarInput.addEventListener("change", function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                if (!file.type.startsWith("image/")) {
+                    Swal.fire({
+                        icon: "error", title: "Oops...", text: "Đã có lỗi, không tải ảnh lên được!",
+                        footer: "Vui lòng chỉ chọn file định dạng hình ảnh (.jpg, .png)"
+                    });
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    mainAvatar.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                hideButton();
+            });
+        }
+        
+        btnSave.addEventListener('click', async function (event){
+            event.stopPropagation();
+            try {
+                const formData = new FormData();
+                const imgPreview = avatarInput.files[0];
+                formData.append("imageURL", imgPreview);
+                
+                const response = await fetch('@Html.Raw(Url.Action("saveAvatar", "Customer"))', {
+                    method: 'POST',
+                    body: formData
                 });
-                return;
+
+                if (!response.ok) throw new Error('Lỗi máy chủ');
+                const data = await response.json();
+                
+                if (data.success) {
+                   originalURL = mainAvatar.src;
+                   
+                   // Cập nhật ảnh trên Header ngay lập tức
+                   const headerAvatar = document.getElementById('layoutHeaderAvatar');
+                   if (headerAvatar) {
+                       headerAvatar.src = mainAvatar.src;
+                   }
+                   
+                   Swal.fire("Thành công!", "Cập nhật ảnh đại diện thành công", "success");
+                   hideButton();
+                } else {
+                    Swal.fire({
+                        title: "Thất bại!",
+                        text: data.message || "Không thể gửi hình lên server.",
+                        icon: "error", 
+                        confirmButtonColor: "#d33"
+                    });
+                    hideButton();
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+                hideButton();
             }
-            //Lấy tên hình đã chọn
-            imageURL = file.name; 
-            console.log("Tên hình đã chọn" + imageURL);
-            // Xử lý hiện hình lên sau khi chọn file
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                mainAvatar.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-            //Hiện lên và disable nút để tránh nhấn đè lên 
-            hideButton();
         });
+        
+        btnDelete.addEventListener('click', async function (event){
+            event.stopPropagation();
+            hideButton();
+            mainAvatar.src = originalURL;
+            avatarInput.value = ""; 
+        });
+    });
+
+    function hideButton(){
+        const iconBTN = document.querySelector('.action-buttons');
+        const avatar_container = document.querySelector('.avatar-container');
+        
+        if(avatar_container.getAttribute('onclick') !== "")
+            avatar_container.removeAttribute('onclick');
+        else 
+            avatar_container.setAttribute('onclick','document.getElementById("AvatarBtn").click()');
+            
+        iconBTN.classList.toggle('hidden');
     }
-    btnSave.addEventListener('click', async function (event){
-        //Gọi hàm save
-        event.stopPropagation(); //Khi bấm gọi trực tiếp nút bên trong div cha có onclick mở chọn file để ngắn ấn đè
-        try {
-            const formData = new FormData();
-            const imgPreview = avatarInput.files[0];
-            formData.append("imageURL", imgPreview);
-            // 1. Gửi lệnh XÓA lên Server, fetch (/Controller/Ham_controller,{method:'POST',body:FromData})
-            const response = await fetch('/Customer/saveAvatar', {
-                method: 'POST',
-                body: formData
-            });
-            //reponse.ok sau khi goi ham tu fecth 
-            if (!response.ok) throw new Error('Lỗi máy chủ');
-            const data = await response.json(); //gan du lieu json da lay
-            if (data.success) {
-               Swal.fire("Thông báo", "Đã up hình lên thành công", "success");
-               hideButton();
-               return;
-            }
-            else {console.log("Lỗi gì đó ko up hình được")
-             Swal.fire({
-                title: "Thất bại!",
-                text: data.message || "Không thể gửi hình lên server, vui lòng kiểm tra lại.",
-                icon: "error", 
-                confirmButtonColor: "#d33"
-            });
-            hideButton();
-            }
-        } catch (error) {
-            hideButton();
-            iconBTN.classList.toggle('hidden');
+
+    function updateVIP() {
+        console.log("Đang chạy cập nhật vip");
+        var totalSpent = parseFloat('@Html.Raw(totalSpent.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))');
+        var currentMembership = '@Html.Raw(Model.MembershipLevel ?? "")';
+        let newMembership = "";
+        let userName = '@Html.Raw(User.Identity?.Name)';
+        if (totalSpent >= 1000000 && totalSpent < 5000000) {
+            newMembership = "Đồng";
+        } else if (totalSpent >= 5000000 && totalSpent < 50000000) {
+            newMembership = "Bạc";
+        } else if (totalSpent >= 50000000) {
+            newMembership = "Vàng";
+        }
+        else if (totalSpent < 1000000) newMembership = "No VIP";
+        
+        if (newMembership !== "" && newMembership !== currentMembership && userName !== "") {
+            fetch(`/User/setVIP?name=${userName}&membership=${newMembership}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Đã nâng cấp lên VIP: " + newMembership);
+                    // Cập nhật giao diện ngay lập tức
+                    updateVIPInAdvance(newMembership);
+                }
+                else {
+                    alert('Lỗi khi nâng cấp VIP: ' + (data.message || "Không thể cập nhật VIP."));
+                    console.error('Lỗi khi nâng cấp VIP:', data.message || "Không thể cập nhật VIP.");
+                }
+            })
+            .catch(error => { alert('Lỗi khi nâng cấp VIP: ' + error.message); console.error('Lỗi khi nâng cấp VIP:', error); });
+        }
+    }
+    function updateVIPInAdvance(newMembership) {
+        // 1. Cập nhật Badge VIP (Nút nhỏ dưới Tên Khách hàng)
+        const membershipBadge = document.querySelector('.membership-level');
+        if (membershipBadge) {
+            membershipBadge.textContent = "VIP " + newMembership;
+            membershipBadge.classList.remove('membership-bronze', 'membership-silver', 'membership-gold');
+            if (newMembership === "Đồng") membershipBadge.classList.add('membership-bronze');
+            else if (newMembership === "Bạc") membershipBadge.classList.add('membership-silver');
+            else if (newMembership === "Vàng" || newMembership === "VIP Vàng") membershipBadge.classList.add('membership-gold');
         }
 
-    });
-    btnDelete.addEventListener('click', async function (event){
-        //Gọi hàm delete gỡ hình
-        event.stopPropagation(); //Khi bấm gọi trực tiếp nút bên trong div cha có onclick mở chọn file để ngắn ấn đè
-        hideButton();
-        //Set hình trở lại 
-        mainAvatar.src = originalURL;
-    });
-});
-function hideButton(){
-    const iconBTN =  document.querySelector('.action-buttons');
-    const avatar_container = document.querySelector('.avatar-container');
-    //An nut len
-    iconBTN.classList.toggle('hidden');
-    //So sánh điều kiện
-    if(avatar_container.getAttribute('onclick') !== "")
-        avatar_container.removeAttribute('onclick');
-    else 
-        avatar_container.setAttribute('onclick','document.getElementById("AvatarBtn").click()');
-}
-function updateVIP() {
-    var totalSpent = @(totalSpent.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
-    var currentMembership = '@Model.MembershipLevel';
-    let newMembership = "";
-
-    
-    if (totalSpent >= 1000000 && totalSpent < 5000000) {
-        newMembership = "Đồng";
-    } else if (totalSpent >= 5000000 && totalSpent < 50000000) {
-        newMembership = "Bạc";
-    } else if (totalSpent >= 50000000) {
-        newMembership = "Vàng";
-    }
-
-    if (newMembership !== "" && newMembership !== currentMembership) {
-        fetch('@Url.Action("SetVIP", "User")', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: @Model.IDCus, membership: newMembership, message: "Đang cập nhật VIP" })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log("Đã nâng cấp lên VIP: " + newMembership);
-                // Bạn có thể dùng Swal.fire báo tin vui cho khách hàng ở đây!
+        // 2. Cập nhật 3D Banner lớn
+        const vipBanner = document.getElementById('vipBanner3d');
+        if (vipBanner) {
+            vipBanner.classList.remove('tier-bronze', 'tier-silver', 'tier-gold', 'tier-none');
+            const tierMap = { "Đồng": "tier-bronze", "Bạc": "tier-silver", "Vàng": "tier-gold"};
+            vipBanner.classList.add(tierMap[newMembership] || 'tier-none');
+            
+            // Đổi icon
+            const icon = vipBanner.querySelector('.vip-tier-icon');
+            if (icon) {
+                icon.className = 'fas vip-tier-icon ' + ({ "Đồng": "fa-medal", "Bạc": "fa-award", "Vàng": "fa-crown" }[newMembership] || 'fa-gem');
             }
-        })
-        .catch(error => { console.error('Lỗi khi nâng cấp VIP:', error); });
+            // Đổi chữ hiển thị
+            const title = vipBanner.querySelector('h2');
+            if (title){
+                if (newMembership.trim() !== "No VIP" ) title.innerText = "VIP " + newMembership;
+                else title.innerText = "Hiện tại chưa phải là VIP"
+            } 
+        }
+
+        // 3. Cập nhật 3 thẻ Grid (Dời chữ "Hiện tại" sang thẻ mới)
+        document.querySelectorAll('.vip-tier-mini').forEach(el => {
+            el.classList.remove('active');
+            const badge = el.querySelector('.tier-badge');
+            if (badge) badge.remove();
+        });
+        
+        let targetGridClass = "";
+        if (newMembership === "Đồng") targetGridClass = ".tier-bronze-mini";
+        else if (newMembership === "Bạc") targetGridClass = ".tier-silver-mini";
+        else if (newMembership === "Vàng" || newMembership === "VIP Vàng") targetGridClass = ".tier-gold-mini";
+        
+        if (targetGridClass) {
+            const activeGrid = document.querySelector(targetGridClass);
+            if (activeGrid) {
+                activeGrid.classList.add('active');
+                activeGrid.insertAdjacentHTML('afterbegin', '<span class="tier-badge">Hiện tại</span>');
+            }
+        }
+
+        // 4. Tính toán và vẽ lại Thanh tiến độ BẰNG JAVASCRIPT (Khắc phục lỗi kẹt số liệu)
+        const progressContainer = document.querySelector('.vip-progress-container');
+        if (progressContainer) {
+            // Lấy lại tổng chi tiêu từ C# xuống JS
+            var totalSpent = parseFloat('@Html.Raw(totalSpent.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))');
+            var totalOrders = parseInt('@Html.Raw(totalOrders)');
+            
+            let nextMucToiDa = 0;
+            let progressBarClass = "";
+            
+            if (newMembership === "Đồng") { 
+                nextMucToiDa = 5000000; // Mốc tiếp theo là 5M
+                progressBarClass = "vip-progress-bar-inner-bronze"; 
+            }
+            else if (newMembership === "Bạc") { 
+                nextMucToiDa = 50000000; // Mốc tiếp theo là 50M
+                progressBarClass = "vip-progress-bar-inner-silver"; 
+            }
+            
+            let html = `<div class="progress-info">
+                    Tổng đơn: <strong>${totalOrders.toLocaleString('vi-VN')}</strong> &middot; Đã chi: <strong>${totalSpent.toLocaleString('vi-VN')}₫</strong>
+                </div>`;
+
+            if (newMembership === "Vàng" || newMembership === "VIP Vàng") {
+                html += `<div class="progress-note" style="color: #10b981; font-weight: 600;">
+                    <i class="fas fa-crown" style="color: #fbbf24;"></i> Chúc mừng! Bạn đã đạt mức VIP cao nhất.
+                </div>`;
+            }
+            else {
+                // Tự tính % mới thay vì lấy từ Razor
+                let newProgressPercent = (totalSpent / nextMucToiDa) * 100;
+                if (newProgressPercent > 100) newProgressPercent = 100;
+                
+                html += `<div class="vip-progress-bar-outer">
+                            <div class="${progressBarClass}" style="width:${newProgressPercent.toFixed(1)}%"></div>
+                         </div>
+                         <div class="progress-note">
+                            Hoàn thành <strong>${newProgressPercent.toFixed(1)}%</strong> để lên hạng VIP kế tiếp (${nextMucToiDa.toLocaleString('vi-VN')}₫)
+                         </div>`;
+            }
+            progressContainer.innerHTML = html;
+        }
     }
+
+    // 3D tilt effect for VIP banner
+    const vipBanner3d = document.getElementById('vipBanner3d');
+    if (vipBanner3d) {
+        vipBanner3d.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            this.style.transform = `rotateX(${-y * 12}deg) rotateY(${x * 12}deg) translateY(-6px)`;
+        });
+        vipBanner3d.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    }
+    </script>
 }
-</script>
