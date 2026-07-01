@@ -5,30 +5,27 @@ using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using TechStore.Models;
 using Microsoft.EntityFrameworkCore;
-
+using System.Threading.Tasks;
 
 namespace TechStore.Controllers
 {
     public class CustomerProController : Controller
     {
-        // GET: CustomerPro
         private readonly DBTechStoreEntities db;
-    private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-    public CustomerProController(DBTechStoreEntities dbContext, ApplicationDbContext appContext)
-    {
-        db = dbContext;
-        _context = appContext;
-    }
+        public CustomerProController(DBTechStoreEntities dbContext, ApplicationDbContext appContext)
+        {
+            db = dbContext;
+            _context = appContext;
+        }
+
         [HttpGet]
         public ActionResult Details(int id)
         {
-                
-                var Products = _context.Products.FirstOrDefault(s => s.ProductID == id);
-                var inventory = _context.Inventories.FirstOrDefault(s => s.ProductID == id);
-                //var relatedProducts = _context.Products.Where(s => s.Category1.IDCate == Products.Category1.IDCate).ToList();//Tìm sản phẩm tương tự nhưng có mã Catrgory giống như sản phẩm hồi nãy
-               
-                var reviews = _context.Reviews.Where(s => s.ProductID == id && s.IsHidden == false).ToList();
+            var Products = _context.Products.FirstOrDefault(s => s.ProductID == id);
+            var inventory = _context.Inventories.FirstOrDefault(s => s.ProductID == id);
+            var reviews = _context.Reviews.Where(s => s.ProductID == id && s.IsHidden == false).ToList();
 
             // Tính toán số lượng đã bán cho mỗi sản phẩm
             var soldQuantities = new Dictionary<int, int>();
@@ -53,25 +50,42 @@ namespace TechStore.Controllers
                     ? soldItems[pro.ProductID]
                     : 0);
             }
+
+            // ==============================================================
+            // BẮT ĐẦU: LẤY SẢN PHẨM GỢI Ý TỪ THUẬT TOÁN APRIORI
+            // ==============================================================
+            var aiProductIds = _context.ProductRecommendations
+                .Where(r => r.ProductID_A == id)
+                .OrderByDescending(r => r.Confidence) // Ưu tiên tỷ lệ mua chung cao nhất
+                .Take(4) // Lấy tối đa 4 sản phẩm
+                .Select(r => r.ProductID_B)
+                .ToList();
+
+            ViewBag.AI_Recommendations = _context.Products
+                .Where(p => aiProductIds.Contains(p.ProductID))
+                .ToList();
+            // ==============================================================
+            // KẾT THÚC: LẤY SẢN PHẨM GỢI Ý
+            // ==============================================================
+
             var relatedPro = new RelatedPro
-                {
-                    Products = Products,
-                    RelatedReviews = reviews,
-                    SoldItem = soldQuantities,
-                    StockQuantity = inventory?.StockQuantity ?? 0
-                };
-                return View(relatedPro);
-            
+            {
+                Products = Products,
+                RelatedReviews = reviews,
+                SoldItem = soldQuantities,
+                StockQuantity = inventory?.StockQuantity ?? 0
+            };
+            return View(relatedPro);
         }
 
-        public class ReviewJSON()
+        public class ReviewJSON
         {
-            public decimal score {get ;set;}
-            public string? content {get ;set;}
-            public int proID {get ;set;}
+            public decimal score { get; set; }
+            public string? content { get; set; }
+            public int proID { get; set; }
         }
+        
         [HttpPost]
-        [HttpPost] // Nên khai báo rõ đây là phương thức POST
         public async Task<ActionResult> CreateReview([FromBody] ReviewJSON data)
         {
             // 1. Kiểm tra đăng nhập

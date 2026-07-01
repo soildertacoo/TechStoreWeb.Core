@@ -23,6 +23,7 @@ namespace TechStore.Models
         
         // 2. Tên biến ChatMessages có "s" để ChatHub không báo lỗi
         public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+        public virtual DbSet<ProductRecommendation> ProductRecommendations { get; set; }
         
         public virtual DbSet<CartItem> CartItems {get; set;}
         public virtual DbSet<Inventory> Inventories { get; set; }
