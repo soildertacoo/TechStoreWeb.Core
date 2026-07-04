@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechStore.Models;
+using TechStoreWeb.Core.InventoryServices;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,20 +11,22 @@ namespace TechStore.Controllers
     public class InventoryController : BaseController
     {
         private readonly ApplicationDbContext _context;
+        private readonly DBTechStoreEntities _dbTechStoreEntities;
+        private readonly IInventoryService _inventoryService;
 
-        public InventoryController(ApplicationDbContext context)
+        public InventoryController(ApplicationDbContext context, DBTechStoreEntities dbTechStoreEntities, IInventoryService inventoryService)
         {
             _context = context;
+            _dbTechStoreEntities = dbTechStoreEntities;
+            _inventoryService = inventoryService;
         }
 
-        // GET: Inventory
         public async Task<IActionResult> Index()
         {
             try
             {
-                var inventories = await _context.Inventories
-                    .Include(i => i.Product)
-                    .ToListAsync();
+                var inventories = await _inventoryService.GetAllInventoriesAsync();
+                ViewBag.LowStockThreshold = InventoryConstants.LowStockThreshold;
                 return View(inventories);
             }
             catch (Exception ex)
@@ -33,7 +36,6 @@ namespace TechStore.Controllers
             }
         }
 
-        // GET: Inventory/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -41,34 +43,29 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var inventory = await _context.Inventories
-                .Include(i => i.Product)
-                .FirstOrDefaultAsync(m => m.InventoryID == id);
-
+            var inventory = await _inventoryService.GetInventoryByIdAsync(id.Value);
             if (inventory == null)
             {
                 return NotFound();
             }
 
-            // Lấy danh sách sản phẩm cùng loại
+            ViewBag.StockSummary = await _inventoryService.GetStockSummaryAsync(inventory.ProductID);
+            ViewBag.LowStockThreshold = InventoryConstants.LowStockThreshold;
+
             if (inventory.Product != null)
             {
-                ViewBag.SameCategoryProducts = await _context.Products
+                ViewBag.SameCategoryProducts = await _dbTechStoreEntities.Products
                     .Where(p => p.Category == inventory.Product.Category)
                     .Include(p => p.Category1)
                     .ToListAsync();
-                
-                // Lấy thông tin tồn kho của các sản phẩm này
+
                 var productIds = ((List<Products>)ViewBag.SameCategoryProducts).Select(p => p.ProductID).ToList();
-                ViewBag.StockInfo = await _context.Inventories
-                    .Where(i => productIds.Contains(i.ProductID))
-                    .ToDictionaryAsync(i => i.ProductID, i => i.StockQuantity);
+                ViewBag.StockInfo = await _inventoryService.GetStockByProductIdsAsync(productIds);
             }
 
             return View(inventory);
         }
 
-        // GET: Inventory/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -76,20 +73,23 @@ namespace TechStore.Controllers
                 return NotFound();
             }
 
-            var inventory = await _context.Inventories
-                .Include(i => i.Product)
-                .FirstOrDefaultAsync(m => m.InventoryID == id);
-
+            var inventory = await _inventoryService.GetInventoryByIdAsync(id.Value);
             if (inventory == null)
             {
-                // Nếu chưa có bản ghi tồn kho cho sản phẩm này, có thể tạo mới
-                // Nhưng ở đây ta giả định là quản lý theo ID tồn kho
                 return NotFound();
             }
+
+            ViewBag.AdjustmentModel = new StockAdjustmentViewModel
+            {
+                InventoryID = inventory.InventoryID,
+                ProductID = inventory.ProductID,
+                ProductName = inventory.Product?.NamePro ?? string.Empty,
+                CurrentStock = inventory.StockQuantity
+            };
+
             return View(inventory);
         }
 
-        // POST: Inventory/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("InventoryID,ProductID,StockQuantity,Note")] Inventory inventory)
@@ -103,9 +103,7 @@ namespace TechStore.Controllers
             {
                 try
                 {
-                    inventory.LastUpdated = DateTime.Now;
-                    _context.Update(inventory);
-                    await _context.SaveChangesAsync();
+                    await _inventoryService.SetStockAsync(inventory.InventoryID, inventory.StockQuantity, inventory.Note);
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
@@ -113,15 +111,57 @@ namespace TechStore.Controllers
                     ModelState.AddModelError("", "Không thể lưu thay đổi: " + ex.Message);
                 }
             }
+
+            inventory = await _inventoryService.GetInventoryByIdAsync(id) ?? inventory;
+            ViewBag.AdjustmentModel = new StockAdjustmentViewModel
+            {
+                InventoryID = inventory.InventoryID,
+                ProductID = inventory.ProductID,
+                ProductName = inventory.Product?.NamePro ?? string.Empty,
+                CurrentStock = inventory.StockQuantity
+            };
             return View(inventory);
         }
 
-        // GET: Inventory/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdjustStock(StockAdjustmentViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var inventory = await _inventoryService.GetInventoryByIdAsync(model.InventoryID);
+                if (inventory == null) return NotFound();
+
+                ViewBag.AdjustmentModel = model;
+                return View("Edit", inventory);
+            }
+
+            try
+            {
+                await _inventoryService.AdjustStockAsync(
+                    model.InventoryID,
+                    model.AdjustmentType,
+                    model.Quantity,
+                    model.Note);
+
+                return RedirectToAction(nameof(Details), new { id = model.InventoryID });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                var inventory = await _inventoryService.GetInventoryByIdAsync(model.InventoryID);
+                if (inventory == null) return NotFound();
+
+                ViewBag.AdjustmentModel = model;
+                return View("Edit", inventory);
+            }
+        }
+
         public IActionResult Create()
         {
             try
             {
-                ViewBag.ProductID = _context.Products.ToList();
+                ViewBag.ProductID = _dbTechStoreEntities.Products.ToList();
                 return View();
             }
             catch (Exception ex)
@@ -131,7 +171,6 @@ namespace TechStore.Controllers
             }
         }
 
-        // POST: Inventory/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductID,StockQuantity,Note")] Inventory inventory)
@@ -140,9 +179,10 @@ namespace TechStore.Controllers
             {
                 try
                 {
-                    inventory.LastUpdated = DateTime.Now;
-                    _context.Add(inventory);
-                    await _context.SaveChangesAsync();
+                    await _inventoryService.CreateInventoryAsync(
+                        inventory.ProductID,
+                        inventory.StockQuantity,
+                        inventory.Note);
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
@@ -150,29 +190,23 @@ namespace TechStore.Controllers
                     ModelState.AddModelError("", "Bị lỗi khi nhập kho: " + ex.Message);
                 }
             }
-            ViewBag.ProductID = _context.Products.ToList();
+            ViewBag.ProductID = _dbTechStoreEntities.Products.ToList();
             return View(inventory);
         }
 
-        // POST: Inventory/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var inventory = await _context.Inventories.FindAsync(id);
-            if (inventory == null)
+            try
             {
-                return NotFound();
+                await _inventoryService.DeleteInventoryAsync(id);
             }
-
-            _context.Inventories.Remove(inventory);
-            await _context.SaveChangesAsync();
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool InventoryExists(int id)
-        {
-            return _context.Inventories.Any(e => e.InventoryID == id);
         }
     }
 }

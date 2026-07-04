@@ -1,34 +1,83 @@
 @model TechStore.Models.Inventory
+@using TechStore.Models
+@using TechStoreWeb.Core.InventoryServices
 
 @{
     ViewData["Title"] = "Cập nhật tồn kho";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var adjustmentModel = ViewBag.AdjustmentModel as StockAdjustmentViewModel ?? new StockAdjustmentViewModel();
 }
 
 <h2>Cập nhật tồn kho cho: @Model.Product?.NamePro</h2>
 
 <div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-exchange-alt mr-1"></i> Nhập / Xuất kho (theo số lượng)
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Tồn kho hiện tại: <strong class="text-primary">@Model.StockQuantity</strong> đơn vị
+                </p>
+                <form asp-action="AdjustStock" method="post">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <input type="hidden" asp-for="@adjustmentModel.InventoryID" name="InventoryID" value="@Model.InventoryID" />
+                    <input type="hidden" name="ProductID" value="@Model.ProductID" />
+                    <input type="hidden" name="CurrentStock" value="@Model.StockQuantity" />
+
+                    <div class="form-group">
+                        <label class="control-label">Loại thao tác</label>
+                        <select name="AdjustmentType" class="form-control">
+                            <option value="@((int)InventoryMovementType.Import)">Nhập thêm vào kho (+)</option>
+                            <option value="@((int)InventoryMovementType.Export)">Xuất bớt khỏi kho (-)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Số lượng</label>
+                        <input name="Quantity" class="form-control" type="number" min="1" value="1" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Ghi chú</label>
+                        <textarea name="Note" class="form-control" placeholder="VD: Nhập hàng từ NCC ABC"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-check"></i> Áp dụng điều chỉnh
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="col-md-6">
-        <form asp-action="Edit" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <input type="hidden" asp-for="InventoryID" />
-            <input type="hidden" asp-for="ProductID" />
-            
-            <div class="form-group">
-                <label asp-for="StockQuantity" class="control-label"></label>
-                <input asp-for="StockQuantity" class="form-control" type="number" />
-                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sliders-h mr-1"></i> Đặt số lượng tuyệt đối
             </div>
-            <div class="form-group">
-                <label asp-for="Note" class="control-label"></label>
-                <textarea asp-for="Note" class="form-control"></textarea>
-                <span asp-validation-for="Note" class="text-danger"></span>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="InventoryID" />
+                    <input type="hidden" asp-for="ProductID" />
+
+                    <div class="form-group">
+                        <label asp-for="StockQuantity" class="control-label"></label>
+                        <input asp-for="StockQuantity" class="form-control" type="number" min="0" />
+                        <small class="form-text text-muted">Đặt trực tiếp tổng tồn kho (dùng khi kiểm kê).</small>
+                        <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Note" class="control-label"></label>
+                        <textarea asp-for="Note" class="form-control"></textarea>
+                        <span asp-validation-for="Note" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 

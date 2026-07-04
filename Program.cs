@@ -29,6 +29,10 @@ internal class Program
         // Kích hoạt luôn ApplicationDbContext nếu project của bạn có dùng Identity
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
+        builder.Services.AddScoped<TechStoreWeb.Core.InventoryServices.IInventoryService,
+            TechStoreWeb.Core.InventoryServices.InventoryService>();
+        builder.Services.AddScoped<TechStoreWeb.Core.InventoryServices.IInventoryCalculationService,
+            TechStoreWeb.Core.InventoryServices.InventoryCalculationService>();
         builder.Services.AddHealthChecks()
         .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 

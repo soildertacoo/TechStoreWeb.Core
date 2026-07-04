@@ -1,4 +1,4 @@
-﻿@using System.Text.Json
+@using System.Text.Json
 @{
     ViewBag.Title = "Thống kê";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -31,6 +31,90 @@
 </style>
 
 <div class="container-fluid">
+    <!-- Tổng hợp thống kê -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow-sm rounded border-left-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-3">
+                            <div class="icon-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-dollar-sign fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-gray-500">Tổng doanh thu</p>
+                            <h5 class="mb-0 font-weight-bold text-primary">
+                                @(((ViewBag.DataRevenue as List<decimal>)?.Sum())?.ToString("N0") ?? "0") ₫
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow-sm rounded border-left-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-3">
+                            <div class="icon-circle bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-shopping-cart fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-gray-500">Tổng giá vốn hàng bán</p>
+                            <h5 class="mb-0 font-weight-bold text-warning">
+                                @((ViewBag.TotalCost as decimal?)?.ToString("N0") ?? "0") ₫
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow-sm rounded border-left-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-3">
+                            <div class="icon-circle bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-chart-bar fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-gray-500">Tổng lợi nhuận gộp</p>
+                            <h5 class="mb-0 font-weight-bold text-success">
+                                @((ViewBag.TotalProfit as decimal?)?.ToString("N0") ?? "0") ₫
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card shadow-sm rounded border-left-info">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-3">
+                            <div class="icon-circle bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-percentage fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-gray-500">Tỷ suất lợi nhuận</p>
+                            <h5 class="mb-0 font-weight-bold text-info">
+                                @{
+                                    var totalRevenue = (ViewBag.DataRevenue as List<decimal>)?.Sum() ?? 0;
+                                    var profitMargin = totalRevenue > 0 ? ((ViewBag.TotalProfit as decimal?) / totalRevenue * 100) : 0;
+                                    <text>@(profitMargin?.ToString("F2") ?? "0")</text>
+                                }%
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="card shadow-sm rounded chart-card">
@@ -63,6 +147,19 @@
                 </div>
                 <div class="card-body">
                     <canvas id="reviewChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm rounded chart-card">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Thống kê Lời Lỗ</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="profitLossChart"></canvas>
                 </div>
             </div>
         </div>
@@ -240,6 +337,96 @@
                         },
                         grid: {
                             drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Profit/Loss Chart
+    const profitLossCtx = document.getElementById('profitLossChart')?.getContext('2d');
+    const profitLossLabels = @Html.Raw(JsonSerializer.Serialize(ViewBag.ProfitLossLabels ?? new string[0]));
+    const profitLossRevenueData = @Html.Raw(JsonSerializer.Serialize(ViewBag.ProfitLossRevenueData ?? new decimal[0]));
+    const profitLossCostData = @Html.Raw(JsonSerializer.Serialize(ViewBag.ProfitLossCostData ?? new decimal[0]));
+    const profitLossProfitData = @Html.Raw(JsonSerializer.Serialize(ViewBag.ProfitLossProfitData ?? new decimal[0]));
+    
+    if (profitLossCtx) {
+        new Chart(profitLossCtx, {
+            type: 'line',
+            data: {
+                labels: profitLossLabels,
+                datasets: [
+                    {
+                        label: 'Doanh thu',
+                        data: profitLossRevenueData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Giá vốn hàng bán',
+                        data: profitLossCostData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Lợi nhuận gộp',
+                        data: profitLossProfitData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Thống kê Lời Lỗ',
+                        font: { size: 18 },
+                        padding: { top: 10, bottom: 10 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ': ' + new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                }).format(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            tooltipFormat: 'DD',
+                            displayFormats: {
+                                day: 'dd/MM/yyyy'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Ngày'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => value.toLocaleString('vi-VN') + ' ₫'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Số tiền (VNĐ)'
                         }
                     }
                 }

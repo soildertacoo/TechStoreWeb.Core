@@ -1,4 +1,3 @@
-﻿using AspNetCoreGeneratedDocument;
 using Microsoft.EntityFrameworkCore;
 
 namespace TechStore.Models
@@ -27,6 +26,8 @@ namespace TechStore.Models
         
         public virtual DbSet<CartItem> CartItems {get; set;}
         public virtual DbSet<Inventory> Inventories { get; set; }
+        public virtual DbSet<InventoryMovement> InventoryMovements { get; set; }
+        public virtual DbSet<InventoryBatch> InventoryBatches { get; set; }
         public virtual DbSet<Banner> Banners { get; set; }
         public virtual DbSet<Promotion> Promotions { get; set; }
         public virtual DbSet<OTPModel> OTPModels { get; set; }
@@ -67,6 +68,18 @@ namespace TechStore.Models
             //     .ToTable("OrderPro",tb => tb.HasTrigger("trg_AutoUpgradeVIP"));
                 modelBuilder.Entity<OrderPro>()
                 .ToTable(tb => tb.UseSqlOutputClause(false));
+
+            modelBuilder.Entity<InventoryMovement>()
+                .HasOne(m => m.Product)
+                .WithMany()
+                .HasForeignKey(m => m.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            modelBuilder.Entity<InventoryBatch>()
+                .HasOne(b => b.Product)
+                .WithMany()
+                .HasForeignKey(b => b.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
             }
             
     }

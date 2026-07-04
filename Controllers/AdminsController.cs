@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using TechStore.Models;
@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using TechStoreWeb.Core.Helpers;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using System.Data.Common;
+using TechStoreWeb.Core.InventoryServices;
 
 namespace TechStore.Controllers
 {
@@ -16,14 +17,16 @@ namespace TechStore.Controllers
         private readonly DBTechStoreEntities dBO;
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly IInventoryCalculationService _inventoryCalculationService;
 
         // 2. Tạo hàm khởi tạo (Constructor) và yêu cầu hệ thống "tiêm" DbContext vào
         public AdminsController(DBTechStoreEntities dbContext, ApplicationDbContext appContext, 
-        IWebHostEnvironment env)
+        IWebHostEnvironment env, IInventoryCalculationService inventoryCalculationService)
         {
             dBO = dbContext;
             _context = appContext;
             _env = env;
+            _inventoryCalculationService = inventoryCalculationService;
         }        
         public ActionResult Index()
         {
@@ -165,26 +168,92 @@ namespace TechStore.Controllers
         }
         
         public ActionResult Statistics()
-        {
-            // Doanh thu theo ngày
-            var revenueOverTime = dBO.OrderDetails
-                .Join(dBO.OrderPro,
-                    od => od.IDOrder,
-                    o => o.ID,
-                    (od, o) => new { od.Subtotal, o.DateOrder })
-                // Đẩy điều kiện lọc rỗng lên đây
-                .Where(x => x.DateOrder != null)
-                // GroupBy thẳng dưới database
-                .GroupBy(x => x.DateOrder.Value.Date) 
-                .Select(g => new 
-                {
-                    Date = g.Key,
-                    Total = g.Sum(x => x.Subtotal)
-                })
-                .ToList(); // Chỉ gọi ToList ở BƯỚC CUỐI CÙNG
+    {
+        // Doanh thu theo ngày
+        var revenueOverTime = dBO.OrderDetails
+            .Join(dBO.OrderPro,
+                od => od.IDOrder,
+                o => o.ID,
+                (od, o) => new { Subtotal = od.Subtotal ?? 0, o.DateOrder, od.IDProduct, Quantity = od.Quantity ?? 0 })
+            .Where(x => x.DateOrder != null)
+            .GroupBy(x => x.DateOrder.Value.Date) 
+            .Select(g => new 
+            {
+                Date = g.Key,
+                TotalRevenue = g.Sum(x => x.Subtotal),
+                Products = g.GroupBy(x => x.IDProduct)
+                    .Select(pg => new { ProductID = pg.Key, QuantitySold = pg.Sum(x => x.Quantity) })
+                    .ToList()
+            })
+            .OrderBy(x => x.Date)
+            .ToList();
 
-            ViewBag.Labels = revenueOverTime.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
-            ViewBag.DataRevenue = revenueOverTime.Select(d => d.Total).ToList();
+        ViewBag.Labels = revenueOverTime.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
+        ViewBag.DataRevenue = revenueOverTime.Select(d => d.TotalRevenue).ToList();
+
+        // Tính toán lời lỗ theo ngày
+            var profitLossLabels = new List<string>();
+            var profitLossRevenueData = new List<decimal>();
+            var profitLossCostData = new List<decimal>();
+            var profitLossProfitData = new List<decimal>();
+            decimal totalProfit = 0;
+            decimal totalCostAll = 0;
+
+            foreach (var day in revenueOverTime)
+            {
+                decimal totalCogs = 0;
+                foreach (var product in day.Products)
+                {
+                    try
+                    {
+                        // Lấy giá vốn trung bình của sản phẩm
+                        var batches = _context.InventoryBatches
+                            .Where(b => b.ProductID == product.ProductID && b.RemainingQuantity > 0)
+                            .ToList();
+
+                        if (batches.Any())
+                        {
+                            decimal totalValue = batches.Sum(b => b.RemainingQuantity * b.UnitCost);
+                            int totalQuantity = batches.Sum(b => b.RemainingQuantity);
+                            decimal avgCost = totalQuantity > 0 ? totalValue / totalQuantity : 0;
+                            totalCogs += avgCost * product.QuantitySold;
+                        }
+                        else
+                        {
+                            // Nếu không có batch nào, lấy giá từ Products
+                            var productInfo = dBO.Products.FirstOrDefault(p => p.ProductID == product.ProductID);
+                            if (productInfo != null)
+                            {
+                                totalCogs += productInfo.Price * product.QuantitySold;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Bỏ qua nếu có lỗi
+                    }
+                }
+
+                decimal revenue = (decimal)day.TotalRevenue;
+                decimal profit = revenue - totalCogs;
+                
+                profitLossLabels.Add(day.Date.ToString("yyyy-MM-dd"));
+                profitLossRevenueData.Add(revenue);
+                profitLossCostData.Add(totalCogs);
+                profitLossProfitData.Add(profit);
+                
+                totalProfit += profit;
+                totalCostAll += totalCogs;
+            }
+
+            ViewBag.ProfitLossLabels = profitLossLabels;
+            ViewBag.ProfitLossRevenueData = profitLossRevenueData;
+            ViewBag.ProfitLossCostData = profitLossCostData;
+            ViewBag.ProfitLossProfitData = profitLossProfitData;
+
+            // Tổng hợp lợi nhuận
+            ViewBag.TotalProfit = totalProfit;
+            ViewBag.TotalCost = totalCostAll;
 
             // Đánh giá
             var reviewData = dBO.Reviews

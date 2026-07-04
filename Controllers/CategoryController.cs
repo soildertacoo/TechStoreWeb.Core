@@ -120,9 +120,9 @@ namespace TechStore.Controllers
             }
             try
             {
-                existCate?.IDCate = category.IDCate ?? existCate.IDCate; 
-                existCate?.NameCate = category.NameCate ?? existCate.NameCate; 
-                db.Entry(existCate ?? category).State = EntityState.Modified;
+                existCate.IDCate = category.IDCate ?? existCate.IDCate; 
+                existCate.NameCate = category.NameCate ?? existCate.NameCate; 
+                db.Entry(existCate).State = EntityState.Modified;
                 //Đổi tên category mà sản phẩm được gắn
                 db.SaveChanges();
                 // db.Products

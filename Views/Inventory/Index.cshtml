@@ -1,8 +1,10 @@
 @model IEnumerable<TechStore.Models.Inventory>
+@using TechStoreWeb.Core.InventoryServices
 
 @{
     ViewData["Title"] = "Quản lý tồn kho";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var lowStockThreshold = (int)(ViewBag.LowStockThreshold ?? InventoryConstants.LowStockThreshold);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -31,7 +33,7 @@
                     <td>@item.InventoryID</td>
                     <td>@item.Product?.NamePro</td>
                     <td>
-                        <span class="badge @(item.StockQuantity < 10 ? "badge-danger" : "badge-success")">
+                        <span class="badge @(item.StockQuantity < lowStockThreshold ? "badge-danger" : "badge-success")">
                             @item.StockQuantity
                         </span>
                     </td>

@@ -1,8 +1,12 @@
 @model TechStore.Models.Inventory
+@using TechStore.Models
+@using TechStoreWeb.Core.InventoryServices
 
 @{
     ViewData["Title"] = "Chi tiết tồn kho";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var summary = ViewBag.StockSummary as InventoryStockSummary;
+    var lowStockThreshold = (int)(ViewBag.LowStockThreshold ?? InventoryConstants.LowStockThreshold);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -40,10 +44,23 @@
                 <dl class="row">
                     <dt class="col-sm-4">Số lượng hiện có:</dt>
                     <dd class="col-sm-8">
-                        <span class="badge @(Model.StockQuantity < 10 ? "badge-danger" : "badge-success") p-2" style="font-size: 1.1em;">
+                        <span class="badge @(Model.StockQuantity < lowStockThreshold ? "badge-danger" : "badge-success") p-2" style="font-size: 1.1em;">
                             @Model.StockQuantity đơn vị
                         </span>
                     </dd>
+
+                    @if (summary != null)
+                    {
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge @(summary.Status == StockStatus.OutOfStock ? "badge-danger" : summary.Status == StockStatus.LowStock ? "badge-warning" : "badge-success")">
+                                @summary.StatusLabel
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Đã bán (tham khảo):</dt>
+                        <dd class="col-sm-8">@summary.UnitsSold đơn vị</dd>
+                    }
 
                     <dt class="col-sm-4">Cập nhật lần cuối:</dt>
                     <dd class="col-sm-8 text-info font-weight-bold">
@@ -55,13 +72,13 @@
                         @(string.IsNullOrEmpty(Model.Note) ? "Không có ghi chú" : Model.Note)
                     </dd>
                 </dl>
-                
+
                 <div class="alert alert-info mt-4">
                     <i class="fas fa-lightbulb mr-2"></i>
-                    <strong>Gợi ý:</strong> 
-                    @if (Model.StockQuantity < 10)
+                    <strong>Gợi ý:</strong>
+                    @if (Model.StockQuantity < lowStockThreshold)
                     {
-                        <span>Số lượng sản phẩm trong kho đang ở mức thấp. Vui lòng xem xét nhập thêm hàng.</span>
+                        <span>Số lượng sản phẩm trong kho đang ở mức thấp (&lt; @lowStockThreshold). Vui lòng xem xét nhập thêm hàng.</span>
                     }
                     else
                     {
@@ -69,6 +86,56 @@
                     }
                 </div>
             </div>
+        </div>
+
+        <div class="mt-5">
+            <h5 class="text-muted mb-3 border-bottom pb-2">
+                <i class="fas fa-history mr-2"></i> Lịch sử nhập / xuất / điều chỉnh
+            </h5>
+            @if (summary?.RecentMovements?.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover border">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Loại</th>
+                                <th class="text-center">Thay đổi</th>
+                                <th class="text-center">Trước → Sau</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var move in summary.RecentMovements)
+                            {
+                                var typeLabel = move.MovementType switch
+                                {
+                                    InventoryMovementType.Import => "Nhập kho",
+                                    InventoryMovementType.Export => "Xuất kho",
+                                    InventoryMovementType.Adjustment => "Điều chỉnh",
+                                    InventoryMovementType.Initial => "Khởi tạo",
+                                    _ => "Khác"
+                                };
+                                var changeClass = move.QuantityChange >= 0 ? "text-success" : "text-danger";
+                                var changeSign = move.QuantityChange >= 0 ? "+" : "";
+                                <tr>
+                                    <td>@move.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@typeLabel</td>
+                                    <td class="text-center font-weight-bold @changeClass">@changeSign@move.QuantityChange</td>
+                                    <td class="text-center">@move.StockBefore → @move.StockAfter</td>
+                                    <td>@(move.Note ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i> Chưa có lịch sử nhập / xuất / điều chỉnh cho sản phẩm này!
+                </div>
+            }
         </div>
 
         @if (ViewBag.SameCategoryProducts != null)
@@ -113,7 +180,7 @@
                                         {
                                             <span class="badge badge-danger">Hết hàng</span>
                                         }
-                                        else if (quantity < 10)
+                                        else if (quantity < lowStockThreshold)
                                         {
                                             <span class="badge badge-warning">Sắp hết</span>
                                         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -32,6 +32,14 @@ namespace TechStore.Models
             public int TotalOrders { get; set; }
             public decimal AverageRating { get; set; }
             public int TotalCustomers { get; set; }
+        }
+
+        public class ProfitLossStatistics
+        {
+            public List<string> Labels { get; set; }
+            public List<decimal> RevenueData { get; set; }
+            public List<decimal> CostData { get; set; }
+            public List<decimal> ProfitData { get; set; }
         }
     }
 }
