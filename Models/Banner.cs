@@ -38,16 +38,15 @@ namespace TechStore.Models
         [DataType(DataType.DateTime)]
         public DateTime? EndDate { get; set; }
 
-        public string ButtonText { get; set; } = "Mua ngay";
+        public string? ButtonText { get; set; } = "Mua ngay";
 
-        public string ButtonColor { get; set; } = "btn-primary";
+        public string? ButtonColor { get; set; } = "btn-primary";
 
-        public string TextColor { get; set; } = "#ffffff";
+        public string? TextColor { get; set; } = "#ffffff";
 
         public bool ShowButton { get; set; } = true;
 
-
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public bool IsPopup { get; set; }
 
