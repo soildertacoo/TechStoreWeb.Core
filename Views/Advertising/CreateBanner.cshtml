@@ -21,15 +21,43 @@
                 <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
                 <span asp-validation-for="ImageUrl" class="text-danger"></span>
             </div>
+            <div class="form-group mb-3">
+                <label>Liên kết sản phẩm</label>
+                <select id="productSelect"
+                        class="form-select">
+                    <option value="">-- Chọn sản phẩm --</option>
+                    <small class="text-muted">
+
+                    Khi chọn sản phẩm, hệ thống sẽ tự tạo LinkUrl.
+
+                    </small>
+                    @foreach (var item in (SelectList)ViewBag.Products)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
             <div class="form-group">
                 <label asp-for="LinkUrl" class="control-label"></label>
-                <input asp-for="LinkUrl" class="form-control" placeholder="/Products/Details/1" />
+                <input asp-for="LinkUrl"
+                        id="LinkUrl"
+                        class="form-control"
+                        readonly
+                        placeholder="Chọn sản phẩm để tự tạo liên kết" />
                 <span asp-validation-for="LinkUrl" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="DisplayOrder" class="control-label"></label>
                 <input asp-for="DisplayOrder" class="form-control" type="number" value="0" />
                 <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StartDate" class="control-label"></label>
+                <input asp-for="StartDate" class="form-control" type="datetime-local" />
+            </div>
+            <div class="form-group">
+                <label asp-for="EndDate" class="control-label"></label>
+                <input asp-for="EndDate" class="form-control" type="datetime-local" />
             </div>
             <div class="form-group form-check">
                 <label class="form-check-label">
@@ -43,3 +71,28 @@
         </form>
     </div>
 </div>
+
+<script>
+
+$(function () {
+
+    $("#productSelect").change(function () {
+
+        var id = $(this).val();
+
+        if (id) {
+
+            $("#LinkUrl").val("/Products/Details/" + id);
+
+        }
+        else {
+
+            $("#LinkUrl").val("");
+
+        }
+
+    });
+
+});
+
+</script>

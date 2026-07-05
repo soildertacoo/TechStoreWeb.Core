@@ -29,5 +29,30 @@ namespace TechStore.Models
 
         [Display(Name = "Ngày tạo")]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        [Display(Name = "Ngày bắt đầu")]
+        [DataType(DataType.DateTime)]
+        public DateTime? StartDate { get; set; }
+
+        [Display(Name = "Ngày kết thúc")]
+        [DataType(DataType.DateTime)]
+        public DateTime? EndDate { get; set; }
+
+        public string ButtonText { get; set; } = "Mua ngay";
+
+        public string ButtonColor { get; set; } = "btn-primary";
+
+        public string TextColor { get; set; } = "#ffffff";
+
+        public bool ShowButton { get; set; } = true;
+
+
+        public string Description { get; set; }
+
+        public bool IsPopup { get; set; }
+
+        public bool IsHomeSlider { get; set; }
+
+        public bool IsMiddleBanner { get; set; }
     }
 }

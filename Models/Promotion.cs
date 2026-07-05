@@ -22,6 +22,14 @@ namespace TechStore.Models
         [Range(0, 100)]
         public decimal DiscountPercentage { get; set; }
 
+        public decimal? DiscountAmount { get; set; }
+
+        public decimal? MinimumOrder { get; set; }
+
+        public decimal? MaximumDiscount { get; set; }
+
+        public int Priority { get; set; }
+
         [Display(Name = "Ngày bắt đầu")]
         public DateTime StartDate { get; set; }
 

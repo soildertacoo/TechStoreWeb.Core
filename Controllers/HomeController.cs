@@ -29,8 +29,14 @@ namespace TechStore.Controllers
                 var proList = db.Products.ToList();
                 // Tính toán số lượng đã bán cho mỗi sản phẩm
                 var soldQuantities = new Dictionary<int, int>();
+
+                var today = DateTime.Now;
+
                 var banners = _context.Banners
-                      .Where(x => x.IsActive)
+                      .Where(x => x.IsActive && 
+                      (!x.StartDate.HasValue || x.StartDate <= today) && 
+                      (!x.EndDate.HasValue || x.EndDate >= today)
+                      )
                       .OrderBy(x => x.DisplayOrder)
                       .ToList();
                 //Lấy điểm của sản phẩm và số lượng đánh giá 

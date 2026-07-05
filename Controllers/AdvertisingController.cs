@@ -3,16 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using TechStore.Models;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Mvc.Rendering;
 namespace TechStore.Controllers
 {
     public class AdvertisingController : BaseController
     {
         private readonly ApplicationDbContext _context;
+        private readonly DBTechStoreEntities dbO;
 
-        public AdvertisingController(ApplicationDbContext context)
+        public AdvertisingController(ApplicationDbContext context, DBTechStoreEntities  dbContext)
         {
             _context = context;
+            dbO = dbContext;
         }
 
         // --- Banners ---
@@ -37,18 +39,30 @@ namespace TechStore.Controllers
             return View(banner);
         }
 
-        public IActionResult CreateBanner() => View();
-
+        public IActionResult CreateBanner()
+        {
+            LoadProducts();
+            return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBanner(Banner banner)
         {
             if (ModelState.IsValid)
             {
+                banner.CreatedDate = DateTime.Now;
+
+                //Nếu admin không nhập ngày bắt đầu thì lấy thời điểm hiện tại
+                if (banner.StartDate == null)
+                {
+                    banner.StartDate = DateTime.Now;
+                }
                 _context.Add(banner);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Banner đã được tạo thành công!";
                 return RedirectToAction(nameof(Banners));
             }
+            LoadProducts();
             return View(banner);
         }
 
@@ -57,6 +71,7 @@ namespace TechStore.Controllers
             if (id == null) return NotFound();
             var banner = await _context.Banners.FindAsync(id);
             if (banner == null) return NotFound();
+            LoadProducts();
             return View(banner);
         }
 
@@ -67,10 +82,22 @@ namespace TechStore.Controllers
             if (id != banner.BannerID) return NotFound();
             if (ModelState.IsValid)
             {
-                _context.Update(banner);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Banners.Update(banner);
+
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Banner đã được cập nhật thành công!";
+                }
+                catch
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật Banner. Vui lòng thử lại.";
+                }
+
                 return RedirectToAction(nameof(Banners));
             }
+            LoadProducts();
             return View(banner);
         }
 
@@ -84,6 +111,16 @@ namespace TechStore.Controllers
             _context.Banners.Remove(banner);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Banners));
+        }
+
+        private void LoadProducts()
+        {
+            ViewBag.Products = new SelectList(
+                dbO.Products
+                .OrderBy(x => x.NamePro)
+                .ToList(),
+                "ProductID",
+                "NamePro");
         }
 
         // --- Promotions ---

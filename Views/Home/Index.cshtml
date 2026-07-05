@@ -336,6 +336,28 @@
     .ts-hero-cta, .ts-hero-cta-ghost { width: 100%; justify-content: center; }
     .ts-section { padding: 48px 16px; }
 }
+
+/* ── Banner ── */
+.home-banner-slider{
+    max-width:1400px;
+    margin:40px auto;
+}
+
+.banner-img{
+    height:420px;
+    object-fit:cover;
+    border-radius:20px;
+}
+
+.carousel-caption{
+    background:rgba(0,0,0,.45);
+    border-radius:15px;
+    padding:20px;
+}
+
+.carousel-item{
+    transition:1s;
+}
 </style>
 
 <div class="ts-page">
@@ -374,6 +396,48 @@
         </div>
     </div>
 </section>
+
+@if (Model.banners != null && Model.banners.Any())
+{
+    <section class="home-banner-slider">
+        <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @{
+                    bool first = true;
+                }
+
+                @foreach (var banner in Model.banners)
+                {
+                    <div class="carousel-item @(first ? "active" : "")">
+                        <a asp-controller="Advertising"
+                           asp-action="BannerRedirect"
+                           asp-route-id="@banner.BannerID">
+                        
+                            <img src="@banner.ImageUrl"
+                                class="banner-img"
+                                alt="@banner.Title" />
+                        
+                            <div class="carousel-caption">
+                                <h2>@banner.Title</h2>
+                                <p>Mua ngay hôm nay</p>
+                            </div>
+                        </a>
+                    </div>
+                   first = false;
+                }
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </section>
+}
 
 <!-- CATEGORY BAR -->
 <nav class="ts-catbar" aria-label="Danh mục">

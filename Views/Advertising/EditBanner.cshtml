@@ -40,12 +40,39 @@
                     </div>
 
                     <div class="form-group mb-3">
+                        <label>Liên kết sản phẩm</label>
+
+                        <select id="productSelect"
+                                class="form-select">
+                                <small class="text-muted">
+                                    Khi chọn sản phẩm, hệ thống sẽ tự tạo LinkUrl.
+                                </small>
+
+                            <option value="">
+                                -- Chọn sản phẩm --
+                            </option>
+
+                                @foreach (var item in (SelectList)ViewBag.Products)
+                                {
+                                    <option value="@item.Value">
+                                      @item.Text
+                                    </option>
+                                }
+
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
                         <label asp-for="LinkUrl" class="control-label font-weight-bold"></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-link"></i></span>
                             </div>
-                            <input asp-for="LinkUrl" class="form-control" placeholder="/Products/Details/1" />
+                            <input asp-for="LinkUrl" 
+                            id="LinkUrl" 
+                            class="form-control"
+                            readonly
+                             placeholder="Chọn sản phẩm để tự tạo liên kết" />
                         </div>
                         <span asp-validation-for="LinkUrl" class="text-danger"></span>
                     </div>
@@ -58,11 +85,32 @@
                                 <span asp-validation-for="DisplayOrder" class="text-danger"></span>
                             </div>
                         </div>
+
                         <div class="col-md-6 d-flex align-items-center mt-4">
                             <div class="form-group form-check">
                                 <label class="form-check-label">
                                     <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
                                 </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="StartDate" class="control-label font-weight-bold"></label>
+                                <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="EndDate" class="control-label font-weight-bold"></label>
+                                <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
@@ -96,3 +144,28 @@
         });
     </script>
 }
+
+<script>
+
+$(function () {
+
+    $("#productSelect").change(function () {
+
+        var id = $(this).val();
+
+        if (id) {
+
+            $("#LinkUrl").val("/Products/Details/" + id);
+
+        }
+        else {
+
+            $("#LinkUrl").val("");
+
+        }
+
+    });
+
+});
+
+</script>
