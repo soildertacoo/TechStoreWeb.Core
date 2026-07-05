@@ -2,229 +2,303 @@
 @{
     ViewBag.Title = "Kết quả thanh toán";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.FullWidth = true;
 
-    // 1. Hứng dữ liệu từ cục "Anonymous Object" ở Controller trả về
     string rspCode = "";
     string message = "";
-    
     try {
-        // Lấy RspCode và Message. Nếu không có thì lấy thẳng từ URL (vnp_ResponseCode) Request Query 
         rspCode = Model?.RspCode ?? Context.Request.Query["vnp_ResponseCode"].ToString();
         message = Model?.Message ?? "Không có thông báo cụ thể nào";
-    } 
-    catch {
-        // Đề phòng lỗi đọc model, tự động vét data từ URL
+    } catch {
         rspCode = Context.Request.Query["vnp_ResponseCode"].ToString();
         message = "Trạng thái giao dịch: " + rspCode;
     }
-
-    // 2. Xác định trạng thái Thành Công hay Thất Bại
     bool isSuccess = (rspCode == "00");
 }
 
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-    }
+    /* ── Page Background ── */
+    body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important; }
+    body::before { display: none !important; }
+    .main-content-full { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding-top: 72px; padding-bottom: 0; }
+    footer { margin-top: 0 !important; }
 
-    /* ================= GIAO DIỆN MẶC ĐỊNH (THÀNH CÔNG) ================= */
-    .success-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+    .pay-page {
+        min-height: calc(100vh - 72px);
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        position: relative;
+        overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
+        padding: 60px 24px 80px;
+    }
+    .pay-page::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(102,126,234,.2) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 50%, rgba(0,212,255,.15) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    .pay-page::after {
+        content: '';
+        position: absolute; inset: 0;
+        background-image: radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
     }
 
-    .success-wrapper {
-        max-width: 600px;
-        width: 90%;
+    /* ── Animated Orbs ── */
+    .pay-orb {
+        position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none;
+        animation: payOrb 20s ease-in-out infinite alternate;
+    }
+    .pay-orb-1 { width: 600px; height: 600px; background: rgba(102,126,234,.5); top: -150px; left: -120px; }
+    .pay-orb-2 { width: 500px; height: 500px; background: rgba(0,212,255,.4); bottom: -120px; right: -100px; animation-delay: -8s; }
+    .pay-orb-3 { width: 350px; height: 350px; background: rgba(236,72,153,.3); top: 50%; left: 50%; animation-delay: -12s; }
+    @@keyframes payOrb { from { transform: translate(0,0) scale(1); } to { transform: translate(50px,-60px) scale(1.15); } }
+
+    /* ── Success Card ── */
+    .pay-card {
+        position: relative; z-index: 2;
+        background: rgba(255,255,255,.98);
+        backdrop-filter: blur(30px);
+        border-radius: 32px;
+        max-width: 560px; width: 100%;
+        padding: 56px 48px;
         text-align: center;
-        position: relative;
+        border: 2px solid rgba(255,255,255,.2);
+        box-shadow: 0 40px 100px rgba(0,0,0,.3);
+        animation: payCardIn .8s cubic-bezier(.23,1,.32,1) both;
+        transform-style: preserve-3d;
+    }
+    @@keyframes payCardIn {
+        from { opacity: 0; transform: translateY(50px) rotateX(12deg) scale(.92); }
+        to   { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
+    }
+    .pay-card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; right: 0; height: 5px;
+        border-radius: 32px 32px 0 0;
+        background: linear-gradient(90deg, #667eea, #764ba2, #00d4ff);
     }
 
-    .success-card {
-        background: white;
-        border-radius: 30px;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.15);
-        padding: 60px 40px;
+    /* ── Success Icon ── */
+    .pay-icon {
+        width: 120px; height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 32px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 3.5rem; color: #fff;
+        position: relative;
+        animation: payIconPulse 3s ease-in-out infinite;
+    }
+    .pay-icon.success { background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 20px 60px rgba(102,126,234,.5); }
+    .pay-icon.error   { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 20px 60px rgba(220,38,38,.4); }
+    @@keyframes payIconPulse {
+        0%,100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+    .pay-icon::after {
+        content: '';
+        position: absolute; inset: -12px;
+        border-radius: 50%;
+        border: 3px solid rgba(102,126,234,.4);
+        animation: payRing 2.5s ease-out infinite;
+    }
+    .pay-icon.error::after { border-color: rgba(220,38,38,.4); }
+    @@keyframes payRing { from { transform: scale(.85); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
+
+    /* ── Typography ── */
+    .pay-title {
+        font-size: 2.2rem; font-weight: 900;
+        color: #0f172a; margin-bottom: 16px;
+        letter-spacing: -.04em;
+        background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .pay-msg { 
+        color: #64748b; font-size: 1.05rem; line-height: 1.8; margin-bottom: 36px; 
+        font-weight: 500;
+    }
+
+    /* ── Details Section ── */
+    .pay-details {
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 28px 32px;
+        text-align: left;
+        margin-bottom: 36px;
         position: relative;
         overflow: hidden;
-        transform: scale(0.9);
-        animation: successAppear 0.8s ease-out forwards;
+    }
+    .pay-details::before {
+        content: '';
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(102,126,234,.05), transparent);
+        animation: shimmer 3s infinite;
+    }
+    @@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    .pay-details h4 { 
+        font-size: .9rem; font-weight: 800; color: #667eea; 
+        text-transform: uppercase; letter-spacing: .1em; margin-bottom: 20px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .pay-detail-row { 
+        display: flex; justify-content: space-between; align-items: center; 
+        padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: .95rem; 
+        transition: background .3s;
+    }
+    .pay-detail-row:hover { background: rgba(102,126,234,.05); }
+    .pay-detail-row:last-child { border-bottom: none; }
+    .pay-detail-row span:first-child { color: #64748b; font-weight: 500; }
+    .pay-detail-row span:last-child { font-weight: 800; color: #0f172a; }
+    .pay-detail-row .status-ok { color: #10b981; }
+    .pay-detail-row .status-err { color: #dc2626; }
+
+    /* ── Action Buttons ── */
+    .pay-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .pay-btn {
+        display: inline-flex; align-items: center; gap: 12px;
+        padding: 16px 32px; border-radius: 50px;
+        font-weight: 800; font-size: 1rem;
+        text-decoration: none; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none; cursor: pointer;
+        position: relative; overflow: hidden;
+    }
+    .pay-btn::before {
+        content: '';
+        position: absolute; top: 50%; left: 50%;
+        width: 0; height: 0; border-radius: 50%;
+        background: rgba(255,255,255,.3);
+        transform: translate(-50%, -50%);
+        transition: width .6s, height .6s;
+    }
+    .pay-btn:hover::before { width: 300px; height: 300px; }
+    .pay-btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff; box-shadow: 0 8px 25px rgba(102,126,234,.4);
+    }
+    .pay-btn-primary:hover { 
+        transform: translateY(-4px); 
+        box-shadow: 0 16px 40px rgba(102,126,234,.5); 
+        color: #fff; 
+    }
+    .pay-btn-ghost {
+        background: linear-gradient(135deg, #f8f9fa 0%, #f1f5f9 100%); 
+        color: #475569;
+        border: 2px solid #e2e8f0;
+    }
+    .pay-btn-ghost:hover { 
+        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); 
+        border-color: #667eea; 
+        color: #667eea; 
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102,126,234,.2);
     }
 
-    @@keyframes successAppear {
-        0% { transform: scale(0.7) translateY(50px); opacity: 0; }
-        100% { transform: scale(1) translateY(0); opacity: 1; }
+    /* ── Confetti ── */
+    .pay-confetti { position: absolute; pointer-events: none; z-index: 1; }
+
+    /* ── Responsive ── */
+    @@media (max-width: 768px) {
+        .pay-card { padding: 44px 32px; border-radius: 24px; }
+        .pay-icon { width: 100px; height: 100px; font-size: 3rem; }
+        .pay-title { font-size: 1.8rem; }
+        .pay-details { padding: 24px 28px; }
     }
-
-    .success-card::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
-        background: linear-gradient(90deg, #4ecdc4, #667eea, #764ba2, #f093fb);
-        animation: rainbow 3s linear infinite;
-    }
-
-    @@keyframes rainbow {
-        0% { background-position: 0% 50%; }
-        100% { background-position: 200% 50%; }
-    }
-
-    .success-icon {
-        width: 120px; height: 120px; border-radius: 50%;
-        background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-        margin: 0 auto 30px; display: flex; align-items: center; justify-content: center;
-        position: relative; animation: pulse 2s ease-in-out infinite;
-    }
-
-    @@keyframes pulse {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.4); }
-        50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(78, 205, 196, 0); }
-    }
-
-    .success-icon::before {
-        content: '✓'; font-size: 60px; color: white; font-weight: bold;
-        animation: checkmark 1s ease-in-out 0.3s both;
-    }
-
-    @@keyframes checkmark {
-        0% { transform: scale(0) rotate(45deg); opacity: 0; }
-        100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-
-    .success-title {
-        font-size: 2.5rem; font-weight: 700; color: #2d3748; margin-bottom: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-clip: text; animation: slideInUp 0.8s ease-out 0.5s both;
-    }
-
-    /* ================= GIAO DIỆN LỖI (MÀU ĐỎ/HỒNG) ================= */
-    .error-container {
-        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-    }
-
-    .error-card::before {
-        background: linear-gradient(90deg, #ff4b2b, #ff416c);
-    }
-
-    .error-icon {
-        background: linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%);
-        animation: pulse-error 2s ease-in-out infinite;
-    }
-
-    @@keyframes pulse-error {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.4); }
-        50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 65, 108, 0); }
-    }
-
-    .error-icon::before { content: '✕'; }
-
-    .error-title {
-        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-
-    .back-button-error {
-        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%) !important;
-    }
-
-    /* ================= CÁC THÀNH PHẦN KHÁC ================= */
-    @@keyframes slideInUp {
-        0% { transform: translateY(30px); opacity: 0; }
-        100% { transform: translateY(0); opacity: 1; }
-    }
-
-    .success-message {
-        font-size: 1.2rem; color: #718096; margin-bottom: 40px; line-height: 1.6;
-        animation: slideInUp 0.8s ease-out 0.7s both;
-    }
-
-    .success-details {
-        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-        border-radius: 20px; padding: 25px; margin-bottom: 40px;
-        animation: slideInUp 0.8s ease-out 0.9s both;
-    }
-
-    .success-details h4 { color: #2d3748; margin-bottom: 15px; font-size: 1.1rem; font-weight: 600; }
-    .success-details p { color: #4a5568; margin: 8px 0; font-size: 0.95rem; }
-    .success-details .highlight { color: #667eea; font-weight: 600; }
-
-    .back-button {
-        display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white; padding: 18px 40px; border-radius: 50px; text-decoration: none;
-        font-size: 1.1rem; font-weight: 600; transition: all 0.3s ease; position: relative;
-        overflow: hidden; text-transform: uppercase; letter-spacing: 1px;
-        animation: slideInUp 0.8s ease-out 1.1s both;
-    }
-
-    .back-button::before {
-        content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-
-    .back-button:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); color: white; text-decoration: none; }
-    .back-button:hover::before { left: 100%; }
-
-    .floating-elements { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-    .floating-element { position: absolute; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; animation: float 6s ease-in-out infinite; }
-    .confetti { position: absolute; width: 10px; height: 10px; background: #f093fb; animation: confetti 3s ease-in-out infinite; }
-
-    @@keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-        50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
-    }
-    @@keyframes confetti {
-        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    @@media (max-width: 480px) {
+        .pay-card { padding: 36px 24px; border-radius: 20px; }
+        .pay-actions { flex-direction: column; }
+        .pay-btn { width: 100%; justify-content: center; }
+        .pay-page { padding: 40px 16px 60px; }
+        .pay-icon { width: 90px; height: 90px; font-size: 2.5rem; }
+        .pay-title { font-size: 1.5rem; }
     }
 </style>
 
-<div class="success-container @(isSuccess ? "" : "error-container")">
-    <div class="floating-elements">
-        <div class="floating-element" style="top: 20%; left: 10%;"></div>
-        <div class="floating-element" style="top: 60%; left: 85%;"></div>
-        <div class="floating-element" style="top: 40%; left: 70%;"></div>
+<div class="pay-page" id="payPage">
+    <div class="pay-orb pay-orb-1"></div>
+    <div class="pay-orb pay-orb-2"></div>
+    <div class="pay-orb pay-orb-3"></div>
 
-        @if (isSuccess)
+    @if (isSuccess)
+    {
+        for (int i = 0; i < 8; i++)
         {
-            <div class="confetti" style="left: 10%; background: #667eea; animation-delay: 0s;"></div>
-            <div class="confetti" style="left: 30%; background: #4ecdc4; animation-delay: 0.5s;"></div>
-            <div class="confetti" style="left: 50%; background: #f093fb; animation-delay: 1s;"></div>
-            <div class="confetti" style="left: 70%; background: #764ba2; animation-delay: 1.5s;"></div>
-            <div class="confetti" style="left: 90%; background: #44a08d; animation-delay: 2s;"></div>
+            <div class="pay-confetti" style="left:@(10 + i * 11)%; top:@(20 + (i % 3) * 15)%; width:8px; height:8px; background:@(new[]{"#6e6af0","#60a5fa","#34d399","#a78bfa","#fbbf24"}[i%5]); border-radius:@(i%2==0?"50%":"2px"); animation: payConfetti @(2+i*0.3)s ease-in-out @(i*0.2)s infinite alternate;"></div>
         }
-    </div>
+    }
 
-    <div class="success-wrapper">
-        <div class="success-card @(isSuccess ? "" : "error-card")">
-            
-            <div class="success-icon @(isSuccess ? "" : "error-icon")"></div>
+    <div class="pay-card" id="payCard">
+        <div class="pay-icon @(isSuccess ? "success" : "error")">
+            <i class="fas @(isSuccess ? "fa-check" : "fa-times")"></i>
+        </div>
 
-            <h2 class="success-title @(isSuccess ? "" : "error-title")">
-                @(isSuccess ? "Thanh toán thành công!" : "Giao dịch thất bại!")
-            </h2>
+        <h1 class="pay-title">
+            @(isSuccess ? "Thanh toán thành công!" : "Giao dịch thất bại")
+        </h1>
 
-            <p class="success-message">
-                @(isSuccess ? "Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi. Đơn hàng của bạn đã được xử lý thành công." : message)
-            </p>
+        <p class="pay-msg">
+            @(isSuccess
+                ? "Cảm ơn bạn đã mua sắm tại TechStoreVN. Đơn hàng của bạn đã được xử lý và sẽ sớm được giao đến bạn."
+                : message)
+        </p>
 
-            <div class="success-details">
-                <h4>Chi tiết hệ thống:</h4>
-                <p><span class="highlight">Mã phản hồi:</span> @rspCode</p>
-                <p><span class="highlight">Trạng thái:</span> @(isSuccess ? "Đã ghi nhận" : "Bị hủy / Lỗi")</p>
-                <p><span class="highlight">Thời gian:</span> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+        <div class="pay-details">
+            <h4><i class="fas fa-receipt me-2"></i>Chi tiết giao dịch</h4>
+            <div class="pay-detail-row">
+                <span>Mã phản hồi</span>
+                <span>@rspCode</span>
             </div>
+            <div class="pay-detail-row">
+                <span>Trạng thái</span>
+                <span class="@(isSuccess ? "status-ok" : "status-err")">
+                    @(isSuccess ? "✓ Đã ghi nhận" : "✕ Bị hủy / Lỗi")
+                </span>
+            </div>
+            <div class="pay-detail-row">
+                <span>Thời gian</span>
+                <span>@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+        </div>
 
-            @Html.ActionLink("Quay lại trang chính", "Index", "Home", null, new { @class = "back-button " + (isSuccess ? "" : "back-button-error") })
+        <div class="pay-actions">
+            <a href="@Url.Action("Index", "Home")" class="pay-btn pay-btn-primary">
+                <i class="fas fa-home"></i> Về trang chủ
+            </a>
+            @if (isSuccess)
+            {
+                <a href="@Url.Action("ThongTinCaNhan", "User")" class="pay-btn pay-btn-ghost">
+                    <i class="fas fa-receipt"></i> Xem đơn hàng
+                </a>
+            }
         </div>
     </div>
 </div>
+
+<style>
+@@keyframes payConfetti {
+    from { transform: translateY(0) rotate(0deg); opacity: .6; }
+    to   { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const page = document.getElementById('payPage');
+    const card = document.getElementById('payCard');
+    if (page && card) {
+        page.addEventListener('mousemove', function(e) {
+            const rect = page.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            card.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 6}deg)`;
+        });
+        page.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    }
+});
+</script>
