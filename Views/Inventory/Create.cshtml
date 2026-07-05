@@ -24,6 +24,12 @@
                 <span asp-validation-for="StockQuantity" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="UnitCost" class="control-label"></label>
+                <input asp-for="UnitCost" class="form-control" type="number" step="0.01" min="0" />
+                <small class="form-text text-muted">Giá nhập sẽ được dùng để tính giá vốn và lợi nhuận cho sản phẩm.</small>
+                <span asp-validation-for="UnitCost" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Note" class="control-label"></label>
                 <textarea asp-for="Note" class="form-control"></textarea>
                 <span asp-validation-for="Note" class="text-danger"></span>

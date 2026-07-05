@@ -24,5 +24,10 @@ namespace TechStore.Models
 
         [Display(Name = "Ghi chú")]
         public string Note { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Giá nhập (VND)")]
+        [Range(0, double.MaxValue, ErrorMessage = "Giá nhập phải lớn hơn hoặc bằng 0")]
+        public decimal? UnitCost { get; set; }
     }
 }

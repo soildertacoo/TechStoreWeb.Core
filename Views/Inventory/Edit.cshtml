@@ -38,6 +38,11 @@
                         <input name="Quantity" class="form-control" type="number" min="1" value="1" required />
                     </div>
                     <div class="form-group">
+                        <label class="control-label">Giá nhập (VND)</label>
+                        <input name="UnitPrice" class="form-control" type="number" step="0.01" min="0" value="@(adjustmentModel.UnitPrice ?? 0)" />
+                        <small class="form-text text-muted">Chỉ áp dụng khi nhập kho; sẽ dùng cho tính giá vốn và lời lỗ.</small>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">Ghi chú</label>
                         <textarea name="Note" class="form-control" placeholder="VD: Nhập hàng từ NCC ABC"></textarea>
                     </div>

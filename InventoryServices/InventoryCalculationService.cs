@@ -339,9 +339,18 @@ namespace TechStoreWeb.Core.InventoryServices
                 }
                 catch
                 {
-                    var inventoryValue = await CalculateInventoryValueAsync(productId, method);
-                    decimal avgCost = inventoryValue.AverageCostPerUnit;
-                    totalCostOfGoodsSold = totalUnitsSold * avgCost;
+                    var batches = await GetInventoryBatchesAsync(productId);
+                    if (batches.Any())
+                    {
+                        var avgCost = batches.Average(b => b.UnitCost);
+                        totalCostOfGoodsSold = totalUnitsSold * avgCost;
+                    }
+                    else
+                    {
+                        var inventoryValue = await CalculateInventoryValueAsync(productId, method);
+                        decimal avgCost = inventoryValue.AverageCostPerUnit;
+                        totalCostOfGoodsSold = totalUnitsSold * avgCost;
+                    }
                 }
             }
 

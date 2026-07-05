@@ -85,6 +85,47 @@
                         <span>Số lượng hàng trong kho hiện tại đang ổn định.</span>
                     }
                 </div>
+
+                @if (summary?.ProfitLossInfo != null)
+                {
+                    <div class="card border-secondary mt-4">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="fas fa-chart-line mr-1"></i> Thông tin giá vốn &amp; lợi nhuận
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5">Tổng đơn vị đã bán:</dt>
+                                <dd class="col-sm-7">@summary.ProfitLossInfo.TotalUnitsSold</dd>
+
+                                <dt class="col-sm-5">Doanh thu bán hàng:</dt>
+                                <dd class="col-sm-7">
+                                    @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", summary.ProfitLossInfo.TotalRevenue)
+                                </dd>
+
+                                <dt class="col-sm-5">Giá vốn hàng đã bán:</dt>
+                                <dd class="col-sm-7">
+                                    @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", summary.ProfitLossInfo.TotalCostOfGoodsSold)
+                                </dd>
+
+                                <dt class="col-sm-5">Lợi nhuận gộp:</dt>
+                                <dd class="col-sm-7">
+                                    @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", summary.ProfitLossInfo.GrossProfit)
+                                </dd>
+
+                                <dt class="col-sm-5">Tỷ lệ lợi nhuận:</dt>
+                                <dd class="col-sm-7">@summary.ProfitLossInfo.ProfitMarginPercentage.ToString("0.##") %</dd>
+
+                                @if (summary.ProfitLossInfo.TotalUnitsSold > 0)
+                                {
+                                    <dt class="col-sm-5">Giá vốn trung bình / đơn vị:</dt>
+                                    <dd class="col-sm-7">
+                                        @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", summary.ProfitLossInfo.TotalCostOfGoodsSold / summary.ProfitLossInfo.TotalUnitsSold)
+                                    </dd>
+                                }
+                            </dl>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 

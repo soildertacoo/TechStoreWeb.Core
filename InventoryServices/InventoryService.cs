@@ -119,7 +119,7 @@ namespace TechStoreWeb.Core.InventoryServices
         }
 
         public async Task<(Inventory inventory, InventoryMovement movement)> CreateInventoryAsync(
-            int productId, int initialQuantity, string? note)
+            int productId, int initialQuantity, string? note, decimal? unitCost = null)
         {
             if (initialQuantity < 0)
                 throw new InvalidOperationException("Số lượng tồn kho ban đầu không được âm.");
@@ -142,6 +142,15 @@ namespace TechStoreWeb.Core.InventoryServices
             _dbTechStoreEntities.Inventories.Add(inventory);
             await _dbTechStoreEntities.SaveChangesAsync();
 
+            if (initialQuantity > 0 && unitCost.HasValue)
+            {
+                await _calculationService.AddInventoryBatchAsync(
+                    productId,
+                    initialQuantity,
+                    unitCost.Value,
+                    note ?? "Khởi tạo tồn kho");
+            }
+
             var movement = await RecordMovementAsync(
                 productId,
                 InventoryMovementType.Initial,
@@ -154,7 +163,7 @@ namespace TechStoreWeb.Core.InventoryServices
         }
 
         public async Task<(Inventory inventory, InventoryMovement movement)> ImportStockAsync(
-            int productId, int quantity, string? note)
+            int productId, int quantity, string? note, decimal? unitCost = null)
         {
             ValidatePositiveQuantity(quantity, "nhập kho");
 
@@ -174,6 +183,15 @@ namespace TechStoreWeb.Core.InventoryServices
                 stockBefore,
                 stockAfter,
                 note ?? $"Nhập kho +{quantity}");
+
+            if (unitCost.HasValue)
+            {
+                await _calculationService.AddInventoryBatchAsync(
+                    productId,
+                    quantity,
+                    unitCost.Value,
+                    note ?? $"Nhập kho +{quantity}");
+            }
 
             await _dbTechStoreEntities.SaveChangesAsync();
             return (inventory, movement);
@@ -238,14 +256,14 @@ namespace TechStoreWeb.Core.InventoryServices
         }
 
         public async Task<(Inventory inventory, InventoryMovement movement)> AdjustStockAsync(
-            int inventoryId, InventoryMovementType adjustmentType, int quantity, string? note)
+            int inventoryId, InventoryMovementType adjustmentType, int quantity, string? note, decimal? unitCost = null)
         {
-            var inventory = await _context.Inventories.FindAsync(inventoryId)
+            var inventory = await _dbTechStoreEntities.Inventories.FindAsync(inventoryId)
                 ?? throw new InvalidOperationException("Không tìm thấy bản ghi tồn kho.");
 
             return adjustmentType switch
             {
-                InventoryMovementType.Import => await ImportStockAsync(inventory.ProductID, quantity, note),
+                InventoryMovementType.Import => await ImportStockAsync(inventory.ProductID, quantity, note, unitCost),
                 InventoryMovementType.Export => await ExportStockAsync(inventory.ProductID, quantity, note),
                 _ => throw new InvalidOperationException("Loại điều chỉnh không hợp lệ. Chỉ hỗ trợ Nhập hoặc Xuất.")
             };

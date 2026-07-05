@@ -19,10 +19,10 @@ namespace TechStoreWeb.Core.InventoryServices
         string GetStockStatusLabel(StockStatus status);
 
         Task<(Inventory inventory, InventoryMovement movement)> CreateInventoryAsync(
-            int productId, int initialQuantity, string? note);
+            int productId, int initialQuantity, string? note, decimal? unitCost = null);
 
         Task<(Inventory inventory, InventoryMovement movement)> ImportStockAsync(
-            int productId, int quantity, string? note);
+            int productId, int quantity, string? note, decimal? unitCost = null);
 
         Task<(Inventory inventory, InventoryMovement movement)> ExportStockAsync(
             int productId, int quantity, string? note);
@@ -31,7 +31,7 @@ namespace TechStoreWeb.Core.InventoryServices
             int inventoryId, int newQuantity, string? note);
 
         Task<(Inventory inventory, InventoryMovement movement)> AdjustStockAsync(
-            int inventoryId, InventoryMovementType adjustmentType, int quantity, string? note);
+            int inventoryId, InventoryMovementType adjustmentType, int quantity, string? note, decimal? unitCost = null);
 
         Task DeleteInventoryAsync(int inventoryId);
         Task<bool> ProductHasInventoryAsync(int productId);

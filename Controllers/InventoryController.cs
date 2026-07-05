@@ -142,7 +142,8 @@ namespace TechStore.Controllers
                     model.InventoryID,
                     model.AdjustmentType,
                     model.Quantity,
-                    model.Note);
+                    model.Note,
+                    model.UnitPrice);
 
                 return RedirectToAction(nameof(Details), new { id = model.InventoryID });
             }
@@ -173,7 +174,7 @@ namespace TechStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,StockQuantity,Note")] Inventory inventory)
+        public async Task<IActionResult> Create([Bind("ProductID,StockQuantity,Note,UnitCost")] Inventory inventory)
         {
             if (ModelState.IsValid)
             {
@@ -182,7 +183,8 @@ namespace TechStore.Controllers
                     await _inventoryService.CreateInventoryAsync(
                         inventory.ProductID,
                         inventory.StockQuantity,
-                        inventory.Note);
+                        inventory.Note,
+                        inventory.UnitCost);
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
