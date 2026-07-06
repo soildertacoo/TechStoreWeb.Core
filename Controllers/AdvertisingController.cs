@@ -42,6 +42,7 @@ namespace TechStore.Controllers
         public IActionResult CreateBanner()
         {
             LoadProducts();
+            LoadCategories();
             return View();
         }
         [HttpPost]
@@ -66,12 +67,21 @@ namespace TechStore.Controllers
             return View(banner);
         }
 
+        private void LoadCategories()
+        {
+            ViewBag.Categories = new SelectList(
+                dbO.Category.OrderBy(x => x.NameCate).ToList(),
+                "IDCate",
+                "NameCate");
+        }
+
         public async Task<IActionResult> EditBanner(int? id)
         {
             if (id == null) return NotFound();
             var banner = await _context.Banners.FindAsync(id);
             if (banner == null) return NotFound();
             LoadProducts();
+            LoadCategories();
             return View(banner);
         }
 
@@ -79,26 +89,64 @@ namespace TechStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditBanner(int id, Banner banner)
         {
+            Console.WriteLine($"CategoryID = {banner.CategoryID}");
+            Console.WriteLine($"ProductID = {banner.ProductID}");
+            Console.WriteLine($"LinkUrl = {banner.LinkUrl}");
+            Console.WriteLine($"Title = {banner.Title}");
+
             if (id != banner.BannerID) return NotFound();
-            if (ModelState.IsValid)
+
+            ModelState.Remove(nameof(Banner.LinkUrl));
+
+            if (!ModelState.IsValid)
             {
-                try
+                LoadCategories();
+                LoadProducts();
+
+                foreach (var item in ModelState)
                 {
-                    _context.Banners.Update(banner);
+                    foreach (var error in item.Value.Errors)
+                    {
+                        // Log lỗi hoặc xử lý theo nhu cầu của bạn
+                        Console.WriteLine($"Field = {item.Key}");
+                        Console.WriteLine($"Error = {error.ErrorMessage}");                    }
+                }        
 
-                    await _context.SaveChangesAsync();
+                Console.WriteLine(ModelState.IsValid);
 
-                    TempData["SuccessMessage"] = "Banner đã được cập nhật thành công!";
-                }
-                catch
-                {
-                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật Banner. Vui lòng thử lại.";
-                }
-
-                return RedirectToAction(nameof(Banners));
+                
+                return View(banner);
             }
-            LoadProducts();
-            return View(banner);
+
+            var oldBanner = await _context.Banners.FindAsync(id);
+            
+            if (oldBanner == null)
+               return NotFound();
+
+            oldBanner.Title = banner.Title;
+            oldBanner.ImageUrl = banner.ImageUrl;
+            //oldBanner.LinkUrl = banner.LinkUrl;
+            oldBanner.StartDate = banner.StartDate;
+            oldBanner.EndDate = banner.EndDate;
+            oldBanner.DisplayOrder = banner.DisplayOrder;
+            oldBanner.IsActive = banner.IsActive;
+            oldBanner.CategoryID = banner.CategoryID;
+            oldBanner.ProductID = banner.ProductID;
+
+            Console.WriteLine("===== Before Save =====");
+            Console.WriteLine(oldBanner.Title);
+            Console.WriteLine(oldBanner.ImageUrl);
+            Console.WriteLine(oldBanner.ProductID);
+            Console.WriteLine(oldBanner.CategoryID);
+
+            var result = await _context.SaveChangesAsync();
+
+            Console.WriteLine($"Rows affected = {result}");
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Cập nhật thành công";
+
+            return RedirectToAction(nameof(Banners));
         }
 
         [HttpPost]
@@ -116,12 +164,64 @@ namespace TechStore.Controllers
         private void LoadProducts()
         {
             ViewBag.Products = new SelectList(
-                dbO.Products
-                .OrderBy(x => x.NamePro)
-                .ToList(),
+                dbO.Products.OrderBy(x => x.NamePro).ToList(),
                 "ProductID",
                 "NamePro");
+
+            ViewBag.Categories = new SelectList(
+                dbO.Category.OrderBy(x => x.NameCate).ToList(),
+                "IDCate",
+                "NameCate");
         }
+
+        public IActionResult BannerProducts(int id)
+        {
+            var banner = _context.Banners.FirstOrDefault(x => x.BannerID == id);
+           
+
+            if (banner == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+             // Lấy danh sách sản phẩm liên quan đến banner này
+            IQueryable<Products> products = dbO.Products;
+
+            //Nếu chọn 1 sản phẩm
+            if (banner.ProductID.HasValue)
+            {
+                var p = dbO.Products.FirstOrDefault(
+                    x => x.ProductID == banner.ProductID.Value);
+                
+                if (p != null)
+                {
+                    products = products
+                    .Where(x => x.Category == p.Category);
+                }
+            }
+
+            //Nếu chọn cả danh mục
+            else if (!string.IsNullOrEmpty(banner.CategoryID))
+            {
+                products = products
+                    .Where(x => x.Category == banner.CategoryID);
+            }
+
+           ViewBag.BannerTitle = banner.Title;
+
+           return View(products.ToList());
+        }
+
+        public IActionResult BannerRedirect(int id)
+        {
+            var banner = _context.Banners.FirstOrDefault(x => x.BannerID == id);
+
+            if (banner == null)
+                return RedirectToAction("Index", "Home");
+
+           return RedirectToAction(nameof(BannerProducts), new { id });
+        }
+
 
         // --- Promotions ---
         public async Task<IActionResult> Promotions()

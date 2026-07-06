@@ -25,20 +25,27 @@ namespace TechStore.Controllers
         {
             using (var db = dbO)
             {
-                // Lấy tất cả sản phẩm
-                var proList = db.Products.ToList();
-                // Tính toán số lượng đã bán cho mỗi sản phẩm
-                var soldQuantities = new Dictionary<int, int>();
+                var model = new indexProducts();
+
+                // Danh sách sản phẩm
+                model.products = db.Products.ToList();
 
                 var today = DateTime.Now;
 
-                var banners = _context.Banners
-                      .Where(x => x.IsActive && 
+                model.banners = _context.Banners
+                      .Where(x => 
+                      x.IsActive && 
                       (!x.StartDate.HasValue || x.StartDate <= today) && 
                       (!x.EndDate.HasValue || x.EndDate >= today)
                       )
                       .OrderBy(x => x.DisplayOrder)
                       .ToList();
+
+                // Lấy tất cả sản phẩm
+                var proList = db.Products.ToList();
+                // Tính toán số lượng đã bán cho mỗi sản phẩm
+                var soldQuantities = new Dictionary<int, int>();
+
                 //Lấy điểm của sản phẩm và số lượng đánh giá 
                 // Query để lấy số lượng đã bán từ OrderDetailss
                 if(proList.Count > 0)
@@ -101,7 +108,7 @@ namespace TechStore.Controllers
                         products = proList,
                         soldQuantities = soldItems,
                         scoreProducts = scoreProducts,
-                        banners = banners,
+                        banners = model.banners,
                         bestSeller = top3BestSellers
                     };
                     return View(indexpros);

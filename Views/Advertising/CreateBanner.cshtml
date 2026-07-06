@@ -21,20 +21,32 @@
                 <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
                 <span asp-validation-for="ImageUrl" class="text-danger"></span>
             </div>
+            <div class="alert alert-info mb-3">
+
+                Chọn <b>Danh mục</b> để banner mở toàn bộ sản phẩm của danh mục.
+
+                <br>
+
+                 Hoặc chọn <b>Sản phẩm</b> để banner mở các sản phẩm cùng loại.
+
+            </div>
             <div class="form-group mb-3">
-                <label>Liên kết sản phẩm</label>
-                <select id="productSelect"
-                        class="form-select">
+                <label asp-for="CategoryID"></label>
+                <select asp-for="CategoryID"
+                        asp-items="ViewBag.Categories"
+                        class="form-control"
+                        id="CategoryID">
+                    <option value="">-- Chọn danh mục --</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProductID"></label>
+                <select asp-for="ProductID"
+                        asp-items="ViewBag.Products"
+                        class="form-control"
+                        id="ProductID">
                     <option value="">-- Chọn sản phẩm --</option>
-                    <small class="text-muted">
-
-                    Khi chọn sản phẩm, hệ thống sẽ tự tạo LinkUrl.
-
-                    </small>
-                    @foreach (var item in (SelectList)ViewBag.Products)
-                    {
-                        <option value="@item.Value">@item.Text</option>
-                    }
                 </select>
             </div>
             <div class="form-group">
@@ -72,22 +84,28 @@
     </div>
 </div>
 
+@section Scripts{
+
 <script>
 
 $(function () {
 
-    $("#productSelect").change(function () {
+    $("#ProductID").change(function () {
 
-        var id = $(this).val();
+       let id = $(this).val();
 
-        if (id) {
-
-            $("#LinkUrl").val("/Products/Details/" + id);
-
-        }
-        else {
-
+        if(id!="")
+            $("#LinkUrl").val("/Advertising/BannerProducts?id=" + id);
+        else
             $("#LinkUrl").val("");
+
+    });
+
+    $("#CategoryID").change(function () {
+
+        if ($(this).val() != "") {
+
+            $("#ProductID").val("");
 
         }
 
@@ -96,3 +114,5 @@ $(function () {
 });
 
 </script>
+
+}

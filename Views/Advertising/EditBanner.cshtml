@@ -16,10 +16,11 @@
     <div class="card-body p-4">
         <div class="row">
             <div class="col-md-7">
-                <form asp-action="EditBanner">
+                <form asp-action="EditBanner" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input type="hidden" asp-for="BannerID" />
                     <input type="hidden" asp-for="CreatedDate" />
+                    <input type="hidden" asp-for="LinkUrl" />
 
                     <div class="form-group mb-3">
                         <label asp-for="Title" class="control-label font-weight-bold"></label>
@@ -39,43 +40,33 @@
                         <small class="form-text text-muted">Đường dẫn hình ảnh từ internet hoặc thư mục Images.</small>
                     </div>
 
+                    <div class="alert alert-info mb-3">
+                        Chọn <b>1 trong 2</b>:
+                        <br />
+                         • Danh mục → Banner mở toàn bộ sản phẩm của danh mục.
+                         <br />
+                         • Sản phẩm → Banner mở các sản phẩm cùng loại.
+                    </div>
+
                     <div class="form-group mb-3">
-                        <label>Liên kết sản phẩm</label>
+                        <label>Danh mục</label>
 
-                        <select id="productSelect"
-                                class="form-select">
-                                <small class="text-muted">
-                                    Khi chọn sản phẩm, hệ thống sẽ tự tạo LinkUrl.
-                                </small>
-
-                            <option value="">
-                                -- Chọn sản phẩm --
-                            </option>
-
-                                @foreach (var item in (SelectList)ViewBag.Products)
-                                {
-                                    <option value="@item.Value">
-                                      @item.Text
-                                    </option>
-                                }
-
+                        <select asp-for="CategoryID"
+                                asp-items="ViewBag.Categories"
+                                class="form-control">
+                            <option value="">-- Chọn danh mục --</option>
                         </select>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="LinkUrl" class="control-label font-weight-bold"></label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-link"></i></span>
-                            </div>
-                            <input asp-for="LinkUrl" 
-                            id="LinkUrl" 
-                            class="form-control"
-                            readonly
-                             placeholder="Chọn sản phẩm để tự tạo liên kết" />
-                        </div>
-                        <span asp-validation-for="LinkUrl" class="text-danger"></span>
+                        <label>Sản phẩm</label>
+                        <select asp-for="ProductID"
+                                asp-items="ViewBag.Products"
+                                class="form-control">
+                            <option value="">-- Chọn sản phẩm --</option>
+                        </select>
                     </div>
+
 
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -144,28 +135,3 @@
         });
     </script>
 }
-
-<script>
-
-$(function () {
-
-    $("#productSelect").change(function () {
-
-        var id = $(this).val();
-
-        if (id) {
-
-            $("#LinkUrl").val("/Products/Details/" + id);
-
-        }
-        else {
-
-            $("#LinkUrl").val("");
-
-        }
-
-    });
-
-});
-
-</script>

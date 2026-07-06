@@ -14,12 +14,11 @@ namespace TechStore.Models
         [Display(Name = "Tiêu đề quảng cáo")]
         public string Title { get; set; }
 
-        [Required]
         [Display(Name = "Đường dẫn hình ảnh")]
         public string ImageUrl { get; set; }
 
         [Display(Name = "Đường dẫn liên kết")]
-        public string LinkUrl { get; set; }
+        public string? LinkUrl { get; set; }
 
         [Display(Name = "Thứ tự hiển thị")]
         public int DisplayOrder { get; set; }
@@ -53,5 +52,9 @@ namespace TechStore.Models
         public bool IsHomeSlider { get; set; }
 
         public bool IsMiddleBanner { get; set; }
+
+        public int? ProductID { get; set; }
+
+        public string? CategoryID { get; set; }
     }
 }
