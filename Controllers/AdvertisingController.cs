@@ -45,10 +45,23 @@ namespace TechStore.Controllers
             LoadCategories();
             return View();
         }
+
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBanner(Banner banner)
         {
+            // Chỉ được chọn 1 trong 2
+            if (banner.ProductID.HasValue && !string.IsNullOrEmpty(banner.CategoryID))
+            {
+                ModelState.AddModelError("", "Chỉ được chọn Danh mục hoặc Sản phẩm.");
+            }
+
+            if (!banner.ProductID.HasValue && string.IsNullOrEmpty(banner.CategoryID))
+            {
+                ModelState.AddModelError("", "Phải chọn Danh mục hoặc Sản phẩm.");
+            }
+
             if (ModelState.IsValid)
             {
                 banner.CreatedDate = DateTime.Now;
@@ -97,6 +110,17 @@ namespace TechStore.Controllers
             if (id != banner.BannerID) return NotFound();
 
             ModelState.Remove(nameof(Banner.LinkUrl));
+
+            // Chỉ được chọn 1 trong 2
+            if (banner.ProductID.HasValue && !string.IsNullOrEmpty(banner.CategoryID))
+            {
+                ModelState.AddModelError("", "Chỉ được chọn Danh mục hoặc Sản phẩm.");
+            }
+
+            if (!banner.ProductID.HasValue && string.IsNullOrEmpty(banner.CategoryID))
+            {
+                ModelState.AddModelError("", "Phải chọn Danh mục hoặc Sản phẩm.");
+            }
 
             if (!ModelState.IsValid)
             {

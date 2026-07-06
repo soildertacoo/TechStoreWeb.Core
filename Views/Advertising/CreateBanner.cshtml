@@ -92,6 +92,10 @@ $(function () {
 
     $("#ProductID").change(function () {
 
+        if($(this).val()!=""){
+        $("#CategoryID").val("");
+    }
+
        let id = $(this).val();
 
         if(id!="")

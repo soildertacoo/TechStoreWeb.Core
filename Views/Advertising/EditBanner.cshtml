@@ -134,4 +134,22 @@
             });
         });
     </script>
+    
+    <script>
+        $(function () {
+            $("#ProductID").change(function () {
+                if($(this).val()!=""){
+                    $("#CategoryID").val("");
+                }
+            });
+        });
+
+        $(function () {
+            $("#CategoryID").change(function () {
+                if($(this).val()!=""){
+                    $("#ProductID").val("");
+                }
+            });
+        });
+    </script>
 }

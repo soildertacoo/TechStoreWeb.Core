@@ -1,0 +1,63 @@
+@model IEnumerable<TechStore.Models.Products>
+
+@{
+    ViewData["Title"] = ViewBag.BannerTitle;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">
+        @ViewBag.BannerTitle
+    </h2>
+
+    <div class="row">
+
+        @if (!Model.Any())
+        {
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    Không có sản phẩm.
+                </div>
+            </div>
+        }
+
+        @foreach (var item in Model)
+        {
+            <div class="col-md-3 mb-4">
+
+                <div class="card h-100">
+
+                    <img src="@item.ImagePro"
+                         class="card-img-top"
+                         style="height:220px;object-fit:cover;" />
+
+                    <div class="card-body">
+
+                        <h5>@item.NamePro</h5>
+
+                        <p class="text-danger fw-bold">
+                            @String.Format("{0:N0} VNĐ", item.Price)
+                        </p>
+
+                    </div>
+
+                    <div class="card-footer">
+
+                        <a asp-controller="Products"
+                           asp-action="Detail"
+                           asp-route-id="@item.ProductID"
+                           class="btn btn-primary w-100">
+                            Xem chi tiết
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
