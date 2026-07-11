@@ -167,15 +167,62 @@ namespace TechStore.Controllers
             }
         }
         
-        public ActionResult Statistics()
+        public ActionResult Statistics(
+            string type="day",
+            DateTime? date=null,
+            int? month=null,
+            int? quarter=null,
+            int? year=null,
+            DateTime? fromDate=null,
+            DateTime? toDate=null
+        )
     {
-        // Doanh thu theo ngày
-        var revenueOverTime = dBO.OrderDetails
+        var revenueQuery = dBO.OrderDetails
             .Join(dBO.OrderPro,
                 od => od.IDOrder,
                 o => o.ID,
-                (od, o) => new { Subtotal = od.Subtotal ?? 0, o.DateOrder, od.IDProduct, Quantity = od.Quantity ?? 0 })
-            .Where(x => x.DateOrder != null)
+                (od, o) => new
+                {
+                    Subtotal = od.Subtotal ?? 0,
+                    o.DateOrder,
+                    od.IDProduct,
+                    Quantity = od.Quantity ?? 0
+                })
+            .Where(x => x.DateOrder != null);
+            switch(type)
+            {
+                case "day":
+                    if(date.HasValue)
+                        revenueQuery=revenueQuery.Where(x=>x.DateOrder.Value.Date==date.Value.Date);
+                    break;
+
+                case "month":
+                    if (month.HasValue && year.HasValue)
+                    revenueQuery=revenueQuery.Where(x=>x.DateOrder.Value.Month==month &&
+                             x.DateOrder.Value.Year==year);
+                    break;
+                
+                case "quarter":
+                    if (quarter.HasValue && year.HasValue)
+                    {
+                        int start=(quarter.Value-1)*3+1;
+                            revenueQuery=revenueQuery.Where(x=>
+                             x.DateOrder.Value.Year==year &&
+                             x.DateOrder.Value.Month>=start &&
+                             x.DateOrder.Value.Year==year);
+                    }
+                    break;
+
+                case "range":
+                    revenueQuery=revenueQuery.Where(x=>
+                     x.DateOrder.Value>=fromDate &&
+                     x.DateOrder.Value<=toDate);
+                break;
+            }
+
+
+        // Doanh thu theo ngày
+        var revenueOverTime = revenueQuery
             .GroupBy(x => x.DateOrder.Value.Date) 
             .Select(g => new 
             {
@@ -191,6 +238,7 @@ namespace TechStore.Controllers
         ViewBag.Labels = revenueOverTime.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
         ViewBag.DataRevenue = revenueOverTime.Select(d => d.TotalRevenue).ToList();
 
+        
         // Tính toán lời lỗ theo ngày
             var profitLossLabels = new List<string>();
             var profitLossRevenueData = new List<decimal>();
