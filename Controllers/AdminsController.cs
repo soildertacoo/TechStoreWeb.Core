@@ -206,10 +206,11 @@ namespace TechStore.Controllers
                     if (quarter.HasValue && year.HasValue)
                     {
                         int start=(quarter.Value-1)*3+1;
-                            revenueQuery=revenueQuery.Where(x=>
+                        int end = start + 2;
+                        revenueQuery=revenueQuery.Where(x=>
                              x.DateOrder.Value.Year==year &&
                              x.DateOrder.Value.Month>=start &&
-                             x.DateOrder.Value.Year==year);
+                             x.DateOrder.Value.Month<=end);
                     }
                     break;
 
@@ -303,8 +304,41 @@ namespace TechStore.Controllers
             ViewBag.TotalProfit = totalProfit;
             ViewBag.TotalCost = totalCostAll;
 
-            // Đánh giá
-            var reviewData = dBO.Reviews
+            // Đánh giá - áp dụng filter theo thời gian
+            var reviewQuery = dBO.Reviews.AsQueryable();
+            switch(type)
+            {
+                case "day":
+                    if(date.HasValue)
+                        reviewQuery=reviewQuery.Where(r=>r.ReviewDate.HasValue && r.ReviewDate.Value.Date==date.Value.Date);
+                    break;
+
+                case "month":
+                    if (month.HasValue && year.HasValue)
+                        reviewQuery=reviewQuery.Where(r=>r.ReviewDate.HasValue && r.ReviewDate.Value.Month==month &&
+                                 r.ReviewDate.Value.Year==year);
+                    break;
+                
+                case "quarter":
+                    if (quarter.HasValue && year.HasValue)
+                    {
+                        int start=(quarter.Value-1)*3+1;
+                        int end = start + 2;
+                        reviewQuery=reviewQuery.Where(r=>r.ReviewDate.HasValue &&
+                                 r.ReviewDate.Value.Year==year &&
+                                 r.ReviewDate.Value.Month>=start &&
+                                 r.ReviewDate.Value.Month<=end);
+                    }
+                    break;
+
+                case "range":
+                    reviewQuery=reviewQuery.Where(r=>r.ReviewDate.HasValue &&
+                     r.ReviewDate.Value>=fromDate &&
+                     r.ReviewDate.Value<=toDate);
+                break;
+            }
+
+            var reviewData = reviewQuery
                 .GroupBy(r => r.ProductID)
                 .Select(g => new
                 {
@@ -322,8 +356,8 @@ namespace TechStore.Controllers
             ViewBag.ReviewData = reviewData.Select(r => r.ReviewCount).ToList();
             ViewBag.AverageRating = reviewData.Select(r => r.ReviewAverage).ToList();
 
-            // Bán chạy
-            var bestSelling = dBO.OrderDetails
+            // Bán chạy - áp dụng filter theo thời gian (sử dụng revenueQuery đã filter)
+            var bestSelling = revenueQuery
                 .GroupBy(od => od.IDProduct)
                 .Select(g => new {
                     ProductsName = dBO.Products

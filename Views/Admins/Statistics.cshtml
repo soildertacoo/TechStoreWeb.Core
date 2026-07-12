@@ -124,46 +124,56 @@
                         <div class="col-md-3">
                             <label>Kiểu thống kê</label>
                             <select id="filterType" name="type" class="form-control">
-                                 <option value="day">Theo ngày</option>
-                                 <option value="month">Theo tháng</option>
-                                 <option value="quarter">Theo quý</option>
-                                 <option value="range">Nâng cao</option>
+                                 <option value="day" selected="@(Context.Request.Query["type"] == "day" ? "true" : "false")">Theo ngày</option>
+                                 <option value="month" selected="@(Context.Request.Query["type"] == "month" ? "true" : "false")">Theo tháng</option>
+                                 <option value="quarter" selected="@(Context.Request.Query["type"] == "quarter" ? "true" : "false")">Theo quý</option>
+                                 <option value="range" selected="@(Context.Request.Query["type"] == "range" ? "true" : "false")">Nâng cao</option>
                             </select>
                         </div>
 
-                        <div class="col-md-3 filter-day">
+                        <div class="col-md-3 filter-day d-none">
+                            <label>Ngày</label>
+                            <input type="date" name="date" class="form-control" value="@Context.Request.Query["date"]" />
+                        </div>
+
+                        <div class="col-md-3 filter-month d-none">
                             <label>Tháng</label>
                             <select name="month" class="form-control">
                                 @for (int i = 1; i <= 12; i++)
                                 {
-                                    <option value="@i">@i</option>
+                                    <option value="@i" selected="@(Context.Request.Query["month"] == i.ToString() ? "true" : "false")">@i</option>
                                 }
                             </select>
+                        </div>
+
+                        <div class="col-md-2 filter-month d-none">
+                            <label>Năm</label>
+                            <input type="number" name="year" class="form-control" value="@(Context.Request.Query["year"].Count > 0 ? Context.Request.Query["year"].ToString() : DateTime.Now.Year.ToString())">
                         </div>
 
                         <div class="col-md-3 filter-quarter d-none">
                             <label>Quý</label>
                             <select name="quarter" class="form-control">
-                                <option value="1">Quý I</option>
-                                <option value="2">Quý II</option>
-                                <option value="3">Quý III</option>
-                                <option value="4">Quý IV</option>
+                                <option value="1" selected="@(Context.Request.Query["quarter"] == "1" ? "true" : "false")">Quý I</option>
+                                <option value="2" selected="@(Context.Request.Query["quarter"] == "2" ? "true" : "false")">Quý II</option>
+                                <option value="3" selected="@(Context.Request.Query["quarter"] == "3" ? "true" : "false")">Quý III</option>
+                                <option value="4" selected="@(Context.Request.Query["quarter"] == "4" ? "true" : "false")">Quý IV</option>
                             </select>
                         </div>
 
                          <div class="col-md-2 filter-quarter d-none">
                              <label>Năm</label>
-                             <input type="number" name="year" class="form-control" value="@DateTime.Now.Year">
+                             <input type="number" name="year" class="form-control" value="@(Context.Request.Query["year"].Count > 0 ? Context.Request.Query["year"].ToString() : DateTime.Now.Year.ToString())">
                          </div>
 
                         <div class="col-md-3 filter-range d-none">
                             <label>Từ ngày</label>
-                            <input type="date" name="fromDate" class="form-control" />
+                            <input type="date" name="fromDate" class="form-control" value="@Context.Request.Query["fromDate"]" />
                         </div>
 
                         <div class="col-md-3 filter-range d-none">
                             <label>Đến ngày</label>
-                            <input type="date" name="toDate" class="form-control" />
+                            <input type="date" name="toDate" class="form-control" value="@Context.Request.Query["toDate"]" />
                         </div>
 
                         <div class="col-md-2">
@@ -506,6 +516,7 @@
         document.querySelectorAll(".filter-range").forEach(x=>x.classList.remove("d-none"));
     }
 
+// Gọi updateFilter ngay khi load trang để hiển thị đúng filter
 updateFilter();
 
 type.onchange=updateFilter;
