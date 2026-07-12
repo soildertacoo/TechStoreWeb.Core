@@ -85,6 +85,7 @@ namespace TechStore.Controllers
                     if (existingOrder == null) return NotFound();
                     
                     existingOrder.Status = orderPro.Status;
+                    existingOrder.PaymentStatus = existingOrder.PaymentStatus != "Đã thanh toán" && orderPro.Status == "Đã giao" ? "Đã thanh toán" : existingOrder.PaymentStatus; // Giữ nguyên trạng thái thanh toán
                     db.Entry(existingOrder).State = EntityState.Modified;
                     db.SaveChanges();
                     return RedirectToAction("Index", "OrderPro");
@@ -244,7 +245,10 @@ namespace TechStore.Controllers
                     //Huy don tren GHN truc tiep hoac la don vi gi khac trong tuong lai                    
                     GhnShippingService ghn = new GhnShippingService(new HttpClient());
                     var provider = await db.ShippingProviders.FirstOrDefaultAsync(ship => ship.ProviderCode.Trim().ToLower() == "ghn");
-                    await ghn.cancelDVVC(item.ShippingCode, provider);
+                    if (provider !=null && item.ShippingCode != null && !string.IsNullOrEmpty(item.ShippingCode))
+                    {
+                        await ghn.cancelDVVC(item.ShippingCode, provider);
+                    }
                     await db.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }

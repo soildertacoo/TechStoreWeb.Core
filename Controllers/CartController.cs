@@ -187,28 +187,28 @@ namespace TechStore.Controllers
             
             bool isValid = true;
 
-            var nameCheck = ValidateName(cus.NameCus);
+            var nameCheck = ValidateName(model.Customers.NameCus);
             if (!nameCheck.IsValid) 
             { 
                 ModelState.AddModelError("Customers.NameCus", nameCheck.Error); // Thêm báo lỗi vào validation trong cshtml
                 isValid = false; 
             }
 
-            // var phoneCheck = ValidatePhoneNumber(cus.PhoneCus);
-            // if (!phoneCheck.IsValid) 
-            // { 
-            //     ModelState.AddModelError("Customers.PhoneCus", phoneCheck.Error); 
-            //     isValid = false; 
-            // }
+            var phoneCheck = ValidatePhoneNumber(model.Customers.PhoneCus);
+            if (!phoneCheck.IsValid) 
+            { 
+                ModelState.AddModelError("Customers.PhoneCus", phoneCheck.Error); 
+                isValid = false; 
+            }
 
-            var emailCheck = ValidateEmail(cus.EmailCus);
+            var emailCheck = ValidateEmail(model.Customers.EmailCus);
             if (!emailCheck.IsValid) 
             { 
                 ModelState.AddModelError("Customers.EmailCus", emailCheck.Error); 
                 isValid = false; 
             }
             //Join thành một địa chỉ hoàn chỉnh
-            string address = string.Join(", ", new[] { cus.StreetAddress, cus.Ward, cus.City }.Where(s => !string.IsNullOrWhiteSpace(s)));
+            string address = string.Join(", ", new[] { model.Customers.StreetAddress, model.Customers.Ward, model.Customers.City }.Where(s => !string.IsNullOrWhiteSpace(s)));
             var addressCheck = ValidateAddress(address);
             if (!addressCheck.IsValid) 
             { 
