@@ -261,6 +261,10 @@ namespace TechStoreWeb.Core.InventoryServices
             return result;
         }
 
+        //Tính lãi/lỗ cho một sản phẩm cụ thể
+        //Tính tổng doanh thu, giá vốn hàng bán, lợi nhuận gộp, tỷ suất lợi nhuận
+        //Hỗ trợ 3 phương pháp giá vốn: FIFO, LIFO, Weighted Average
+
         public async Task<ProfitLossResult> CalculateProductProfitLossAsync(
             int productId, 
             InventoryCostingMethod method = InventoryCostingMethod.FIFO)
@@ -295,6 +299,7 @@ namespace TechStoreWeb.Core.InventoryServices
             decimal grossProfit = totalRevenue - totalCostOfGoodsSold;
             decimal profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
 
+            //Chứa thông tin lãi/lỗ sản phẩm (tổng doanh thu, giá vốn, lợi nhuận gộp, tỷ suất lợi nhuận)
             return new ProfitLossResult
             {
                 ProductID = productId,
@@ -308,6 +313,8 @@ namespace TechStoreWeb.Core.InventoryServices
             };
         }
 
+        //Tính lãi/lỗ cho một sản phẩm trong khoảng thời gian cụ thể
+        //Lọc đơn hàng trong khoảng ngày startDate đến endDate
         public async Task<ProfitLossResult> CalculateProductProfitLossByDateRangeAsync(
             int productId, 
             DateTime startDate, 
@@ -370,6 +377,8 @@ namespace TechStoreWeb.Core.InventoryServices
             };
         }
 
+        //Tính lãi/lỗ định kỳ cho tất cả sản phẩm
+        //Tổng hợp doanh thu, giá vốn, lợi nhuận của nhiều sản phẩm
         public async Task<PeriodicProfitLossResult> CalculatePeriodicProfitLossAsync(
             DateTime startDate, 
             DateTime endDate, 
@@ -384,6 +393,7 @@ namespace TechStoreWeb.Core.InventoryServices
                 .Distinct()
                 .ToListAsync();
 
+            //Chứa thông tin lãi/lỗ định kỳ cho nhiều sản phẩm
             var result = new PeriodicProfitLossResult
             {
                 StartDate = startDate,
