@@ -188,7 +188,7 @@ namespace TechStore.Controllers
                     o.PaymentStatus,
                     od.IDProduct,
                     Quantity = od.Quantity ?? 0
-                })
+                })// điều kiện lọc PaymentStatus == "Đã thanh toán" vào revenueQuery
             .Where(x => x.DateOrder != null && x.PaymentStatus == "Đã thanh toán");
             switch(type)
             {
