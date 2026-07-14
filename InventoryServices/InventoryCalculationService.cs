@@ -274,7 +274,8 @@ namespace TechStoreWeb.Core.InventoryServices
                 throw new InvalidOperationException("Sản phẩm không tồn tại.");
 
             var orderDetails = await _dbTechStoreEntities.OrderDetails
-                .Where(od => od.IDProduct == productId)
+                .Include(od => od.OrderPro)
+                .Where(od => od.IDProduct == productId && od.OrderPro != null && od.OrderPro.PaymentStatus == "Đã thanh toán")
                 .ToListAsync();
 
             int totalUnitsSold = orderDetails.Sum(od => od.Quantity ?? 0);
@@ -329,6 +330,7 @@ namespace TechStoreWeb.Core.InventoryServices
                 .Include(od => od.OrderPro)
                 .Where(od => od.IDProduct == productId 
                     && od.OrderPro != null 
+                    && od.OrderPro.PaymentStatus == "Đã thanh toán"
                     && od.OrderPro.DateOrder >= startDate 
                     && od.OrderPro.DateOrder <= endDate)
                 .ToListAsync();
@@ -387,6 +389,7 @@ namespace TechStoreWeb.Core.InventoryServices
             var productIds = await _dbTechStoreEntities.OrderDetails
                 .Include(od => od.OrderPro)
                 .Where(od => od.OrderPro != null 
+                    && od.OrderPro.PaymentStatus == "Đã thanh toán"
                     && od.OrderPro.DateOrder >= startDate 
                     && od.OrderPro.DateOrder <= endDate)
                 .Select(od => od.IDProduct)

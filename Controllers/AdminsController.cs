@@ -185,10 +185,11 @@ namespace TechStore.Controllers
                 {
                     Subtotal = od.Subtotal ?? 0,
                     o.DateOrder,
+                    o.PaymentStatus,
                     od.IDProduct,
                     Quantity = od.Quantity ?? 0
                 })
-            .Where(x => x.DateOrder != null);
+            .Where(x => x.DateOrder != null && x.PaymentStatus == "Đã thanh toán");
             switch(type)
             {
                 case "day":
