@@ -174,7 +174,9 @@ namespace TechStore.Controllers
             int? quarter=null,
             int? year=null,
             DateTime? fromDate=null,
-            DateTime? toDate=null
+            DateTime? toDate=null,
+            string? orderStatus=null,
+            string? paymentMethod=null
         )
     {
         var revenueQuery = dBO.OrderDetails
@@ -186,10 +188,24 @@ namespace TechStore.Controllers
                     Subtotal = od.Subtotal ?? 0,
                     o.DateOrder,
                     o.PaymentStatus,
+                    o.Status,
+                    o.PaymentMethod,
                     od.IDProduct,
                     Quantity = od.Quantity ?? 0
                 })// điều kiện lọc PaymentStatus == "Đã thanh toán" vào revenueQuery
             .Where(x => x.DateOrder != null && x.PaymentStatus == "Đã thanh toán");
+
+        // Lọc theo trạng thái đơn hàng
+        if (!string.IsNullOrEmpty(orderStatus))
+        {
+            revenueQuery = revenueQuery.Where(x => x.Status == orderStatus);
+        }
+
+        // Lọc theo phương thức thanh toán
+        if (!string.IsNullOrEmpty(paymentMethod))
+        {
+            revenueQuery = revenueQuery.Where(x => x.PaymentMethod == paymentMethod);
+        }
             switch(type)
             {
                 case "day":

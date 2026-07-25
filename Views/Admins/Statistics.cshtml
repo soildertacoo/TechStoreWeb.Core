@@ -176,6 +176,27 @@
                             <input type="date" name="toDate" class="form-control" value="@Context.Request.Query["toDate"]" />
                         </div>
 
+                        <div class="col-md-3">
+                            <label>Trạng thái đơn</label>
+                            <select name="orderStatus" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Đang xử lý" selected="@(Context.Request.Query["orderStatus"] == "Đang xử lý" ? "true" : "false")">Đang xử lý</option>
+                                <option value="Đang giao" selected="@(Context.Request.Query["orderStatus"] == "Đang giao" ? "true" : "false")">Đang giao</option>
+                                <option value="Đã giao" selected="@(Context.Request.Query["orderStatus"] == "Đã giao" ? "true" : "false")">Đã giao</option>
+                                <option value="Hủy đơn" selected="@(Context.Request.Query["orderStatus"] == "Hủy đơn" ? "true" : "false")">Đã hủy</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Phương thức thanh toán</label>
+                            <select name="paymentMethod" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="COD" selected="@(Context.Request.Query["paymentMethod"] == "COD" ? "true" : "false")">Ship code (COD)</option>
+                                <option value="VNPAY" selected="@(Context.Request.Query["paymentMethod"] == "VNPAY" ? "true" : "false")">Thanh toán trực tuyến</option>
+                                <option value="Bank Transfer" selected="@(Context.Request.Query["paymentMethod"] == "Bank Transfer" ? "true" : "false")">Chuyển khoản</option>
+                            </select>
+                        </div>
+
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-info w-100">
                                 <i class="fas fa-filter"></i> Thống kê

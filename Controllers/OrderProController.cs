@@ -169,6 +169,293 @@ namespace TechStore.Controllers
             public string? status{get; set;}
             public string? paymentStatus{get; set;}
         }
+
+        // 1.5. Xử lý đơn hàng - Các action method mới theo yêu cầu
+        
+        // Xem tất cả đơn hàng theo khoảng thời gian
+        [HttpGet]
+        public ActionResult IndexByDateRange(DateTime? fromDate, DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            
+            return View("Index", list);
+        }
+
+        // Duyệt đơn hàng theo khoảng thời gian
+        [HttpGet]
+        public ActionResult ApproveOrders(DateTime? fromDate, DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            query = query.Where(o => o.Status == "Đang xử lý");
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.Title = "Duyệt Đơn Hàng";
+            
+            return View("Index", list);
+        }
+
+        // Phân công giao đơn hàng theo khoảng thời gian
+        [HttpGet]
+        public ActionResult AssignDelivery(DateTime? fromDate, DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            query = query.Where(o => o.Status == "Đã duyệt" || o.Status == "Đang xử lý");
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.Title = "Phân Công Giao Hàng";
+            
+            return View("Index", list);
+        }
+
+        // Xác nhận giao hàng
+        [HttpPost]
+        public ActionResult ConfirmDelivery(int orderId, string deliveryPerson)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+            
+            try
+            {
+                var order = db.OrderPro.FirstOrDefault(o => o.ID == orderId);
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+                
+                order.Status = "Đang giao";
+                // Có thể thêm trường DeliveryPerson vào model nếu cần
+                // order.DeliveryPerson = deliveryPerson;
+                
+                db.Entry(order).State = EntityState.Modified;
+                db.SaveChanges();
+                
+                return Json(new { success = true, message = "Đã xác nhận giao hàng" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        // Đơn hàng giao không thành công theo khoảng thời gian
+        [HttpGet]
+        public ActionResult FailedDelivery(DateTime? fromDate, DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            query = query.Where(o => o.Status == "Giao thất bại");
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.Title = "Đơn Hàng Giao Thất Bại";
+            
+            return View("Index", list);
+        }
+
+        // Đơn hàng giao thành công theo khoảng thời gian
+        [HttpGet]
+        public ActionResult SuccessfulDelivery(DateTime? fromDate, DateTime? toDate, bool? isCollected = null)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            query = query.Where(o => o.Status == "Đã giao");
+            
+            // Lọc theo đã thu tiền hoặc chưa thu tiền
+            if (isCollected.HasValue)
+            {
+                if (isCollected.Value)
+                    query = query.Where(o => o.PaymentStatus == "Đã thanh toán");
+                else
+                    query = query.Where(o => o.PaymentStatus == "Chưa thanh toán");
+            }
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.Title = isCollected == true ? "Đơn Giao Thành Công - Đã Thu Tiền" : 
+                           isCollected == false ? "Đơn Giao Thành Công - Chưa Thu Tiền" : "Đơn Giao Thành Công";
+            
+            return View("Index", list);
+        }
+
+        // Tất cả đơn hàng đã hủy theo khoảng thời gian
+        [HttpGet]
+        public ActionResult CancelledOrders(DateTime? fromDate, DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            query = query.Where(o => o.Status == "Hủy đơn" || o.Status == "Đã hủy");
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.Title = "Đơn Hàng Đã Hủy";
+            
+            return View("Index", list);
+        }
+
+        // Đơn hàng cần hủy theo khoảng thời gian
+        [HttpGet]
+        public ActionResult OrdersToCancel(DateTime? fromDate, DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            query = query.Where(o => o.Status == "Đang xử lý" || o.Status == "Đã duyệt");
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.Title = "Đơn Hàng Cần Hủy";
+            
+            return View("Index", list);
+        }
+
+        // Thu công nợ - đơn hàng giao thành công chưa thu tiền
+        [HttpGet]
+        public ActionResult CollectDebt(DateTime? fromDate, DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return RedirectToAction("Login", "Admins");
+            }
+            
+            var query = db.OrderPro.Include(o => o.Customer).AsQueryable();
+            query = query.Where(o => o.Status == "Đã giao" && o.PaymentStatus == "Chưa thanh toán");
+            
+            if (fromDate.HasValue)
+                query = query.Where(o => o.DateOrder >= fromDate);
+            
+            if (toDate.HasValue)
+                query = query.Where(o => o.DateOrder <= toDate);
+            
+            var list = query.OrderByDescending(o => o.DateOrder).ToList();
+            
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.Title = "Thu Công Nợ";
+            
+            return View("Index", list);
+        }
+
+        // Xác nhận thu tiền
+        [HttpPost]
+        public ActionResult ConfirmPayment(int orderId)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("admin")))
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+            
+            try
+            {
+                var order = db.OrderPro.FirstOrDefault(o => o.ID == orderId);
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+                
+                order.PaymentStatus = "Đã thanh toán";
+                db.Entry(order).State = EntityState.Modified;
+                db.SaveChanges();
+                
+                return Json(new { success = true, message = "Đã xác nhận thu tiền" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
         [HttpPost] 
         /*public async Task<IActionResult> Delete_KH([FromBody] JSONOrder data)
         {
