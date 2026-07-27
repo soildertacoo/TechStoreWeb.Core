@@ -45,7 +45,14 @@
                         <div>
                             <p class="mb-1 text-gray-500">Tổng doanh thu</p>
                             <h5 class="mb-0 font-weight-bold text-primary">
-                                @(((ViewBag.DataRevenue as List<decimal>)?.Sum())?.ToString("N0") ?? "0") ₫
+                                @if (ViewBag.TotalRevenue != null)
+                                {
+                                    @Convert.ToDecimal(ViewBag.TotalRevenue).ToString("N0") <text>₫</text>
+                                }
+                                else
+                                {
+                                    <text>0 ₫</text>
+                                }
                             </h5>
                         </div>
                     </div>

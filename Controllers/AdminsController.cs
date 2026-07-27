@@ -192,8 +192,12 @@ namespace TechStore.Controllers
                     o.PaymentMethod,
                     od.IDProduct,
                     Quantity = od.Quantity ?? 0
-                })// điều kiện lọc PaymentStatus == "Đã thanh toán" vào revenueQuery
-            .Where(x => x.DateOrder != null && x.PaymentStatus == "Đã thanh toán");
+                })
+            .Where(x => x.DateOrder != null);
+
+        // Debug: Kiểm tra tổng số lượng đơn hàng ban đầu
+        var totalOrders = revenueQuery.Count();
+        System.Diagnostics.Debug.WriteLine($"Tổng số lượng đơn hàng ban đầu: {totalOrders}");
 
         // Lọc theo trạng thái đơn hàng
         if (!string.IsNullOrEmpty(orderStatus))
@@ -206,6 +210,26 @@ namespace TechStore.Controllers
         {
             revenueQuery = revenueQuery.Where(x => x.PaymentMethod == paymentMethod);
         }
+
+        // Debug: Kiểm tra số lượng trước khi filter theo thời gian
+        System.Diagnostics.Debug.WriteLine($"Số lượng đơn hàng trước filter thời gian: {revenueQuery.Count()}");
+        System.Diagnostics.Debug.WriteLine($"Filter type: {type}");
+        System.Diagnostics.Debug.WriteLine($"Date: {date}");
+        System.Diagnostics.Debug.WriteLine($"Month: {month}, Year: {year}");
+        System.Diagnostics.Debug.WriteLine($"Quarter: {quarter}, Year: {year}");
+        System.Diagnostics.Debug.WriteLine($"FromDate: {fromDate}, ToDate: {toDate}");
+        
+        // Kiểm tra xem có filter thời gian nào không
+        bool hasTimeFilter = (type == "day" && date.HasValue) ||
+                            (type == "month" && month.HasValue && year.HasValue) ||
+                            (type == "quarter" && quarter.HasValue && year.HasValue) ||
+                            (type == "range" && fromDate.HasValue && toDate.HasValue);
+                            
+        if (!hasTimeFilter)
+        {
+            System.Diagnostics.Debug.WriteLine("Không có filter thời gian hợp lệ, lấy tất cả dữ liệu");
+        }
+        
             switch(type)
             {
                 case "day":
@@ -232,11 +256,16 @@ namespace TechStore.Controllers
                     break;
 
                 case "range":
-                    revenueQuery=revenueQuery.Where(x=>
-                     x.DateOrder.Value>=fromDate &&
-                     x.DateOrder.Value<=toDate);
+                    if (fromDate.HasValue && toDate.HasValue)
+                    {
+                        revenueQuery=revenueQuery.Where(x=>
+                         x.DateOrder.Value>=fromDate &&
+                         x.DateOrder.Value<=toDate);
+                    }
                 break;
             }
+
+        System.Diagnostics.Debug.WriteLine($"Số lượng đơn hàng sau filter thời gian: {revenueQuery.Count()}");
 
 
         // Doanh thu theo ngày
@@ -255,6 +284,32 @@ namespace TechStore.Controllers
 
         ViewBag.Labels = revenueOverTime.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
         ViewBag.DataRevenue = revenueOverTime.Select(d => d.TotalRevenue).ToList();
+        
+        // Tổng doanh thu - tính trực tiếp từ revenueQuery để đảm bảo chính xác
+        decimal totalRevenueDirect = (decimal)revenueQuery.Sum(x => x.Subtotal);
+        ViewBag.TotalRevenue = totalRevenueDirect;
+        
+        // Debug log
+        System.Diagnostics.Debug.WriteLine($"revenueOverTime.Count: {revenueOverTime.Count}");
+        System.Diagnostics.Debug.WriteLine($"ViewBag.TotalRevenue (from revenueOverTime): {(revenueOverTime.Any() ? revenueOverTime.Sum(d => d.TotalRevenue) : 0)}");
+        System.Diagnostics.Debug.WriteLine($"ViewBag.TotalRevenue (direct from query): {totalRevenueDirect}");
+        System.Diagnostics.Debug.WriteLine($"ViewBag.DataRevenue count: {(ViewBag.DataRevenue as List<decimal>)?.Count ?? 0}");
+        
+        // Debug: Kiểm tra từng giá trị trong DataRevenue
+        var dataRevList = ViewBag.DataRevenue as List<decimal>;
+        if (dataRevList != null)
+        {
+            for (int i = 0; i < dataRevList.Count; i++)
+            {
+                System.Diagnostics.Debug.WriteLine($"DataRevenue[{i}]: {dataRevList[i]}");
+            }
+        }
+        
+        // Đảm bảo DataRevenue luôn có giá trị (dù rỗng)
+        if (ViewBag.DataRevenue == null)
+        {
+            ViewBag.DataRevenue = new List<decimal>();
+        }
 
         
         // Tính toán lời lỗ theo ngày
