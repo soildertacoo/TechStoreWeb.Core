@@ -89,7 +89,7 @@ namespace TechStore.Controllers
         public async Task<ActionResult> CreateReview([FromBody] ReviewJSON data)
         {
             // 1. Kiểm tra đăng nhập
-            if (!User.Identity.IsAuthenticated)
+            if (User?.Identity == null || !User.Identity.IsAuthenticated)
             {
                 return Json(new { success = false, message = "Bạn phải đăng nhập mới đánh giá sản phẩm này được." });
             }

@@ -1,14 +1,14 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http; // Bắt buộc phải có cho Session
-using TechStore.Models;
-using ClosedXML.Excel;
 using System.Data;
 using  System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
+using ClosedXML.Excel;
+using Microsoft.AspNetCore.Http; // Bắt buộc phải có cho Session
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TechStore.Models;
 using TechStoreWeb.Core.PayModel;
 using TechStoreWeb.Core.ShippingServices;
 namespace TechStore.Controllers
@@ -151,13 +151,35 @@ namespace TechStore.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index_KH(int id)
+        public ActionResult Index_KH()
         {
+            // 1. Chặn đứng khách vãng lai
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("DangNhap", "User");
+            }
+
             if (TempData["Error"] != null)
             {
                 ViewBag.Error = (string)TempData["Error"];
             }
-            var list = db.OrderPro.Include(o => o.Customer).Where(s => s.IDCus == id).OrderByDescending(o => o.ID).ToList();
+
+            // 2. Tự động lấy tên khách hàng từ Cookie để đối chiếu (An toàn tuyệt đối)
+            string currentUsername = User.Identity.Name;
+            var customer = db.Customers.FirstOrDefault(c => c.NameCus == currentUsername);
+
+            if (customer == null) 
+            {
+                return RedirectToAction("DangNhap", "User");
+            }
+
+            // 3. Chỉ lấy đúng đơn hàng của khách hàng này
+            var list = db.OrderPro
+                        .Include(o => o.Customer)
+                        .Where(s => s.IDCus == customer.IDCus)
+                        .OrderByDescending(o => o.ID)
+                        .ToList();
+                        
             return View(list);
         }
         public class JSONOrder()
@@ -547,7 +569,38 @@ namespace TechStore.Controllers
                 }
             }
             return Json(new { success = true });
-        }   
+        }
+        // =====================================================================
+        // DÀNH CHO KHÁCH VÃNG LAI: TRA CỨU ĐƠN HÀNG BẰNG MÃ VẬN ĐƠN
+        // =====================================================================
+        [HttpGet]
+        public ActionResult TrackOrder()
+        {
+            return View(); 
+        }
+
+        [HttpPost]
+        public ActionResult TrackOrder(string trackingCode)
+        {
+            if (string.IsNullOrWhiteSpace(trackingCode))
+            {
+                ViewBag.Error = "Vui lòng nhập mã đơn hàng (Tracking Number)!";
+                return View();
+            }
+
+            // Tìm đơn hàng theo mã TrackingNumber
+            var order = db.OrderPro.FirstOrDefault(o => o.TrackingNumber == trackingCode.Trim());
+
+            if (order == null)
+            {
+                ViewBag.Error = "Không tìm thấy đơn hàng. Vui lòng kiểm tra lại mã!";
+                return View();
+            }
+
+            // Nếu tìm thấy, mượn luôn trang Details_KH để hiển thị chi tiết cho khách xem
+            return RedirectToAction("Details_KH", new { id = order.ID });
+        }
+        // =====================================================================   
         [HttpPost]
         //Nếu FormData trong view chuyền thì FromForm ngược lại thì FromBody
         public async Task<IActionResult> exportExcel([FromForm] JSONOrder data)

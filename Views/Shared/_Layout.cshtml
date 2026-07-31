@@ -1034,10 +1034,26 @@
                     }
                     else
                     {
-                        <a href="@Url.Action("DangNhap","User")" class="user-btn">
+                        
+                        // 1. Nút Tra cứu đơn hàng (Không cần đăng nhập) -->
+                        <a href="@Url.Action("TrackOrder", "OrderPro")" class="user-btn">
+                            <i class="fas fa-search-location" style="color: black"></i>
+                            <span style="color: black">Tra cứu đơn hàng</span>
+                        </a>
+
+                        // 2. Nút Đăng ký -->
+                        <a href="@Url.Action("DangKy", "User")" class="user-btn">
+                            <i class="fas fa-user-plus" style="color: black"></i>
+                            <span style="color: black">Đăng ký</span>
+                        </a>
+
+                        //3. Nút Đăng nhập (Ông đã có sẵn) -->
+                        <a href="@Url.Action("DangNhap", "User")" class="user-btn">
                             <i class="fas fa-sign-in-alt" style="color: black"></i>
                             <span style="color: black">Đăng nhập</span>
                         </a>
+                        
+                        //-- ======== KẾT THÚC SỬA ======== -->
                     }
                     
                     @await Html.PartialAsync(partialViewName: "~/Views/Cart/CartPartital.cshtml")

@@ -250,6 +250,18 @@
 
         <div class="pay-details">
             <h4><i class="fas fa-receipt me-2"></i>Chi tiết giao dịch</h4>
+            
+            <!-- 1. ĐÃ THÊM: Hiển thị Mã đơn hàng nổi bật ở đây -->
+            @if (ViewBag.TrackingNumber != null)
+            {
+                <div class="pay-detail-row">
+                    <span>Mã đơn hàng</span>
+                    <span class="fw-bold text-primary fs-5" style="letter-spacing: 1px;">
+                        @ViewBag.TrackingNumber
+                    </span>
+                </div>
+            }
+
             <div class="pay-detail-row">
                 <span>Mã phản hồi</span>
                 <span>@rspCode</span>
@@ -270,7 +282,9 @@
             <a href="@Url.Action("Index", "Home")" class="pay-btn pay-btn-primary">
                 <i class="fas fa-home"></i> Về trang chủ
             </a>
-            @if (isSuccess)
+            
+            <!-- 2. ĐÃ SỬA: Chỉ hiện nút "Xem đơn hàng" cho Khách đã đăng nhập (VIP) -->
+            @if (isSuccess && User.Identity != null && User.Identity.IsAuthenticated)
             {
                 <a href="@Url.Action("ThongTinCaNhan", "User")" class="pay-btn pay-btn-ghost">
                     <i class="fas fa-receipt"></i> Xem đơn hàng

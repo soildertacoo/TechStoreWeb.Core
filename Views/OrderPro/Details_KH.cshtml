@@ -77,12 +77,22 @@
                 <div class="card-body p-4">
                     <div class="row g-4">
                         <div class="col-md-6 border-end">
-                            <h6 class="text-uppercase fw-bold text-muted mb-3"><i class="fas fa-user-circle me-2 text-primary"></i>Thông tin người nhận</h6>
-                            <h5 class="fw-bold text-dark mb-2">@Html.DisplayFor(model => model.OrderPro.Customer.NameCus)</h5>
-                            <p class="text-muted mb-0 lh-lg">
-                                <i class="fas fa-map-marker-alt text-secondary me-2"></i> @Html.DisplayFor(model => model.OrderPro.AddressDeliverry)<br>
-                                <i class="fas fa-phone-alt text-secondary me-2"></i> @(string.IsNullOrEmpty(Model.OrderPro.Customer.PhoneCus) ? "Chưa cập nhật" : Model.OrderPro.Customer.PhoneCus)
-                            </p>
+                               <h6 class="text-uppercase fw-bold text-muted mb-3"><i class="fas fa-user-circle me-2 text-primary"></i>Thông tin người nhận</h6>
+    
+                                <!-- Ưu tiên 1: Lấy tên từ đơn hàng mới (NameDeliverry) -->
+                                <!-- Ưu tiên 2: Nếu không có (đơn cũ của khách VIP), lấy thẳng tên từ tài khoản Customer -->
+                                <!-- Ưu tiên 3: Nếu vẫn không có nữa thì mới hiển thị "Khách vãng lai" -->
+                                <h5 class="fw-bold text-dark mb-2">
+                                    @(Model.OrderPro.NameDeliverry ?? Model.OrderPro.Customer?.NameCus ?? "Khách vãng lai")
+                                </h5>
+                                
+                                <p class="text-muted mb-0 lh-lg">
+                                    <i class="fas fa-map-marker-alt text-secondary me-2"></i> @Html.DisplayFor(model => model.OrderPro.AddressDeliverry)<br>
+                                    
+                                    <!-- Tương tự cho Số điện thoại -->
+                                    <i class="fas fa-phone-alt text-secondary me-2"></i> 
+                                    @(Model.OrderPro.PhoneDeliverry ?? Model.OrderPro.Customer?.PhoneCus ?? "Chưa cung cấp")
+                                </p>
                         </div>
                         <div class="col-md-6 ps-md-4">
                             <h6 class="text-uppercase fw-bold text-muted mb-3"><i class="fas fa-shipping-fast me-2 text-info"></i>Thông tin giao hàng</h6>
@@ -185,8 +195,14 @@
                     {
                         <div class="mt-4 pt-3 border-top border-light text-center">
                             <a class="btn btn-outline-dark rounded-pill px-4 fw-bold w-100" id="idSupport" 
-                               href="@Url.Action("IndexSupport", "Contact", new { idOrder = Model.OrderPro.ID, namecus = Model.OrderPro.Customer.NameCus, email = Model.OrderPro.Customer.EmailCus, phone = Model.OrderPro.Customer.PhoneCus, trackingNumber = Model.OrderPro.TrackingNumber })">
-                               <i class="fas fa-headset me-2"></i> Yêu cầu hỗ trợ
+                            href="@Url.Action("IndexSupport", "Contact", new { 
+                                idOrder = Model.OrderPro.ID, 
+                                namecus = Model.OrderPro.NameDeliverry ?? "Khách vãng lai", 
+                                email = Model.OrderPro.Customer?.EmailCus ?? "", 
+                                phone = Model.OrderPro.PhoneDeliverry ?? "", 
+                                trackingNumber = Model.OrderPro.TrackingNumber 
+                                })">
+                                <i class="fas fa-headset me-2"></i> Yêu cầu hỗ trợ
                             </a>
                         </div>
                     }

@@ -1,0 +1,132 @@
+@{
+    ViewBag.Title = "Tra cứu đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- CSS THEO CHUẨN TRANG CHECKOUT CỦA ÔNG --- */
+    body {
+        background-color: #f3f4f6;
+    }
+    
+    .track-page {
+        padding: 80px 0;
+        min-height: 75vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .track-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        padding: 50px 40px;
+        width: 100%;
+        max-width: 550px;
+        text-align: center;
+        border: 1px solid #f3f4f6;
+    }
+
+    .track-icon {
+        font-size: 56px;
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+    }
+
+    .track-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 12px;
+    }
+
+    .track-desc {
+        color: #6b7280;
+        margin-bottom: 35px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .form-control-modern {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px 20px;
+        font-size: 1.1rem;
+        width: 100%;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+        text-align: center;
+        letter-spacing: 1.5px;
+        color: #1f2937;
+        font-weight: 600;
+        background: #f9fafb;
+    }
+
+    .form-control-modern:focus {
+        border-color: #3b82f6;
+        outline: none;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+
+    .form-control-modern::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+        letter-spacing: normal;
+    }
+
+    .btn-track {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 16px 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-track:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+</style>
+
+<div class="track-page">
+    <div class="track-card">
+        <i class="fas fa-shipping-fast track-icon"></i>
+        <h1 class="track-title">Tra cứu đơn hàng</h1>
+        <p class="track-desc">Để kiểm tra tình trạng đơn hàng, vui lòng nhập <strong>Mã vận đơn (Tracking Number)</strong> mà chúng tôi đã cung cấp lúc đặt hàng.</p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger" style="border-radius: 10px; text-align: left; font-size: 0.95rem; margin-bottom: 25px;">
+                <i class="fas fa-exclamation-circle me-2"></i> @ViewBag.Error
+            </div>
+        }
+
+        <!-- Bắt đầu form tra cứu -->
+        @using (Html.BeginForm("TrackOrder", "OrderPro", FormMethod.Post))
+        {
+            <input type="text" name="trackingCode" class="form-control-modern" placeholder="Nhập mã vận đơn (VD: AB12C3D4)" required autocomplete="off" />
+            <button type="submit" class="btn-track">
+                <i class="fas fa-search"></i> Kiểm tra tình trạng đơn
+            </button>
+        }
+        
+        <div style="margin-top: 25px; font-size: 0.85rem; color: #9ca3af;">
+            <i class="fas fa-info-circle me-1"></i> Mọi thắc mắc vui lòng liên hệ bộ phận CSKH
+        </div>
+    </div>
+</div>

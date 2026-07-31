@@ -199,15 +199,13 @@ namespace TechStore.Controllers
         }
         public ActionResult ThongTinCaNhan()
         {
-            string? session = HttpContext.Session.GetString("DaDangNhap") != null ?  
-            HttpContext.Session.GetString("DaDangNhap") : User.Identity.Name;
-
-            if (session == null)
+           // Cánh cửa thép: Khách vãng lai bay màu ngay lập tức
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("DangNhap");
             }
             
-            string name = session;
+            string name = User.Identity.Name;
             ViewBag.Error = (string?)TempData["Loi"];
             var customer = dbO_Cus.Customers.FirstOrDefault(s => s.NameCus == name);            
             

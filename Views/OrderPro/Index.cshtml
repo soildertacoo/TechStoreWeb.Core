@@ -134,8 +134,14 @@
                                         @(string.IsNullOrEmpty(item.TrackingNumber) ? "DH" + item.ID : item.TrackingNumber)
                                     </a>
                                 </td>
-                                <td>
-                                    <div class="font-weight-bold">@item.Customer.NameCus</div>
+                               <td>
+                                    <div class="font-weight-bold">
+                                        @(item.Customer != null && !string.IsNullOrEmpty(item.Customer.NameCus) ? item.Customer.NameCus : "Khách vãng lai")
+                                    </div>
+                                    @if (item.Customer == null)
+                                    {
+                                        <div class="small text-muted"><i class="fa fa-info-circle"></i> Không có tài khoản</div>
+                                    }
                                 </td>
                                 <td><span class="text-muted">@item.DateOrder</span></td>
                                 <td class="text-center">
@@ -306,10 +312,12 @@
                             *@
                             @{
                                 var uniqueCustomerNames = Model
+                                     .Where(x => x.Customer != null) // Lọc bỏ mấy đơn vãng lai ra trước
                                     .Select(x => x.Customer?.NameCus)
                                     .Where(name => !string.IsNullOrEmpty(name))
                                     .Distinct();
                             }
+                            <option value="Khách vãng lai">-- Chỉ xuất đơn Khách vãng lai --</option>
 
                             @foreach (var name in uniqueCustomerNames)
                             {

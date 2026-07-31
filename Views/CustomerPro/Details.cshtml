@@ -880,31 +880,46 @@ body { font-family: 'Inter', sans-serif; }
             <!-- Write review -->
             <div class="dp-write-review">
                 <h3 class="dp-write-title">Chia sẻ trải nghiệm của bạn</h3>
-                <form id="reviewForm" class="row g-3">
-                    <input type="hidden" id="editReviewId" value="0"/>
-                    <div class="col-12">
-                        <label class="dp-desc-label mb-2">Đánh giá sao</label>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <div class="dp-star-input" id="ratingInput">
-                                <i class="fas fa-star" data-rating="1"></i>
-                                <i class="fas fa-star" data-rating="2"></i>
-                                <i class="fas fa-star" data-rating="3"></i>
-                                <i class="fas fa-star" data-rating="4"></i>
-                                <i class="fas fa-star" data-rating="5"></i>
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <!-- KHÁCH THÂN THIẾT: Hiển thị form đánh giá -->
+                    <form id="reviewForm" class="row g-3">
+                        <input type="hidden" id="editReviewId" value="0"/>
+                        <div class="col-12">
+                            <label class="dp-desc-label mb-2">Đánh giá sao</label>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div class="dp-star-input" id="ratingInput">
+                                    <i class="fas fa-star" data-rating="1"></i>
+                                    <i class="fas fa-star" data-rating="2"></i>
+                                    <i class="fas fa-star" data-rating="3"></i>
+                                    <i class="fas fa-star" data-rating="4"></i>
+                                    <i class="fas fa-star" data-rating="5"></i>
+                                </div>
+                                <span id="ratingText" style="font-size:13px;color:#9ca3af;">Chưa chọn</span>
                             </div>
-                            <span id="ratingText" style="font-size:13px;color:#9ca3af;">Chưa chọn</span>
                         </div>
+                        <div class="col-12">
+                            <label class="dp-desc-label mb-2">Nội dung đánh giá</label>
+                            <textarea id="reviewContent" class="dp-form-input" rows="4" placeholder="Sản phẩm này như thế nào? Hãy chia sẻ nhé..."></textarea>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end">
+                            <button type="submit" class="dp-btn dp-btn-primary btn-submit-review" style="grid-column:auto;width:auto;padding:12px 28px;">
+                                <i class="fas fa-paper-plane"></i> Gửi đánh giá
+                            </button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <!-- KHÁCH VÃNG LAI: Ẩn form, hiện thông báo yêu cầu đăng nhập -->
+                    <div class="text-center py-4" style="background: #fff; border: 1px dashed #d1d5db; border-radius: 10px;">
+                        <i class="fas fa-lock mb-2" style="font-size: 24px; color: #9ca3af;"></i>
+                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">Bạn cần đăng nhập để có thể viết đánh giá cho sản phẩm này.</p>
+                        <a href="@Url.Action("DangNhap", "User")" class="dp-btn dp-btn-secondary" style="font-size: 13px; padding: 8px 20px;">
+                            Đăng nhập ngay
+                        </a>
                     </div>
-                    <div class="col-12">
-                        <label class="dp-desc-label mb-2">Nội dung đánh giá</label>
-                        <textarea id="reviewContent" class="dp-form-input" rows="4" placeholder="Sản phẩm này như thế nào? Hãy chia sẻ nhé..."></textarea>
-                    </div>
-                    <div class="col-12 d-flex justify-content-end">
-                        <button type="submit" class="dp-btn dp-btn-primary btn-submit-review" style="grid-column:auto;width:auto;padding:12px 28px;">
-                            <i class="fas fa-paper-plane"></i> Gửi đánh giá
-                        </button>
-                    </div>
-                </form>
+                }
             </div>
 
             <!-- Review list -->

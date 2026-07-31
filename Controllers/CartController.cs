@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http; // Bắt buộc cho Session
-using TechStore.Models;
-using TechStoreWeb.Core.Helpers;
-using TechStoreWeb.Core.PayModel;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Identity.Client;
-using Microsoft.AspNetCore.WebUtilities; // Nơi chứa SessionExtensions
-using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Text.Json;
-using System.Net.Http;
-using TechStoreWeb.Core.ShippingServices;
-using TechStore.Models.ModelShipping;
-using System.Runtime.InteropServices.Marshalling;
+using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Office.CustomUI;
+using Microsoft.AspNetCore.Http; // Bắt buộc cho Session
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities; // Nơi chứa SessionExtensions
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Identity.Client;
+using TechStore.Models;
+using TechStore.Models.ModelShipping;
+using TechStoreWeb.Core.Helpers;
+using TechStoreWeb.Core.PayModel;
+using TechStoreWeb.Core.ShippingServices;
 namespace TechStore.Controllers
 {
     public class CartController : Controller
@@ -48,8 +48,23 @@ namespace TechStore.Controllers
         public List<CartItem> GetCart()
         {
             // Lấy từ DB ra + tên người dùng dùng giở hàng đó
-            string? userLogged = User.Identity.IsAuthenticated ? User.Identity.Name : "" ;
+            string userLogged = GetCartIdentifier();
             return _context.CartItems.Where(x => x.userLogged == userLogged).ToList() ?? new List<CartItem>();
+        }
+        private string GetCartIdentifier()
+        {
+            // Nếu là khách VIP, dùng luôn Username
+            if (User.Identity != null && User.Identity.IsAuthenticated) 
+                return User.Identity.Name;
+            
+            // Nếu là khách vãng lai, cấp cho họ một mã Session ngẫu nhiên
+            string? cartId = HttpContext.Session.GetString("GuestCartId");
+            if (string.IsNullOrEmpty(cartId))
+            {
+                cartId = Guid.NewGuid().ToString();
+                HttpContext.Session.SetString("GuestCartId", cartId);
+            }
+            return cartId;
         }
 
         // Lưu giỏ hàng vào Session sau khi thay đổi
@@ -130,7 +145,7 @@ namespace TechStore.Controllers
                     ImagePro = addPro.ImagePro,
                     Price = addPro.Price,
                     Number = quantity,
-                    userLogged = User.Identity.IsAuthenticated ? User.Identity.Name : "" 
+                    userLogged = GetCartIdentifier()
                 };
             }
             else //Có thì cập nhật lên 
@@ -148,24 +163,29 @@ namespace TechStore.Controllers
         public ActionResult PaymentCart()
         {
 
-            string ? usermodel = User?.Identity?.Name?.ToString();
-            if (usermodel == null) return RedirectToAction("DangNhap", "User");
-            var cus = db.Customers.FirstOrDefault(s => s.NameCus == usermodel);
-            if (cus == null) return RedirectToAction("DangNhap", "User");
-
             List<CartItem> myCart = GetCart();
             if (!myCart.Any()) return RedirectToAction("ShowCart");
 
-            
-            //var providers =  db.ShippingProviders.Where(item => item.IsActive).ToList();
-            var providers = new List<ShippingProviders>();
-            ViewBag.Total = TotalMoney();
             var checkout = new Payment
             {
                 mycart = myCart,
-                Customers = cus,
-                Providers = providers
+                Providers = new List<ShippingProviders>()
             };
+            ViewBag.Total = TotalMoney();
+
+            // KIỂM TRA PHÂN LUỒNG
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                // Khách VIP: Lấy thông tin từ DB để auto-fill vào form
+                var cus = db.Customers.FirstOrDefault(s => s.NameCus == User.Identity.Name);
+                if (cus != null) checkout.Customers = cus;
+            }
+            else
+            {
+                // Khách vãng lai: Tạo object rỗng để form tự gõ
+                checkout.Customers = new Customer(); 
+            }
+
             return View(checkout);
         }
 
@@ -177,14 +197,10 @@ namespace TechStore.Controllers
             List<CartItem> myCart = GetCart();
             if (!myCart.Any()) return RedirectToAction("Index","Home");
 
+           // 1. XOÁ CHẶN ĐĂNG NHẬP: Lấy thông tin tài khoản nếu có, không có thì để null (Khách vãng lai)
             string? usermodel = User?.Identity?.Name;
-            if (string.IsNullOrEmpty(usermodel)) 
-                return RedirectToAction("DangNhap", "User");
+            var cus = string.IsNullOrEmpty(usermodel) ? null : db.Customers.FirstOrDefault(s => s.NameCus == usermodel);
 
-            var cus = db.Customers.FirstOrDefault(s => s.NameCus == usermodel);
-            if (cus == null) 
-                return RedirectToAction("DangNhap", "User");
-            
             bool isValid = true;
 
             var nameCheck = ValidateName(model.Customers.NameCus);
@@ -219,7 +235,8 @@ namespace TechStore.Controllers
 
             if (!isValid) 
             {
-                var checkout = new Payment { mycart = myCart, Customers = cus };
+                // 2. SỬA CHỖ NÀY: Dùng model.Customers (data khách vừa gõ) thay vì cus (bị null với khách vãng lai)
+                var checkout = new Payment { mycart = myCart, Customers = model.Customers };
                 ViewBag.Total = TotalMoney();
                 return View(checkout);
             }
@@ -235,17 +252,21 @@ namespace TechStore.Controllers
                 try
                 {
                     decimal? shippingCost = TotalMoney() * 0.05m;
-                    int idCus = cus.IDCus;
+                    int? idCus = cus?.IDCus; // Sẽ mang giá trị null nếu là khách vãng lai
                      //Tạo đối tượng VIP mới có sẵn 
-                    if (db.VIPCustomers.FirstOrDefault(s => s.IDCus == idCus) == null)
+                    // 3. CHỈ TẠO/CỘNG ĐIỂM VIP CHO KHÁCH CÓ TÀI KHOẢN
+                    if (idCus.HasValue) 
                     {
-                        VIPCustomer vipCus = new VIPCustomer
+                        if (db.VIPCustomers.FirstOrDefault(s => s.IDCus == idCus.Value) == null)
                         {
-                        IDCus = idCus,
-                        NameCus = cus.NameCus
-                        };
-                        db.VIPCustomers.Add(vipCus);
-                        await db.SaveChangesAsync(); 
+                            VIPCustomer vipCus = new VIPCustomer
+                            {
+                                IDCus = idCus.Value,
+                                NameCus = cus.NameCus
+                            };
+                            db.VIPCustomers.Add(vipCus);
+                            await db.SaveChangesAsync(); 
+                        }
                     }
                     
                     var order = new OrderPro
@@ -254,12 +275,16 @@ namespace TechStore.Controllers
                         DateOrder = DateTime.Now,
                         TotalAmount = TotalMoney() + shippingCost,
                         Status = "Đang xử lý",
-                        PaymentMethod = isCardPayment == true ? "Thanh toán qua thẻ ngân hàng" : "Thanh toán khi nhận hàng",
+                        PaymentMethod = isCardPayment ? "Thanh toán qua thẻ ngân hàng" : "Thanh toán khi nhận hàng",
                         TrackingNumber = trackingNumber,
-                        AddressDeliverry = address,
-                        DeliveryDate = DateTime.Now.AddDays(8),
                         ShippingCost = shippingCost,
-                        PaymentStatus =  "Chưa thanh toán"
+                        PaymentStatus = "Chưa thanh toán",
+                        DeliveryDate = DateTime.Now.AddDays(8),
+                        
+                        // Gán 3 trường thông tin cho GHN
+                        AddressDeliverry = address,
+                        NameDeliverry = model.Customers.NameCus,    // Tên lấy trực tiếp từ form khách gõ
+                        PhoneDeliverry = model.Customers.PhoneCus   // SĐT lấy trực tiếp từ form khách gõ
                     };
 
                     db.OrderPro.Add(order);
@@ -298,7 +323,8 @@ namespace TechStore.Controllers
                         //Chạy thanh toán vnpay
                         return VnPayCheckout(trackingNumber,cartSUM);
                     }
-
+                    // BẮN MÃ ĐƠN HÀNG SANG VIEW CHO ĐƠN TIỀN MẶT
+                    ViewBag.TrackingNumber = trackingNumber;
                     return View("PaymentSuccess", new { RspCode = "00", Message = "Confirm Success" }); //Thanh toan bang tien mat
                 }
                 catch (Exception ex)
@@ -320,6 +346,7 @@ namespace TechStore.Controllers
         {
             string rspCode = "";
             string message = "";
+            string orderId = ""; // THÊM DÒNG NÀY Ở ĐÂY
             
             if (Request.Query.Count > 0)
             {
@@ -358,7 +385,7 @@ namespace TechStore.Controllers
                 }
 
                 // 2. Trích xuất dữ liệu
-                string orderId = vnpay.GetResponseData("vnp_TxnRef");
+                orderId = vnpay.GetResponseData("vnp_TxnRef");
                 long vnp_Amount = Convert.ToInt64(vnpay.GetResponseData("vnp_Amount")); 
                 long vnpayTranId = Convert.ToInt64(vnpay.GetResponseData("vnp_TransactionNo"));
                 string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
@@ -433,6 +460,11 @@ namespace TechStore.Controllers
                 rspCode = "99"; 
                 message = "Thanh toán chưa được thực hiện";
             }
+            // BẮN MÃ ĐƠN HÀNG SANG VIEW CHO ĐƠN VNPAY
+                if (!string.IsNullOrEmpty(orderId))
+                {
+                    ViewBag.TrackingNumber = orderId;
+                }
 
             return View(new { RspCode = rspCode, Message = message });
         }
