@@ -1,4 +1,4 @@
-﻿@model TechStore.Models.Payment
+﻿@model TechStore.Models.PaymentModel
 @{
     ViewBag.Title = "Thanh toán đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -341,7 +341,7 @@
                             <i class="fas fa-id-card"></i> Thông tin giao hàng
                         </div>
                         
-                        @Html.HiddenFor(model => model.Customers.IDCus)
+                        @Html.HiddenFor(model => model.Payment.Customers.IDCus)
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
@@ -355,39 +355,39 @@
                         }
                         
                         <div class="form-group-modern">
-                            @Html.LabelFor(model => model.Customers.NameCus, "Họ và tên", new { @class = "form-label-modern" })
-                            @Html.TextBoxFor(model => model.Customers.NameCus, new { @class = "form-control-modern", placeholder = "Nhập họ và tên người nhận" })
-                            @Html.ValidationMessageFor(model => model.Customers.NameCus, "", new { @class = "text-danger" })
+                            @Html.LabelFor(model => model.Payment.Customers.NameCus, "Họ và tên", new { @class = "form-label-modern" })
+                            @Html.TextBoxFor(model => model.Payment.Customers.NameCus, new { @class = "form-control-modern", placeholder = "Nhập họ và tên người nhận" })
+                            @Html.ValidationMessageFor(model => model.Payment.Customers.NameCus, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="row-grid-2">
                             <div class="form-group-modern">
-                                @Html.LabelFor(model => model.Customers.PhoneCus, "Số điện thoại", new { @class = "form-label-modern" })
-                                @Html.TextBoxFor(model => model.Customers.PhoneCus, new { @class = "form-control-modern", placeholder = "09xx xxx xxx" })
-                                @Html.ValidationMessageFor(model => model.Customers.PhoneCus, "", new { @class = "text-danger" })
+                                @Html.LabelFor(model => model.Payment.Customers.PhoneCus, "Số điện thoại", new { @class = "form-label-modern" })
+                                @Html.TextBoxFor(model => model.Payment.Customers.PhoneCus, new { @class = "form-control-modern", placeholder = "09xx xxx xxx" })
+                                @Html.ValidationMessageFor(model => model.Payment.Customers.PhoneCus, "", new { @class = "text-danger" })
                             </div>
 
                             <div class="form-group-modern">
-                                @Html.LabelFor(model => model.Customers.EmailCus, "Địa chỉ Email", new { @class = "form-label-modern" })
-                                @Html.TextBoxFor(model => model.Customers.EmailCus, new { @class = "form-control-modern", placeholder = "email@domain.com" })
-                                @Html.ValidationMessageFor(model => model.Customers.EmailCus, "", new { @class = "text-danger" })
+                                @Html.LabelFor(model => model.Payment.Customers.EmailCus, "Địa chỉ Email", new { @class = "form-label-modern" })
+                                @Html.TextBoxFor(model => model.Payment.Customers.EmailCus, new { @class = "form-control-modern", placeholder = "email@domain.com" })
+                                @Html.ValidationMessageFor(model => model.Payment.Customers.EmailCus, "", new { @class = "text-danger" })
                             </div>
                         </div>
 
                         <div class="form-group-modern">
-                            @Html.LabelFor(model => model.Customers.StreetAddress, "Địa chỉ chi tiết (Số nhà, Đường)", new { @class = "form-label-modern" })
-                            @Html.TextBoxFor(model => model.Customers.StreetAddress, new { @class = "form-control-modern", placeholder = "Ví dụ: 123 Đường Lê Lợi" })
-                            @Html.ValidationMessageFor(model => model.Customers.StreetAddress, "", new { @class = "text-danger" })
+                            @Html.LabelFor(model => model.Payment.Customers.StreetAddress, "Địa chỉ chi tiết (Số nhà, Đường)", new { @class = "form-label-modern" })
+                            @Html.TextBoxFor(model => model.Payment.Customers.StreetAddress, new { @class = "form-control-modern", placeholder = "Ví dụ: 123 Đường Lê Lợi" })
+                            @Html.ValidationMessageFor(model => model.Payment.Customers.StreetAddress, "", new { @class = "text-danger" })
                         </div>
                             
                         <div class="row-grid-2">
                             <div class="form-group-modern">
-                                @Html.LabelFor(model => model.Customers.City, "Tỉnh/Thành phố", new { @class = "form-label-modern" })
+                                @Html.LabelFor(model => model.Payment.Customers.City, "Tỉnh/Thành phố", new { @class = "form-label-modern" })
                                 <div class="input-icon-wrapper">
-                                    <select id="province" name="Customers.City" class="form-control-modern" required>
-                                        @if (!string.IsNullOrEmpty(Model.Customers.City))
+                                    <select id="province" name="Payment.Customers.City" class="form-control-modern" required>
+                                        @if (!string.IsNullOrEmpty(Model.Payment.Customers.City))
                                         {
-                                            <option value="@Model.Customers.City" selected>@Model.Customers.City</option>
+                                            <option value="@Model.Payment.Customers.City" selected>@Model.Payment.Customers.City</option>
                                         }
                                         else
                                         {
@@ -396,16 +396,16 @@
                                     </select>
                                     <i class="fas fa-map-marker-alt input-icon"></i>
                                 </div>
-                                @Html.ValidationMessageFor(model => model.Customers.City, "", new { @class = "text-danger" })
+                                @Html.ValidationMessageFor(model => model.Payment.Customers.City, "", new { @class = "text-danger" })
                             </div>
 
                             <div class="form-group-modern">
-                                @Html.LabelFor(model => model.Customers.Ward, "Phường/Xã/Quận", new { @class = "form-label-modern" })
+                                @Html.LabelFor(model => model.Payment.Customers.Ward, "Phường/Xã/Quận", new { @class = "form-label-modern" })
                                 <div class="input-icon-wrapper">
-                                    <select id="ward" name="Customers.Ward" class="form-control-modern" required>
-                                        @if (!string.IsNullOrEmpty(Model.Customers.Ward))
+                                    <select id="ward" name="Payment.Customers.Ward" class="form-control-modern" required>
+                                        @if (!string.IsNullOrEmpty(Model.Payment.Customers.Ward))
                                         {
-                                            <option value="@Model.Customers.Ward" selected>@Model.Customers.Ward</option>
+                                            <option value="@Model.Payment.Customers.Ward" selected>@Model.Payment.Customers.Ward</option>
                                         }
                                         else
                                         {
@@ -414,7 +414,7 @@
                                     </select>
                                     <i class="fas fa-building input-icon"></i>
                                 </div>
-                                @Html.ValidationMessageFor(model => model.Customers.Ward, "", new { @class = "text-danger" })
+                                @Html.ValidationMessageFor(model => model.Payment.Customers.Ward, "", new { @class = "text-danger" })
                             </div>
                         </div>
                     </div> 
@@ -429,7 +429,7 @@
                         
                         <!-- List Sản phẩm -->
                         <div class="cart-item-list">
-                            @foreach (var item in Model.mycart)
+                            @foreach (var item in Model.Payment.mycart)
                             {
                                 <div class="cart-item">
                                     <div class="cart-item-info">
@@ -447,7 +447,7 @@
                         <!-- Phương thức thanh toán -->
                         <div class="payment-method-select form-group-modern">
                             <label class="form-label-modern">Phương thức thanh toán</label>
-                            @Html.DropDownListFor(model => model.Order.PaymentMethod, new SelectList(new List<SelectListItem>
+                            @Html.DropDownListFor(model => model.Payment.Order.PaymentMethod, new SelectList(new List<SelectListItem>
                             {
                                 new SelectListItem { Text = "Thanh toán tiền mặt khi nhận hàng (COD)", Value = "2" },
                                 new SelectListItem { Text = "Thanh toán trực tuyến (VNPAY/Thẻ)", Value = "1" }
@@ -459,16 +459,19 @@
                             
                             <select class="form-control-modern" id="methodSelect" required>
                                 <option value="" disabled selected>Chọn phương thức vận chuyển</option>
-                                @foreach (var method in Model.ShippingMethods)
+                                @foreach (var method in Model.Payment.ShippingMethods)
                                 {
                                     <option value="@method.ShippingCost">@method.MethodName - @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", method.ShippingCost)</option>
                                 }
                             </select>
                         </div>
-                        <div class="form-group-modern">
-                            <button type="button" class="btn btn-outline-primary" onclick="openVoucher()">Chọn Voucher</button>
-                        </div>
-                        <span asp-validation-for="@Model.Order.ShippingCost" class="text-danger"></span>
+                       @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <div class="form-group-modern">
+                                <button type="button" class="btn btn-outline-primary" onclick="openVoucher()">Chọn Voucher</button>
+                            </div>
+                        }
+                        <span asp-validation-for="@Model.Payment.Order.ShippingCost" class="text-danger"></span>
                             <!-- Khung Tổng Tiền -->
                         <div class="total-box">
                             <div class="total-title">Tổng thanh toán</div>
@@ -478,7 +481,8 @@
                                 Phí vận chuyển: <span id="shippingCostDisplay">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", 0)</span>
                             </div>
                         </div>
-                        <input type="hidden" id="hiddenShippingCost" name="Order.ShippingCost" value="" required />
+                        <input type="hidden" id="hiddenShippingCost" name="Payment.Order.ShippingCost" value="" required />
+                        <input type="hidden" id="hiddenShippingVoucher" name="voucherShipID" value="" />
                         <!-- Nút Submit -->
                         <button type="submit" class="btn-submit-order">
                             <i class="fas fa-check-circle"></i> Đặt hàng ngay
@@ -611,7 +615,7 @@
                 const provinceSelect = document.getElementById('province');
                 const wardSelect = document.getElementById('ward');
                 
-                const currentCity = '@Html.Raw(Model.Customers.City)';
+                const currentCity = '@Html.Raw(Model.Payment.Customers.City)';
                 
                 data.forEach(p => {
                     const opt = document.createElement("option");

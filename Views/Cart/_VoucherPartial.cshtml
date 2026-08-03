@@ -177,7 +177,7 @@
 
     // Khai báo biến toàn cục để lưu % giảm giá ship
     window.currentShippingDiscount = 0;
-
+    window.storeShipID = document.getElementById('hiddenShippingVoucher');
     function chooseVoucher(element, voucherId, discountPercentage) {
         const allCards = document.querySelectorAll('.voucher-card');
         allCards.forEach(card => card.classList.remove('selected-active'));
@@ -196,7 +196,8 @@
 
             // Lưu % giảm vào biến toàn cục
             window.currentShippingDiscount = discountPercentage;
-            
+            window.storeShipID.value = voucherId;
+            console.log("Da luu ma ship" + window.storeShipID.value );
             // Kích hoạt lại sự kiện 'change' trên ô chọn Ship để hệ thống tự tính lại tiền
             selectMethod.dispatchEvent(new Event('change'));
             
@@ -207,7 +208,7 @@
                 timer: 2000,
                 showConfirmButton: false
             });
-            
+        
             closeVoucher(); // Đóng modal
             return;
         }

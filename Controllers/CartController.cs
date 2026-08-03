@@ -168,33 +168,37 @@ namespace TechStore.Controllers
             var shipMethod = new List<ShippingMethod>();
             if (!myCart.Any()) return RedirectToAction("ShowCart");
 
-            var checkout = new Payment
+            var payment = new Payment
             {
                 mycart = myCart,
                 Providers = new List<ShippingProviders>(),
                 Order = new OrderPro(),
                 ShippingMethods = new List<ShippingMethod>()
             };
+            var checkout = new PaymentModel {
+                
+                Payment = payment
+            };
             ViewBag.Total = TotalMoney();
             //Lay phuong thuc van chuyen 
             var provider = _context.ShippingProviders.FirstOrDefault( s => s.IsActive == true);
             if (provider != null)
             {
-                if (provider.PriceFast > 0) checkout.ShippingMethods.Add(new ShippingMethod() {MethodName = "Nhanh", ShippingCost = provider.PriceFast});
-                if (provider.PriceExpress > 0) checkout.ShippingMethods.Add(new ShippingMethod() {MethodName = "Hoả tốc", ShippingCost = provider.PriceExpress});
-                if (provider.PriceStandard > 0) checkout.ShippingMethods.Add(new ShippingMethod() {MethodName = "Tiêu chuẩn ", ShippingCost = provider.PriceStandard});
+                if (provider.PriceFast > 0) checkout.Payment.ShippingMethods.Add(new ShippingMethod() {MethodName = "Nhanh", ShippingCost = provider.PriceFast});
+                if (provider.PriceExpress > 0) checkout.Payment.ShippingMethods.Add(new ShippingMethod() {MethodName = "Hoả tốc", ShippingCost = provider.PriceExpress});
+                if (provider.PriceStandard > 0) checkout.Payment.ShippingMethods.Add(new ShippingMethod() {MethodName = "Tiêu chuẩn ", ShippingCost = provider.PriceStandard});
             }
             // KIỂM TRA PHÂN LUỒNG
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 // Khách VIP: Lấy thông tin từ DB để auto-fill vào form
                 var cus = db.Customers.FirstOrDefault(s => s.NameCus == User.Identity.Name);
-                if (cus != null) checkout.Customers = cus;
+                if (cus != null) checkout.Payment.Customers = cus;
             }
             else
             {
                 // Khách vãng lai: Tạo object rỗng để form tự gõ
-                checkout.Customers = new Customer(); 
+                checkout.Payment.Customers = new Customer(); 
             }
             return View(checkout);
         }
@@ -278,14 +282,13 @@ namespace TechStore.Controllers
                 {
                     // Tăng tổng số lượng đã dùng của Voucher
                     voucher.isUsedLength = (voucher.isUsedLength ?? 0) + 1;
-                    
                     // 4. LƯU LỊCH SỬ SỬ DỤNG: Đánh dấu user này đã dùng voucher này
-                    _context.UsedPromotions.Add(new UsedPromotion 
-                    {
-                        PromotionID = voucher.PromotionID,
-                        IDCus = currentCustomerId,
-                        UsedDate = DateTime.Now
-                    });
+                    // _context.UsedPromotions.Add(new UsedPromotion 
+                    // {
+                    //     PromotionID = voucher.PromotionID,
+                    //     IDCus = currentCustomerId,
+                    //     UsedDate = DateTime.Now
+                    // });
 
                     hasChanges = true;
                 }
@@ -316,7 +319,7 @@ namespace TechStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken] 
-        public async Task<IActionResult> PaymentCart(Payment model)
+        public async Task<IActionResult> PaymentCart(PaymentModel model)
         {
             // 
             List<CartItem> myCart = GetCart();
@@ -328,55 +331,58 @@ namespace TechStore.Controllers
 
             bool isValid = true;
 
-            var nameCheck = ValidateName(model.Customers.NameCus);
+            var nameCheck = ValidateName(model.Payment.Customers.NameCus);
             if (!nameCheck.IsValid) 
             { 
-                ModelState.AddModelError("Customers.NameCus", nameCheck.Error); // Thêm báo lỗi vào validation trong cshtml
+                ModelState.AddModelError("Payment.Customers.NameCus", nameCheck.Error); // Thêm báo lỗi vào validation trong cshtml
                 isValid = false; 
             }
 
-            var phoneCheck = ValidatePhoneNumber(model.Customers.PhoneCus);
+            var phoneCheck = ValidatePhoneNumber(model.Payment.Customers.PhoneCus);
             if (!phoneCheck.IsValid) 
             { 
-                ModelState.AddModelError("Customers.PhoneCus", phoneCheck.Error); 
+                ModelState.AddModelError("Payment.Customers.PhoneCus", phoneCheck.Error); 
                 isValid = false; 
             }
 
-            var emailCheck = ValidateEmail(model.Customers.EmailCus);
+            var emailCheck = ValidateEmail(model.Payment.Customers.EmailCus);
             if (!emailCheck.IsValid) 
             { 
-                ModelState.AddModelError("Customers.EmailCus", emailCheck.Error); 
+                ModelState.AddModelError("Payment.Customers.EmailCus", emailCheck.Error); 
                 isValid = false; 
             }
             //Join thành một địa chỉ hoàn chỉnh
-            string address = string.Join(", ", new[] { model.Customers.StreetAddress, model.Customers.Ward, model.Customers.City }.Where(s => !string.IsNullOrWhiteSpace(s)));
+            string address = string.Join(", ", new[] { model.Payment.Customers.StreetAddress, model.Payment.Customers.Ward, model.Payment.Customers.City }.Where(s => !string.IsNullOrWhiteSpace(s)));
             var addressCheck = ValidateAddress(address);
             if (!addressCheck.IsValid) 
             { 
                
-                ModelState.AddModelError("Customers.StreetAddress", addressCheck.Error); 
+                ModelState.AddModelError("Payment.Customers.StreetAddress", addressCheck.Error); 
                 isValid = false; 
             }
 
             if (!isValid) 
             {
-                // 2. SỬA CHỖ NÀY: Dùng model.Customers (data khách vừa gõ) thay vì cus (bị null với khách vãng lai)
-                var checkout = new Payment { mycart = myCart, Customers = model.Customers };
+                var userPayment = new Payment { mycart = myCart, Customers = model.Payment.Customers };
                 ViewBag.Total = TotalMoney();
+                var checkout = new PaymentModel {
+                    Payment = userPayment,
+                    voucherShipID = null
+                };
                 return View(checkout);
             }
 
             
             //Xử lý thanh toán tiền mặt, vnPay
             string trackingNumber = GenerateTrackingNumber();
-            bool isCardPayment = model.Order?.PaymentMethod == "1";
+            bool isCardPayment = model.Payment.Order?.PaymentMethod == "1";
 
             // XỬ LÝ LƯU DATABASE VỚI TRANSACTION Nếu là thanh toán bằng tiền mặt 
             using (var transaction = db.Database.BeginTransaction())
             {
                 try
                 {
-                    decimal? shippingCost = model.Order.ShippingCost; // Nếu ShippingCost là null, mặc định là 0
+                    decimal? shippingCost = model.Payment.Order.ShippingCost; // Nếu ShippingCost là null, mặc định là 0
                     int? idCus = cus?.IDCus; // Sẽ mang giá trị null nếu là khách vãng lai
                      //Tạo đối tượng VIP mới có sẵn 
                     // 3. CHỈ TẠO/CỘNG ĐIỂM VIP CHO KHÁCH CÓ TÀI KHOẢN
@@ -408,8 +414,8 @@ namespace TechStore.Controllers
                         
                         // Gán 3 trường thông tin cho GHN
                         AddressDeliverry = address,
-                        NameDeliverry = model.Customers.NameCus,    // Tên lấy trực tiếp từ form khách gõ
-                        PhoneDeliverry = model.Customers.PhoneCus   // SĐT lấy trực tiếp từ form khách gõ
+                        NameDeliverry = model.Payment.Customers.NameCus,    // Tên lấy trực tiếp từ form khách gõ
+                        PhoneDeliverry = model.Payment.Customers.PhoneCus   // SĐT lấy trực tiếp từ form khách gõ
                     };
 
                     db.OrderPro.Add(order);
@@ -441,6 +447,20 @@ namespace TechStore.Controllers
                     decimal? cartSUM = order.TotalAmount;
                     db.CartItems.RemoveRange(myCart);
                     await createOrderProvider(order);
+                    //Kiểm tra cớ ID Voucher Ship ko 
+                    if (model.voucherShipID != null){
+                        //Tim voucher co ship hay ko
+                        var voucher = _context.Promotions.FirstOrDefault(c => c.PromotionID == model.voucherShipID);
+                        if (voucher == null) throw new Exception("Du co ID Voucher Ship nhung tiec lai ko tim ra");
+                        voucher.isUsedLength = (voucher.isUsedLength ?? 0) + 1;
+                        // // LƯU LỊCH SỬ SỬ DỤNG: Đánh dấu user này đã dùng voucher này
+                        _context.UsedPromotions.Add(new UsedPromotion 
+                        {
+                            PromotionID = voucher.PromotionID,
+                            IDCus = model.Payment.Customers.IDCus,
+                            UsedDate = DateTime.Now
+                        });
+                    }
                     await db.SaveChangesAsync(); 
                     transaction.Commit();
 
@@ -458,8 +478,8 @@ namespace TechStore.Controllers
                     transaction.Rollback();
                     Console.WriteLine("DB_ERROR_CART:" + ex.Message);
                     ViewBag.ErrorPayment = "Đặt hàng không thành công: Vui lòng thử lại sau."; // Ẩn ex.Message với người dùng thực tế
-                    model.mycart = myCart;
-                    model.Customers = cus;
+                    model.Payment.mycart = myCart;
+                    model.Payment.Customers = cus;
                     ViewBag.Total = TotalMoney();
                     return View(model);
                 }
