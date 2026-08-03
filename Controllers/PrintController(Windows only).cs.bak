@@ -1,15 +1,15 @@
-﻿using System;
+﻿using SelectPdf;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks; 
+using System.Threading.Tasks; // Thêm thư viện này để chạy bất đồng bộ
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore; // Thêm thư viện này để dùng .Include()
 using TechStore.Models;
-using PuppeteerSharp; // BƯỚC QUAN TRỌNG: Đổi sang dùng PuppeteerSharp
 
 namespace TechStore.Controllers
 {
@@ -19,6 +19,7 @@ namespace TechStore.Controllers
         private readonly ICompositeViewEngine _viewEngine;
         private readonly ITempDataProvider _tempDataProvider;
 
+        // BƯỚC 1: Tiêm DbContext và các công cụ Render View của .NET Core vào Constructor
         public PrintController(
             DBTechStoreEntities dbContext, 
             ICompositeViewEngine viewEngine, 
@@ -30,6 +31,7 @@ namespace TechStore.Controllers
         }
 
         // GET: Print
+        // Đổi thành hàm bất đồng bộ (async Task) vì render trong .NET Core bắt buộc là async
         public async Task<ActionResult> HTML2PDF_Order(string FileName, int idOrder, string viewName= "OrderInvoice")
         {
             var model = GetHoaDonModelByOrderId(idOrder);
@@ -38,32 +40,22 @@ namespace TechStore.Controllers
             // Render view html truc tiep sang string 
             string html = await RenderViewToStringAsync(viewName, model);
             
-            // --- SỬ DỤNG PUPPETEERSHARP ĐỂ XUẤT PDF ---
-            
-            // 1. Tải bản Chromium giả lập về máy (Chỉ mất thời gian ở lần chạy ĐẦU TIÊN)
-            var browserFetcher = new BrowserFetcher();
-            await browserFetcher.DownloadAsync();
+            HtmlToPdf converter = new HtmlToPdf();
+            PdfDocument doc = converter.ConvertHtmlString(html);
 
-            // 2. Khởi động trình duyệt ẩn
-            using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
-            
-            // 3. Mở tab mới và nhét code HTML vào
-            using var page = await browser.NewPageAsync();
-            await page.SetContentAsync(html);
-
-            // 4. Kết xuất ra mảng byte PDF
-            byte[] pdf = await page.PdfDataAsync();
-            
+            byte[] pdf = doc.Save();
+            doc.Close();
             return File(pdf, "application/pdf", FileName);
         }
 
-        // Hàm chuyen view html sang string (Giữ nguyên của bạn)
+        //  hàm chuyen view html sang string 
         private async Task<string> RenderViewToStringAsync(string viewName, object model)
         {
             ViewData.Model = model;
 
             using (var sw = new StringWriter())
             {
+                // Tìm file giao diện (.cshtml)
                 var viewResult = _viewEngine.FindView(ControllerContext, viewName, false);
 
                 if (viewResult.View == null)
@@ -76,6 +68,7 @@ namespace TechStore.Controllers
                     Model = model
                 };
 
+                // Cấu hình môi trường giả lập để vẽ HTML
                 var viewContext = new ViewContext(
                     ControllerContext,
                     viewResult.View,
@@ -90,9 +83,9 @@ namespace TechStore.Controllers
             }
         }
 
-        // Hàm lấy dữ liệu (Giữ nguyên của bạn)
         public HoaDonModel GetHoaDonModelByOrderId(int orderId)
         {
+       
             var order = db.OrderPro.Include(o => o.Customer).FirstOrDefault(o => o.ID == orderId);
             if (order == null) return null;
 
@@ -102,7 +95,7 @@ namespace TechStore.Controllers
             {
                 ID = order.ID,
                 TrackingNumber = order.TrackingNumber,
-                CustomerName = order.Customer?.NameCus, 
+                CustomerName = order.Customer?.NameCus, // Dùng ?. cho an toàn
                 AddressDeliverry = order.AddressDeliverry,
                 DateOrder = order.DateOrder,
                 DeliveryDate = order.DeliveryDate,
@@ -113,7 +106,7 @@ namespace TechStore.Controllers
                 ShippingCost = order.ShippingCost,
                 Products = OrderDetails.Select(od => new HoaDonProductsModel
                 {
-                    ProductsName = od.Products?.NamePro, 
+                    ProductsName = od.Products?.NamePro, // Dùng ?. cho an toàn
                     ImagePro = od.Products?.ImagePro,
                     UnitPrice = (double)od.UnitPrice,
                     Quantity = (int)od.Quantity
