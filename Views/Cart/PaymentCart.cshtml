@@ -478,7 +478,7 @@
                             <div class="total-amount">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", ViewBag.Total)</div>
                             <!-- PHÍ VẬN CHUYỂN -->
                             <div class="shipping-cost">
-                                Phí vận chuyển: <span id="shippingCostDisplay">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", 0)</span>
+                                + <span id="shippingCostDisplay">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", 0)</span>
                             </div>
                         </div>
                         <input type="hidden" id="hiddenShippingCost" name="Payment.Order.ShippingCost" value="" required />

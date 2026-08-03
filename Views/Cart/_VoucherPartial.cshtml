@@ -339,32 +339,45 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ voucherList: selectedVouchers })
             });
-            const responseData = await response.json();
-            
-            if (responseData.success) {
-                alert("Áp dụng Voucher thành công!");
+            const responsedCart = await response.json();
+            console.log("=== DỮ LIỆU SERVER TRẢ VỀ ===", responsedCart);
+            if (responsedCart.success) {
+                alert(responsedCart.message);
                 //Load lai gio hang moi 
                 const productsContainer = document.querySelector(".cart-item-list");
                 let htmlContent = '';
-                responseData.data.forEach(item => {
-                    htmlContent += `
-                        <div class="cart-item">
-                                    <div class="cart-item-info">
-                                        <div class="cart-item-name">${item.namePro}</div>
-                                        <div class="cart-item-meta">Số lượng: <strong>${item.number}</strong></div>
-                                        <div class="cart-item-meta">Đã giảm: <strong>${responseData.discount}%</strong></div>
+                const listCart = responsedCart.cartupdated || responsedCart.Cartupdated || responsedCart.CartUpdated;
+        
+            if (!listCart) {
+                console.error("Không tìm thấy biến cartupdated trong JSON!");
+                throw new Error("Dữ liệu giỏ hàng bị mất kết nối.");
+            }
+            if (listCart.length === 0) {
+                console.warn("Giỏ hàng trống!");
+                productsContainer.innerHTML = "<p>Giỏ hàng của bạn đang trống.</p>";
+                return; 
+            }
+            const discounted = responsedCart.discount;
+            // 4. CHẠY VÒNG LẶP TRÊN BIẾN ĐÃ ĐƯỢC BẢO VỆ
+            listCart.forEach(item => {
+                htmlContent += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <!-- Lưu ý: Nếu listCart bị viết Hoa, có thể item.namePro cũng bị C# đổi thành item.NamePro -->
+                            <div class="cart-item-name">${item.namePro || item.NamePro}</div>
+                            <div class="cart-item-meta">Số lượng: <strong>${item.number || item.Number}</strong></div>
+                            <div class="cart-item-meta">Đã giảm: <strong>${discounted} %</strong></div>
 
-                                    </div>
-                                    <div class="cart-item-price-wrapper">
-                                        <div class="cart-item-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)} VND</div>
-                                    </div>
                         </div>
-                        `;
-                });
+                        <div class="cart-item-price-wrapper">
+                            <div class="cart-item-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price || item.Price)}</div>
+                        </div>
+                    </div>
+                `});
                 productsContainer.innerHTML = htmlContent;
                 closeVoucher();
             } else {
-                alert("Áp dụng Voucher thất bại: " + responseData.message);
+                alert("Áp dụng Voucher thất bại: " + responsedCart.message);
             }
         } catch (error) {
             console.error('Lỗi khi áp dụng Voucher:', error);

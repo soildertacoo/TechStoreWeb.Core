@@ -297,7 +297,6 @@ namespace TechStore.Controllers
             if (hasChanges)
             {
                 await _context.SaveChangesAsync(); 
-                return Json(new { success = true, message = "Áp dụng voucher thành công!" });
             }
             else
             {
@@ -312,9 +311,20 @@ namespace TechStore.Controllers
             }
             
             //Lay lai danh sách giỏ hàng sau khi áp dụng voucher
-            var updatedCart = _context.CartItems.Where(c => c.userLogged == GetCartIdentifier()).ToList();
+            //var updatedCart = _context.CartItems.Where(c => c.userLogged.Trim() == GetCartIdentifier().Trim()).ToList();
+
+        // DA FIX LOI 
+            var updatedCart = _context.CartItems
+                            .Where(c => c.userLogged == GetCartIdentifier())
+                            .Select(c => new 
+                            {
+                                NamePro = c.NamePro, 
+                                Number = c.Number,
+                                Price = c.Price 
+                            })
+                            .ToList();      
             // Trả về kết quả
-            return Json(new { success = true, message = "Áp dụng voucher thành công", discount = totalDiscount, data = updatedCart });
+            return Json(new { success = true, cartupdated = updatedCart, discount = totalDiscount ,message = "Áp dụng voucher thành công" });
         }
 
         [HttpPost]

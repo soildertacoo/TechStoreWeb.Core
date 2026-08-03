@@ -95,7 +95,7 @@
                                 <label class="form-check-label fw-semibold text-secondary" for="checkStandard">Giao Chậm</label>
                             </div>
                             <div class="input-group input-group-sm">
-                                @Html.EditorFor(model => model.PriceStandard, new { htmlAttributes = new { @class = "form-control", placeholder = "0", type="number" } })
+                                @Html.EditorFor(model => model.PriceStandard, new { htmlAttributes = new { @class = "form-control", placeholder = "0", type="number" , oninput = "formatCurrency(this, 'hiddenPriceStandard')", id="hiddenPriceStandard"} })
                                 <span class="input-group-text fw-semibold text-muted bg-white">đ</span>
                             </div>
                         </div>
@@ -107,10 +107,10 @@
                         <div class="card-body p-3">
                             <div class="form-check custom-checkbox mb-2">
                                 @Html.CheckBoxFor(model => model.SupportFast, new { @class = "form-check-input", @id = "checkFast" })
-                                <label class="form-check-label fw-semibold text-primary" for="checkFast">Giao hoa toc</label>
+                                <label class="form-check-label fw-semibold text-primary" for="checkFast">Giao hoả tốc</label>
                             </div>
                             <div class="input-group input-group-sm">
-                                @Html.EditorFor(model => model.PriceFast, new { htmlAttributes = new { @class = "form-control", placeholder = "0", type="number" } })
+                                @Html.EditorFor(model => model.PriceFast, new { htmlAttributes = new { @class = "form-control", placeholder = "0", type="number",oninput = "formatCurrency(this, 'hiddenPriceStandard')",id="hiddenPriceStandard" } })
                                 <span class="input-group-text fw-semibold text-muted bg-white">đ</span>
                             </div>
                         </div>
@@ -125,7 +125,7 @@
                                 <label class="form-check-label fw-bold text-danger" for="checkExpress">Nhanh</label>
                             </div>
                             <div class="input-group input-group-sm">
-                                @Html.EditorFor(model => model.PriceExpress, new { htmlAttributes = new { @class = "form-control", placeholder = "0", type="number" } })
+                                @Html.EditorFor(model => model.PriceExpress, new { htmlAttributes = new { @class = "form-control", placeholder = "0", type="number" , oninput = "formatCurrency(this, 'hiddenPriceStandard')",id="hiddenPriceStandard"} })
                                 <span class="input-group-text fw-semibold text-muted bg-white">đ</span>
                             </div>
                         </div>
@@ -144,3 +144,21 @@
         </div>
     }
 </div>
+<script>
+function formatCurrency(inputElement, hiddenInputId) {
+            // 1. Lọc rác: Loại bỏ tất cả chữ cái và dấu chấm cũ, CHỈ giữ lại số
+            let rawValue = inputElement.value.replace(/[^0-9]/g, '');
+            
+            // 2. Đổ số "sạch" (VD: 1000000) vào ô input bị ẩn để chuẩn bị gửi về C#
+            // Nếu người dùng xóa trắng, mặc định gán là 0 để C# không bị lỗi
+            document.getElementById(hiddenInputId).value = rawValue || 0;
+            
+            // 3. Format lại chuỗi số vừa nhập (Thêm dấu chấm cứ mỗi 3 chữ số)
+            if (rawValue) {
+                // Biểu thức Regex này tự động chèn dấu chấm theo chuẩn Việt Nam
+                inputElement.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            } else {
+                inputElement.value = "";
+            }
+}
+</script>
