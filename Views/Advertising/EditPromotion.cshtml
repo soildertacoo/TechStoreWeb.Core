@@ -16,56 +16,104 @@
     <div class="card-body p-4">
         <form asp-action="EditPromotion">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <span>
+                @if (ViewBag.LoiChinhVoucher != null)
+                {
+                    <div class="alert alert-danger">
+                        <strong>Lỗi:</strong> @ViewBag.LoiChinhVoucher
+                    </div>
+                }
+            </span>
+            <!-- Bắt buộc phải có thẻ hidden chứa ID để update đúng bản ghi -->
             <input type="hidden" asp-for="PromotionID" />
 
             <div class="row">
+                <!-- CỘT TRÁI -->
                 <div class="col-md-6">
                     <div class="form-group mb-3">
-                        <label asp-for="Name" class="control-label font-weight-bold"></label>
+                        <label asp-for="Name" class="control-label font-weight-bold">Tên chương trình khuyến mãi</label>
                         <input asp-for="Name" class="form-control" />
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="DiscountPercentage" class="control-label font-weight-bold"></label>
-                        <div class="input-group">
-                            <input asp-for="DiscountPercentage" class="form-control" type="number" step="0.01" />
-                            <div class="input-group-append">
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
-                        <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Description" class="control-label font-weight-bold"></label>
+                        <label asp-for="Description" class="control-label font-weight-bold">Mô tả chi tiết</label>
                         <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="DiscountPercentage" class="control-label font-weight-bold">Phần trăm giảm (%)</label>
+                            <div class="input-group">
+                                <input asp-for="DiscountPercentage" class="form-control" type="number" step="0.01" min="0" max="100" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="VoucherLength" class="control-label font-weight-bold">Số lượng Voucher</label>
+                            <input asp-for="VoucherLength" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="VoucherLength" class="text-danger"></span>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- CỘT PHẢI -->
                 <div class="col-md-6">
+                    
                     <div class="form-group mb-3">
-                        <label asp-for="StartDate" class="control-label font-weight-bold"></label>
-                        <input asp-for="StartDate" class="form-control" type="date" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
-                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                        <label asp-for="TypeVoucher" class="control-label font-weight-bold">Loại voucher</label>
+                        <select asp-for="TypeVoucher" class="form-control" required>
+                            <option value="" disabled>--Chọn loại voucher--</option>
+                            <option value="Product">Sản phẩm</option>
+                            <option value="Ship">Giảm tiền Ship</option>
+                        </select>
+                        <span asp-validation-for="TypeVoucher" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="EndDate" class="control-label font-weight-bold"></label>
-                        <input asp-for="EndDate" class="form-control" type="date" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
-                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                        <label asp-for="ApplyProduct" class="control-label font-weight-bold">Áp dụng cho Sản phẩm</label>
+                        <select asp-for="ApplyProduct" class="form-control" asp-items="@(new SelectList(ViewBag.ProductID, "ProductID", "NamePro"))">
+                            <option value="">-- Tất cả sản phẩm --</option>
+                        </select>
+                        <span asp-validation-for="ApplyProduct" class="text-danger"></span>
                     </div>
 
-                    <div class="form-group form-check mt-4">
-                        <label class="form-check-label">
+                    <div class="form-group mb-3">
+                        <label asp-for="ApplyCategory" class="control-label font-weight-bold">Hoặc áp dụng Ngành hàng</label>
+                        <select asp-for="ApplyCategory" class="form-control" asp-items="@(new SelectList(ViewBag.CategoryID, "IDCate","NameCate"))">
+                            <option value="">-- Tất cả ngành hàng --</option>
+                        </select>
+                        <span asp-validation-for="ApplyCategory" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="StartDate" class="control-label font-weight-bold">Ngày bắt đầu</label>
+                            <input asp-for="StartDate" class="form-control" type="date" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="EndDate" class="control-label font-weight-bold">Ngày kết thúc</label>
+                            <input asp-for="EndDate" class="form-control" type="date" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-check mt-3">
+                        <label class="form-check-label font-weight-bold">
                             <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
                         </label>
                     </div>
                 </div>
             </div>
 
-            <div class="form-group mt-4 border-top pt-3">
+            <div class="form-group mt-4 border-top pt-4 text-right">
                 <button type="submit" class="btn btn-primary px-4 py-2">
                     <i class="fas fa-save mr-1"></i> Lưu thay đổi
                 </button>

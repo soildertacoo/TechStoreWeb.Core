@@ -22,6 +22,11 @@
                 <th>Giảm giá (%)</th>
                 <th>Thời gian</th>
                 <th>Trạng thái</th>
+                <th>Áp dụng cho sản phẩm</th>
+                <th>Áp dụng cho ngành hàng</th>
+                <th>Số lượng</th>
+                <th>Mức độ ưu tiên</th>
+                <th>Loại Voucher</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -46,6 +51,28 @@
                             else { <span class="badge badge-success">Đang diễn ra</span> }
                         }
                     </td>
+                    <td>@(item.ApplyProduct != null ? item.Products?.NamePro : "Tất cả sản phẩm")</td>
+                    <td>@(item.ApplyCategory?.Trim() == "ALL" ? "Tất cả ngành hàng" : item.Category1?.NameCate)</td>
+                    <td>@item.RemainLength</td>
+                    <td>
+                     @if (item.PriorityLength == 1)
+                        {
+                            <span class="badge bg-secondary">Thấp</span>
+                        }
+                        else if (item.PriorityLength == 2)
+                        {
+                            <span class="badge bg-info">Trung bình</span>
+                        }
+                        else if (item.PriorityLength == 3)
+                        {
+                            <span class="badge bg-warning">Cao</span>
+                        }
+                        else 
+                        {
+                            <span class="badge bg-danger">Rất cao</span>
+                        }
+                    </td>
+                    <td>@item.TypeVoucher</td>
                     <td>
                         <div class="btn-group">
                             <a asp-action="PromotionDetails" asp-route-id="@item.PromotionID" class="btn btn-sm btn-primary" title="Chi tiết">

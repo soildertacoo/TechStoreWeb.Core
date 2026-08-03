@@ -16,6 +16,8 @@ namespace TechStore.Models
         public string? ImagePro { get; set; }
         public decimal Price { get; set; }
         public int Number { get; set; }
+        public string? Category {get;set;}
+
         //Tính FinalPrice = Price * Number
         public decimal FinalPrice()
         {

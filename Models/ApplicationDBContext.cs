@@ -33,12 +33,27 @@ namespace TechStore.Models
         public virtual DbSet<OTPModel> OTPModels { get; set; }
         public virtual DbSet<LoveProducts> LoveProducts { get; set; }
         public virtual DbSet<VIPCustomer> VIPCustomers { get; set; }
-
+        public virtual DbSet<UsedPromotion> UsedPromotions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<UsedPromotion>()
+        .HasKey(up => new { up.PromotionID, up.IDCus });
+
+            // 2. Cấu hình Khóa ngoại trỏ về bảng Promotion
+            modelBuilder.Entity<UsedPromotion>()
+                .HasOne(up => up.Promotion)
+                .WithMany(p => p.UsedPromotions) // Đảm bảo bảng Promotion có ICollection<UsedPromotion>
+                .HasForeignKey(up => up.PromotionID);
+
+            // 3. Cấu hình Khóa ngoại trỏ về bảng Customer
+            modelBuilder.Entity<UsedPromotion>()
+                .HasOne(up => up.Customer)
+                .WithMany(c => c.UsedPromotions) // Đảm bảo bảng Customer có ICollection<UsedPromotion>
+                .HasForeignKey(up => up.IDCus);
             
             modelBuilder.Entity<Products>()
                 .HasOne(p => p.Category1) 
@@ -68,6 +83,9 @@ namespace TechStore.Models
             //     .ToTable("OrderPro",tb => tb.HasTrigger("trg_AutoUpgradeVIP"));
                 modelBuilder.Entity<OrderPro>()
                 .ToTable(tb => tb.UseSqlOutputClause(false));
+
+                modelBuilder.Entity<Promotion>().ToTable(tb => tb.UseSqlOutputClause(false));
+
 
             modelBuilder.Entity<InventoryMovement>()
                 .HasOne(m => m.Product)

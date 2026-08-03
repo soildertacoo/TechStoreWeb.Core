@@ -1,0 +1,386 @@
+<style>
+    /* --- CSS MODAL CHIA 2 CỘT (GIỐNG ẢNH) --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        display: none;
+        align-items: center; justify-content: center;
+        z-index: 999999;
+    }
+
+    .voucher-modal-box {
+        background: white;
+        width: 90%;
+        max-width: 900px;
+        height: 75vh;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        display: flex;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* SIDEBAR BÊN TRÁI */
+    .voucher-sidebar {
+        width: 250px;
+        background: #f8f9fc;
+        padding: 20px 0;
+        border-right: 1px solid #e9ecef;
+        overflow-y: auto;
+    }
+
+    .tab-btn {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 15px 25px;
+        background: none;
+        border: none;
+        font-size: 0.95rem;
+        color: #495057;
+        cursor: pointer;
+        transition: 0.3s;
+        font-weight: 600;
+    }
+
+    .tab-btn:hover {
+        background: #e2e8f0;
+    }
+
+    .tab-btn.active {
+        background: #667eea; /* Màu xanh giống trong ảnh */
+        color: white;
+    }
+
+    /* KHU VỰC NỘI DUNG BÊN PHẢI */
+    .voucher-content {
+        flex: 1;
+        padding: 30px 40px;
+        overflow-y: auto;
+        position: relative;
+        background: #ffffff;
+    }
+
+    .btn-close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #999;
+        cursor: pointer;
+        transition: 0.3s;
+        z-index: 10;
+    }
+
+    .btn-close-modal:hover {
+        color: #ff6b6b;
+        transform: rotate(90deg);
+    }
+
+    /* --- CSS DÀNH CHO CARD VOUCHER --- */
+    .voucher-card { display: flex; background: #fff; border: 1px solid #e9ecef; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; transition: transform 0.3s, box-shadow 0.3s, border 0.3s; position: relative; cursor: pointer; }
+    .voucher-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2); border-color: #667eea; }
+    
+    /* Hiệu ứng khi Voucher được chọn */
+    .voucher-card.selected-active { border: 2px solid #ff4757; background-color: #fff5f5; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2); }
+
+    .voucher-left { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; border-right: 2px dashed rgba(255, 255, 255, 0.6); text-align: center; }
+    .voucher-left.shipping { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
+    .voucher-left h2 { margin: 0; font-size: 1.8rem; font-weight: 800; }
+    .voucher-left span { font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+    .voucher-right { flex: 1; padding: 15px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+    .voucher-title { font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: 5px; }
+    .voucher-desc { font-size: 0.85rem; color: #6c757d; margin-bottom: 12px; }
+    
+    .progress-wrapper { margin-bottom: 15px; }
+    .progress-text { display: flex; justify-content: space-between; font-size: 0.75rem; color: #ff4757; margin-bottom: 5px; font-weight: 700; }
+    .progress-bar-bg { width: 100%; height: 8px; background: #ffe3e3; border-radius: 10px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #ff4757; border-radius: 10px; transition: width 0.5s ease-in-out; }
+    
+    .voucher-footer { display: flex; justify-content: space-between; align-items: center; }
+    .voucher-date { font-size: 0.8rem; color: #adb5bd; font-weight: 500; }
+    .btn-apply { padding: 8px 18px; font-size: 0.9rem; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; background: #5b73e8; color: white; }
+    .btn-apply:hover { background: #4a62d8; }
+    .voucher-main-footer {
+        display: flex;
+        justify-content: flex-end; /* Đẩy nút sang góc phải */
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+    .btn-apply-main {
+        padding: 12px 35px; font-size: 1rem; border: none; border-radius: 8px;
+        font-weight: bold; cursor: pointer; transition: 0.3s;
+        background: #5b73e8; color: white;
+        box-shadow: 0 4px 15px rgba(91, 115, 232, 0.3);
+    }
+    .btn-apply-main:hover { background: #4a62d8; transform: translateY(-2px); }
+</style>
+
+<!-- Khu vực hiển thị chọn Voucher -->
+<div class="modal-overlay" id="voucherModalOverlay">
+    <div class="voucher-modal-box">
+        
+        <!-- SIDEBAR BÊN TRÁI -->
+        <div class="voucher-sidebar">
+            <button class="tab-btn active" onclick="filterVoucher('all', this)">🏷️ Tất cả Voucher</button>
+            <button class="tab-btn" onclick="filterVoucher('product', this)">📦 Sản phẩm</button>
+            <button class="tab-btn" onclick="filterVoucher('ship', this)">🚚 Giảm giá Ship</button>
+        </div>
+
+        <!-- NỘI DUNG BÊN PHẢI -->
+        <div class="voucher-content">
+            <button class="btn-close-modal" onclick="closeVoucher()">✖</button>
+            <h3 style="margin-bottom: 25px; color: #333; font-size: 1.5rem;">Kho Voucher Của Bạn</h3>
+            
+            <!-- Danh sách Voucher -->
+            <div id="voucherListContainer">
+                <!-- JS sẽ bơm HTML vào đây -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let selectedVouchers = [];
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        loadDefaultVouchers();
+    });
+
+    // function chooseVoucher(element, voucherId) {
+    //     const allCards = document.querySelectorAll('.voucher-card');
+    //     allCards.forEach(card => card.classList.remove('selected-active'));
+    //     element.classList.add('selected-active');
+    //     //Chỉ thêm vào nếu voucher là Sản phẩm ko phải ship 
+    //     if (element.classList.contains('type-ship')) {
+    //         //Trừ trực tiếp 
+            
+    //         return;
+    //     }
+    //     const isExist = selectedVouchers.includes(voucherId);
+    //     if (!isExist) {
+    //         selectedVouchers.push(voucherId); 
+    //         console.log("Bạn vừa chọn Voucher có ID là:", voucherId);
+    //     }
+    //     else {
+    //         const index = selectedVouchers.indexOf(voucherId);
+    //         selectedVouchers.splice(index, 1);
+    //         console.log("Bạn vừa bỏ chọn Voucher có ID là:", voucherId);
+    //         element.classList.remove('selected-active');
+    //     }
+    // }
+
+    // Khai báo biến toàn cục để lưu % giảm giá ship
+    window.currentShippingDiscount = 0;
+
+    function chooseVoucher(element, voucherId, discountPercentage) {
+        const allCards = document.querySelectorAll('.voucher-card');
+        allCards.forEach(card => card.classList.remove('selected-active'));
+        element.classList.add('selected-active');
+
+        // NẾU LÀ VOUCHER SHIP: Xử lý trừ tiền trực tiếp trên UI[cite: 4]
+        if (element.classList.contains('type-ship')) {
+            const selectMethod = document.getElementById('methodSelect');
+            
+            // Kiểm tra xem khách đã chọn Đơn vị vận chuyển chưa
+            if (!selectMethod || selectMethod.selectedIndex === 0) {
+                Swal.fire({ icon: 'warning', title: 'Khoan đã', text: 'Vui lòng chọn Phương thức vận chuyển trước khi áp mã Freeship!' });
+                element.classList.remove('selected-active');
+                return;
+            }
+
+            // Lưu % giảm vào biến toàn cục
+            window.currentShippingDiscount = discountPercentage;
+            
+            // Kích hoạt lại sự kiện 'change' trên ô chọn Ship để hệ thống tự tính lại tiền
+            selectMethod.dispatchEvent(new Event('change'));
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: `Đã áp dụng mã giảm ${discountPercentage}% phí vận chuyển!`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            closeVoucher(); // Đóng modal
+            return;
+        }
+
+        // NẾU LÀ VOUCHER SẢN PHẨM: Giữ nguyên logic cũ của bạn[cite: 4]
+        const isExist = selectedVouchers.includes(voucherId);
+        if (!isExist) {
+            selectedVouchers.push(voucherId); 
+            console.log("Bạn vừa chọn Voucher có ID là:", voucherId);
+        }
+        else {
+            const index = selectedVouchers.indexOf(voucherId);
+            selectedVouchers.splice(index, 1);
+            console.log("Bạn vừa bỏ chọn Voucher có ID là:", voucherId);
+            element.classList.remove('selected-active');
+        }
+    }
+
+    // Hàm lọc Voucher và cập nhật màu Sidebar
+    function filterVoucher(type, btnElement = null) {
+        // Nếu có click từ nút Sidebar, xóa màu cũ và gán màu mới
+        if (btnElement) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        const items = document.querySelectorAll('.voucher-item');
+        items.forEach(item => {
+            if (type === 'all' || item.classList.contains('type-' + type)) {
+                item.style.display = 'flex'; 
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    async function loadDefaultVouchers() {
+        try {
+            const response = await fetch('/Cart/LoadVoucher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (response.ok) {
+                const responseData = await response.json();
+                let htmlContent = ''; let footer = '';
+                const voucherListContainer = document.getElementById('voucherListContainer');
+                if (responseData.success) {                
+                responseData.data.forEach(voucher => {
+                    const voucherPercentageUsed = ((voucher.isUsedLength / voucher.voucherLength) * 100).toFixed(2);
+                    
+                    // Phân loại style màu sắc tuỳ vào Category của voucher (Giả sử bạn có phân loại)
+                    const typeVoucherStr = voucher.typeVoucher || voucher.TypeVoucher || ""; 
+                    const isShipping = typeVoucherStr.trim() === "Ship";
+                    const typeClass = isShipping ? "type-ship" : "type-product";
+                    const leftClass = isShipping ? "voucher-left shipping" : "voucher-left";
+                    const label = isShipping ? "Freeship" : "Giảm giá";
+                    const progressBg = isShipping ? "#e6f7f4" : "#ffe3e3";
+                    const progressFill = isShipping ? "#00b09b" : "#6B5BB4";
+
+                    htmlContent += `
+                        <div class="voucher-card voucher-item ${typeClass}" onclick="chooseVoucher(this, '${voucher.promotionID}', ${voucher.discountPercentage})">
+                            <div class="${leftClass}">
+                                <h2>${voucher.discountPercentage}%</h2>
+                                <span>${label}</span>
+                            </div>
+                            <div class="voucher-right">
+                                <div class="voucher-title">${voucher.name}</div>
+                                <div class="voucher-desc">${voucher.description}</div>
+                                
+                                <div class="progress-wrapper">
+                                    <div class="progress-text">
+                                        <span>Đã dùng ${voucherPercentageUsed}%</span>      
+                                        ${voucherPercentageUsed < 50 ? '<span>Còn nhiều</span>' : (voucherPercentageUsed < 80 ? '<span>Còn khá ít</span>' : '<span>Gần hết</span>')}
+                                    </div>
+                                    <div class="progress-bar-bg" style="background: ${progressBg};">
+                                        <div class="progress-bar-fill" style="width: ${voucherPercentageUsed}%; background: ${progressFill};"></div>
+                                    </div>
+                                </div>
+
+                                <div class="voucher-footer">
+                                    <span class="voucher-date">HSD: ${calculateRemainingDays(voucher.endDate)}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                }
+                if (htmlContent === '') {
+                    htmlContent = '<p style="text-align:center; color:#6c757d; margin-top: 20px;">Không có Voucher nào khả dụng.</p>';
+                }
+                voucherListContainer.innerHTML = htmlContent;
+                //Them footer 
+                footer = `<div class="voucher-main-footer">
+                <button type="button" class="btn-apply-main" onclick="applyVoucher(event)">Áp dụng Voucher</button>
+                </div>`;
+                voucherListContainer.innerHTML += footer;                
+                
+                // Gọi lọc 'all' để đảm bảo hiển thị đúng sau khi render
+                filterVoucher('all');
+            } else {
+                console.error('Lỗi khi tải Voucher từ Server');
+            }
+        } catch (error) {
+            console.error('Lỗi mạng:', error);
+        }
+    }
+
+    function openVoucher(){
+        document.getElementById("voucherModalOverlay").style.display = "flex";
+        document.body.style.overflow = "hidden"; 
+    }
+
+    function closeVoucher() {
+        document.getElementById("voucherModalOverlay").style.display = "none";
+        document.body.style.overflow = "auto"; 
+    }
+
+    async function applyVoucher(event) {
+        if(event) event.stopPropagation();
+
+        if (selectedVouchers.length === 0) {
+            alert("Vui lòng chọn ít nhất một Voucher trước khi áp dụng.");
+            return;
+        }
+        
+        try {
+            const response = await fetch ('/Cart/ApplyVoucher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ voucherList: selectedVouchers })
+            });
+            const responseData = await response.json();
+            
+            if (responseData.success) {
+                alert("Áp dụng Voucher thành công!");
+                //Load lai gio hang moi 
+                const productsContainer = document.querySelector(".cart-item-list");
+                let htmlContent = '';
+                responseData.data.forEach(item => {
+                    htmlContent += `
+                        <div class="cart-item">
+                                    <div class="cart-item-info">
+                                        <div class="cart-item-name">${item.namePro}</div>
+                                        <div class="cart-item-meta">Số lượng: <strong>${item.number}</strong></div>
+                                        <div class="cart-item-meta">Đã giảm: <strong>${responseData.discount}%</strong></div>
+
+                                    </div>
+                                    <div class="cart-item-price-wrapper">
+                                        <div class="cart-item-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)} VND</div>
+                                    </div>
+                        </div>
+                        `;
+                });
+                productsContainer.innerHTML = htmlContent;
+                closeVoucher();
+            } else {
+                alert("Áp dụng Voucher thất bại: " + responseData.message);
+            }
+        } catch (error) {
+            console.error('Lỗi khi áp dụng Voucher:', error);
+            alert("Đã xảy ra lỗi khi áp dụng Voucher.");
+        }
+    }
+
+    function calculateRemainingDays(expirationDateString) {
+        const currentDate = new Date();
+        const expirationDate = new Date(expirationDateString);
+        currentDate.setHours(0, 0, 0, 0);
+        expirationDate.setHours(0, 0, 0, 0);
+        const timeDifference = expirationDate.getTime() - currentDate.getTime();
+        const daysRemaining = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+
+        if (daysRemaining > 0) return `Còn ${daysRemaining} ngày`;
+        if (daysRemaining === 0) return "Hết hạn hôm nay";
+        return "Đã hết hạn";
+    }
+</script>

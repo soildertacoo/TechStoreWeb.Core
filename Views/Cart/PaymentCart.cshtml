@@ -384,7 +384,7 @@
                             <div class="form-group-modern">
                                 @Html.LabelFor(model => model.Customers.City, "Tỉnh/Thành phố", new { @class = "form-label-modern" })
                                 <div class="input-icon-wrapper">
-                                    <select id="province" name="City" class="form-control-modern" required>
+                                    <select id="province" name="Customers.City" class="form-control-modern" required>
                                         @if (!string.IsNullOrEmpty(Model.Customers.City))
                                         {
                                             <option value="@Model.Customers.City" selected>@Model.Customers.City</option>
@@ -402,7 +402,7 @@
                             <div class="form-group-modern">
                                 @Html.LabelFor(model => model.Customers.Ward, "Phường/Xã/Quận", new { @class = "form-label-modern" })
                                 <div class="input-icon-wrapper">
-                                    <select id="ward" name="Ward" class="form-control-modern" required>
+                                    <select id="ward" name="Customers.Ward" class="form-control-modern" required>
                                         @if (!string.IsNullOrEmpty(Model.Customers.Ward))
                                         {
                                             <option value="@Model.Customers.Ward" selected>@Model.Customers.Ward</option>
@@ -453,13 +453,32 @@
                                 new SelectListItem { Text = "Thanh toán trực tuyến (VNPAY/Thẻ)", Value = "1" }
                             }, "Value", "Text"), new { @class = "form-control-modern" })
                         </div>
-
-                        <!-- Khung Tổng Tiền -->
+                        <!-- Khung chọn Phương thức vận chuyển -->
+                        <div class="payment-method-select form-group-modern">
+                            <label class="form-label-modern">Phương thức vận chuyển</label>
+                            
+                            <select class="form-control-modern" id="methodSelect" required>
+                                <option value="" disabled selected>Chọn phương thức vận chuyển</option>
+                                @foreach (var method in Model.ShippingMethods)
+                                {
+                                    <option value="@method.ShippingCost">@method.MethodName - @string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", method.ShippingCost)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group-modern">
+                            <button type="button" class="btn btn-outline-primary" onclick="openVoucher()">Chọn Voucher</button>
+                        </div>
+                        <span asp-validation-for="@Model.Order.ShippingCost" class="text-danger"></span>
+                            <!-- Khung Tổng Tiền -->
                         <div class="total-box">
                             <div class="total-title">Tổng thanh toán</div>
                             <div class="total-amount">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", ViewBag.Total)</div>
+                            <!-- PHÍ VẬN CHUYỂN -->
+                            <div class="shipping-cost">
+                                Phí vận chuyển: <span id="shippingCostDisplay">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", 0)</span>
+                            </div>
                         </div>
-
+                        <input type="hidden" id="hiddenShippingCost" name="Order.ShippingCost" value="" required />
                         <!-- Nút Submit -->
                         <button type="submit" class="btn-submit-order">
                             <i class="fas fa-check-circle"></i> Đặt hàng ngay
@@ -470,6 +489,7 @@
         }
     </div>
 </div>
+@await Html.PartialAsync(partialViewName: "~/Views/Cart/_VoucherPartial.cshtml")
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -509,7 +529,8 @@
             // ==========================================
             const form = document.getElementById("checkoutForm");
             const btn_submit = document.querySelector('.btn-submit-order');
-            
+            const selectMethod = document.getElementById('methodSelect');
+            const totalPrice = document.querySelector('.total-amount');
             if (form && btn_submit) {
                 form.addEventListener('submit', function (e) {
                     
@@ -528,6 +549,57 @@
 
             // 2. KHỞI CHẠY API ĐỊA CHỈ
             await loadAddressData();
+
+
+            // selectMethod.addEventListener('change', function () {
+            //     const selectedOption = this.options[this.selectedIndex];
+            //     const shippingCost = parseFloat(selectedOption.value) || 0;
+            //     const originalTotal = @Convert.ToDecimal(ViewBag.Total ?? 0).ToString("0");                
+            //     const newTotal = originalTotal + shippingCost;
+            //     const shippingCostDisplay = document.getElementById('shippingCostDisplay');
+            //     totalPrice.innerHTML = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(newTotal);
+            //     shippingCostDisplay.innerHTML = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(shippingCost);
+            // });
+
+            selectMethod.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                
+                // Tiền ship gốc (chưa giảm)
+                const originalShippingCost = parseFloat(selectedOption.value) || 0;
+                let finalShippingCost = originalShippingCost;
+                
+                // Nếu có Voucher Ship đang được áp dụng, tính toán tiền ship mới
+                if (window.currentShippingDiscount && window.currentShippingDiscount > 0) {
+                    const discountAmount = originalShippingCost * (window.currentShippingDiscount / 100);
+                    finalShippingCost = originalShippingCost - discountAmount;
+                }
+
+                // Lấy tổng tiền giỏ hàng (chưa có ship) từ C#
+                const originalTotal = parseFloat('@Convert.ToDecimal(ViewBag.Total ?? 0).ToString("0")');                
+                
+                // Cộng tổng tiền mới
+                const newTotal = originalTotal + finalShippingCost;
+                
+                // Cập nhật giao diện
+                const shippingCostDisplay = document.getElementById('shippingCostDisplay');
+                totalPrice.innerHTML = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(newTotal);
+                document.getElementById('hiddenShippingCost').value = Math.round(finalShippingCost);
+                // Hiển thị tiền ship trên UI (Có hiệu ứng gạch ngang giá cũ cho đẹp)
+                if (window.currentShippingDiscount > 0) {
+                    shippingCostDisplay.innerHTML = `
+                        <del style="color:#9ca3af; font-size:0.9rem; margin-right:5px;">
+                            ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(originalShippingCost)}
+                        </del> 
+                        <span style="color:#10b981; font-weight:bold;">
+                            ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalShippingCost)}
+                        </span> 
+                        <span style="font-size:0.8rem; color:#ef4444; margin-left:4px;">
+                            (-${window.currentShippingDiscount}%)
+                        </span>`;
+                } else {
+                    shippingCostDisplay.innerHTML = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalShippingCost);
+                }
+            });
 
         });
 

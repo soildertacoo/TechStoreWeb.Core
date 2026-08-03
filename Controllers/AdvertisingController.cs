@@ -252,11 +252,12 @@ namespace TechStore.Controllers
         {
             try
             {
-                return View(await _context.Promotions.ToListAsync());
+                return View(await _context.Promotions.Include(p => p.Products).Include(c => c.Category1).ToListAsync());
             }
             catch (Exception ex)
             {
                 ViewBag.ErrorMessage = "Lỗi khi tải danh sách Khuyến mãi: " + ex.Message;
+                System.Diagnostics.Debug.WriteLine("0323" + ex.Message);
                 return View("Error");
             }
         }
@@ -269,19 +270,64 @@ namespace TechStore.Controllers
             return View(promotion);
         }
 
-        public IActionResult CreatePromotion() => View();
-
+        public IActionResult CreatePromotion() {
+            ViewBag.ProductID = _context.Products.ToList();
+        
+            ViewBag.CategoryID = _context.Category.ToList();
+            ViewData["Category"] = new SelectList(_context.Category, "IDCate", "NameCate");
+            return View();
+        }
+        public class PrivateTypeVoucher {
+            int? Id {get;set;}
+            string? NameType {get;set;}
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePromotion(Promotion promotion)
         {
+            ModelState.Remove("UsedPromotions"); //Đây là bảng trung gian chỉ dùng để lưu lịch sử, không có liên quan gì hết
             if (ModelState.IsValid)
             {
-                _context.Add(promotion);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Promotions));
+                try {
+                    promotion.RemainLength = promotion.VoucherLength;
+                    promotion.ApplyCategory = string.IsNullOrEmpty(promotion.ApplyCategory) ? "ALL" : promotion.ApplyCategory;
+                    promotion.PriorityLength = 4;
+                    _context.Add(promotion);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Promotions");
+                }
+                catch (Exception ex) {
+                    string errorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;                   
+                     ViewBag.LoiTaoVoucher = "Lỗi khi tạo khuyến mãi, có lỗi với SQL. Vui lòng kiểm tra lại dữ liệu nhập." + errorMessage;
+                    ViewBag.ProductID = _context.Products.ToList();
+                    ViewBag.CategoryID = _context.Category.ToList();
+                    ViewData["Category"] = new SelectList(_context.Category, "IDCate", "NameCate");
+                    return View();
+                }
             }
-            return View(promotion);
+            if (!ModelState.IsValid)
+            {
+                var printErrors = "";
+                // Bóc tách toàn bộ thông báo lỗi từ ModelState
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                            .Select(e => e.ErrorMessage)
+                                            .ToList();
+
+                // In từng lỗi ra cửa sổ Output (Tab Debug) của Visual Studio
+                System.Diagnostics.Debug.WriteLine("=== DANH SÁCH LỖI MODELSTATE ===");
+                foreach (var error in errors)
+                {
+                    printErrors += error + "\n";
+                }
+                System.Diagnostics.Debug.WriteLine("================================");
+                ViewBag.LoiTaoVoucher = "Dữ liệu nhập không hợp lệ. Vui lòng kiểm tra lại.\n" + printErrors;
+            }
+            // ViewBag.LoiTaoVoucher = "Dữ liệu nhập không hợp lệ. Vui lòng kiểm tra lại.";
+            ViewBag.ProductID = _context.Products.ToList();                    
+            ViewBag.CategoryID = _context.Category.ToList();
+            ViewData["Category"] = new SelectList(_context.Category, "IDCate", "NameCate");
+            return View();
+
         }
 
         public async Task<IActionResult> EditPromotion(int? id)
@@ -289,6 +335,9 @@ namespace TechStore.Controllers
             if (id == null) return NotFound();
             var promotion = await _context.Promotions.FindAsync(id);
             if (promotion == null) return NotFound();
+            ViewBag.ProductID = _context.Products.ToList();                    
+            ViewBag.CategoryID = _context.Category.ToList();
+            ViewData["Category"] = new SelectList(_context.Category, "IDCate", "NameCate");
             return View(promotion);
         }
 
@@ -297,12 +346,46 @@ namespace TechStore.Controllers
         public async Task<IActionResult> EditPromotion(int id, Promotion promotion)
         {
             if (id != promotion.PromotionID) return NotFound();
+            ModelState.Remove("UsedPromotions"); //Đây là bảng trung gian chỉ dùng để lưu lịch sử, không có liên quan gì hết
             if (ModelState.IsValid)
             {
-                _context.Update(promotion);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    promotion.ApplyCategory = string.IsNullOrEmpty(promotion.ApplyCategory) ? "ALL" : promotion.ApplyCategory;
+                    _context.Update(promotion);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    string errorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                    ViewBag.LoiChinhVoucher = "Lỗi khi chỉnh sửa khuyến mãi, có lỗi với SQL. Vui lòng kiểm tra lại dữ liệu nhập." + errorMessage;
+                    ViewBag.ProductID = _context.Products.ToList();
+                    ViewBag.CategoryID = _context.Category.ToList();
+                    ViewData["Category"] = new SelectList(_context.Category, "IDCate", "NameCate");
+                    return View(promotion);
+                }
                 return RedirectToAction(nameof(Promotions));
             }
+            if (!ModelState.IsValid)
+            {
+                var printErrors = "";
+                // Bóc tách toàn bộ thông báo lỗi từ ModelState
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                            .Select(e => e.ErrorMessage)
+                                            .ToList();
+
+                // In từng lỗi ra cửa sổ Output (Tab Debug) của Visual Studio
+                System.Diagnostics.Debug.WriteLine("=== DANH SÁCH LỖI MODELSTATE ===");
+                foreach (var error in errors)
+                {
+                    printErrors += error + "\n";
+                }
+                System.Diagnostics.Debug.WriteLine("================================");
+                ViewBag.LoiChinhVoucher = "Dữ liệu nhập không hợp lệ. Vui lòng kiểm tra lại.\n" + printErrors;
+            }
+            ViewBag.ProductID = _context.Products.ToList();
+            ViewBag.CategoryID = _context.Category.ToList();
+            ViewData["Category"] = new SelectList(_context.Category, "IDCate", "NameCate");
             return View(promotion);
         }
 

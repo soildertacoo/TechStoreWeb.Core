@@ -53,5 +53,7 @@ namespace TechStore.Models
         public virtual ICollection<OrderPro> OrderPro { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Review> Reviews { get; set; }
+        public virtual ICollection<UsedPromotion> UsedPromotions { get; set; }
+
     }
 }

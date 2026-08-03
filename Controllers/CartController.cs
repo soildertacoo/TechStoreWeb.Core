@@ -145,6 +145,7 @@ namespace TechStore.Controllers
                     ImagePro = addPro.ImagePro,
                     Price = addPro.Price,
                     Number = quantity,
+                    Category = addPro.Category,
                     userLogged = GetCartIdentifier()
                 };
             }
@@ -164,15 +165,25 @@ namespace TechStore.Controllers
         {
 
             List<CartItem> myCart = GetCart();
+            var shipMethod = new List<ShippingMethod>();
             if (!myCart.Any()) return RedirectToAction("ShowCart");
 
             var checkout = new Payment
             {
                 mycart = myCart,
-                Providers = new List<ShippingProviders>()
+                Providers = new List<ShippingProviders>(),
+                Order = new OrderPro(),
+                ShippingMethods = new List<ShippingMethod>()
             };
             ViewBag.Total = TotalMoney();
-
+            //Lay phuong thuc van chuyen 
+            var provider = _context.ShippingProviders.FirstOrDefault( s => s.IsActive == true);
+            if (provider != null)
+            {
+                if (provider.PriceFast > 0) checkout.ShippingMethods.Add(new ShippingMethod() {MethodName = "Nhanh", ShippingCost = provider.PriceFast});
+                if (provider.PriceExpress > 0) checkout.ShippingMethods.Add(new ShippingMethod() {MethodName = "Hoả tốc", ShippingCost = provider.PriceExpress});
+                if (provider.PriceStandard > 0) checkout.ShippingMethods.Add(new ShippingMethod() {MethodName = "Tiêu chuẩn ", ShippingCost = provider.PriceStandard});
+            }
             // KIỂM TRA PHÂN LUỒNG
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
@@ -185,8 +196,122 @@ namespace TechStore.Controllers
                 // Khách vãng lai: Tạo object rỗng để form tự gõ
                 checkout.Customers = new Customer(); 
             }
-
             return View(checkout);
+        }
+        [HttpPost]
+        public async Task<IActionResult> LoadVoucher()
+        {
+            var vouchers = await _context.Promotions.Where(v => v.IsActive == true).ToListAsync();
+            if (vouchers == null || !vouchers.Any())
+            {
+                return Json(new { success = false, message = "Không tìm thấy voucher nào" });
+            }
+            return Json(new { success = true, message = "Load voucher thành công", data = vouchers });
+        }
+        public class VoucherRequest
+        {
+            public List<int> VoucherList { get; set; }
+        }
+        public async Task<IActionResult> ApplyVoucher([FromBody] VoucherRequest request)
+        {
+            if (request == null || request.VoucherList == null || !request.VoucherList.Any())
+            {
+                return BadRequest(new { success = false, message = "Danh sách voucher trống" });
+            }
+
+            //Trừ trưcj tiếp lên giỏ hàng 
+            // 1. Lấy ID khách hàng đang đăng nhập
+            int currentCustomerId = _context.Customers.FirstOrDefault(c => c.NameCus == GetCartIdentifier())?.IDCus ?? 0; 
+            if (currentCustomerId == 0)
+            {
+                return Json(new { success = false, message = "Bạn cần đăng nhập để áp dụng voucher!" });
+            }
+            // 2. KIỂM TRA VOUCHER ĐÃ SỬ DỤNG CHƯA TRƯỚC KHI TÍNH TOÁN
+            var hasUsedAnyVoucher = await _context.UsedPromotions
+                .AnyAsync(up => up.IDCus == currentCustomerId && request.VoucherList.Contains(up.PromotionID));
+
+            if (hasUsedAnyVoucher)
+            {
+                // Return Json hoặc BadRequest tùy thuộc vào cách Frontend của bạn xử lý
+                return Json(new { success = false, message = "Một trong số các voucher bạn chọn đã được sử dụng. Vui lòng chọn mã khác!" });
+            }
+
+            // 3. LOGIC TÍNH TOÁN GIỎ HÀNG (Giữ nguyên)
+            var vouchers = await _context.Promotions
+                .Where(v => request.VoucherList.Contains(v.PromotionID) && v.TypeVoucher == "Product")
+                .ToListAsync();
+
+            var cartItems = _context.CartItems.Where(c => c.userLogged == GetCartIdentifier()).ToList();
+
+            if (!vouchers.Any())
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy voucher hợp lệ" });
+            }
+
+            bool hasChanges = false;
+
+            foreach (var voucher in vouchers)
+            {
+                bool isVoucherAppliedToAnyItem = false; // Đã fix: Thêm biến bị thiếu ở code cũ
+                string voucherCategory = voucher.ApplyCategory?.Trim().ToUpper() ?? "";
+
+                foreach (var item in cartItems)
+                {
+                    // An toàn: Xử lý chuỗi của item trong giỏ
+                    string itemCategory = item.Category?.Trim().ToUpper() ?? "";
+
+                    // Rút gọn logic if-else switch-case dài dòng
+                    bool isValidVoucher = (voucherCategory == "ALL" || voucherCategory == itemCategory);
+
+                    if (isValidVoucher)
+                    {
+                        // Thay đổi giá trị trên thực thể (Entity Framework tự động nhận diện)
+                        item.Price -= (item.Price * (decimal)voucher.DiscountPercentage / 100);
+                        
+                        isVoucherAppliedToAnyItem = true;
+                        hasChanges = true;
+                    }
+                }
+
+                // CHỈ TĂNG số lượng đã dùng 1 lần duy nhất sau khi kiểm tra xong giỏ hàng
+                if (isVoucherAppliedToAnyItem)
+                {
+                    // Tăng tổng số lượng đã dùng của Voucher
+                    voucher.isUsedLength = (voucher.isUsedLength ?? 0) + 1;
+                    
+                    // 4. LƯU LỊCH SỬ SỬ DỤNG: Đánh dấu user này đã dùng voucher này
+                    _context.UsedPromotions.Add(new UsedPromotion 
+                    {
+                        PromotionID = voucher.PromotionID,
+                        IDCus = currentCustomerId,
+                        UsedDate = DateTime.Now
+                    });
+
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges)
+            {
+                await _context.SaveChangesAsync(); 
+                return Json(new { success = true, message = "Áp dụng voucher thành công!" });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Voucher không áp dụng được cho sản phẩm nào trong giỏ." });
+            }
+
+            // Tính toán tổng giảm giá từ các voucher hợp lệ
+            decimal totalDiscount = 0;
+            foreach (var voucher in vouchers)
+            {
+                totalDiscount += (decimal)voucher.DiscountPercentage; // Giả sử DiscountPercentage là phần trăm giảm giá
+            }
+            
+            //Lay lai danh sách giỏ hàng sau khi áp dụng voucher
+            var updatedCart = _context.CartItems.Where(c => c.userLogged == GetCartIdentifier()).ToList();
+            // Trả về kết quả
+            return Json(new { success = true, message = "Áp dụng voucher thành công", discount = totalDiscount, data = updatedCart });
         }
 
         [HttpPost]
@@ -251,7 +376,7 @@ namespace TechStore.Controllers
             {
                 try
                 {
-                    decimal? shippingCost = TotalMoney() * 0.05m;
+                    decimal? shippingCost = model.Order.ShippingCost; // Nếu ShippingCost là null, mặc định là 0
                     int? idCus = cus?.IDCus; // Sẽ mang giá trị null nếu là khách vãng lai
                      //Tạo đối tượng VIP mới có sẵn 
                     // 3. CHỈ TẠO/CỘNG ĐIỂM VIP CHO KHÁCH CÓ TÀI KHOẢN
@@ -634,8 +759,9 @@ namespace TechStore.Controllers
         private (bool IsValid, string Error) ValidateAddress(string address)
         {
             // Đổi thành IsNullOrWhiteSpace cho an toàn tuyệt đối
-            if (string.IsNullOrWhiteSpace(address) || address.Length > 150)
-                return (false, "Địa chỉ không được để trống và không quá 150 ký tự.");
+            if (string.IsNullOrWhiteSpace(address) || address.Length > 150 || address.Length < 5)
+                return (false, "Địa chỉ không được để trống và không được dưới dưới 5 hay quá 150 ký tự.");
+
 
             // \p{L} (chữ cái), 0-9 (số), \s (khoảng trắng), và các dấu , . - /
             string pattern = @"^[\p{L}0-9\s,.\-/]+$";
@@ -740,7 +866,7 @@ namespace TechStore.Controllers
             // Lấy giỏ hàng hiện tại
     
             // Tìm sản phẩm cần xóa
-            CartItem? currentItem = _context.CartItems.SingleOrDefault(p => p.ProductID == data.productID);
+            CartItem? currentItem = _context.CartItems.FirstOrDefault(p => p.ProductID == data.productID);
 
             if (currentItem != null)
             {

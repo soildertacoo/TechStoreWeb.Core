@@ -34,8 +34,8 @@ namespace TechStore.Models
         public string TrackingNumber { get; set; }
         public string ShippingCode {get;set;}
         public string PaymentStatus { get; set; }
-        public string? NameDeliverry { get; set; }
-        public string? PhoneDeliverry { get; set; }
+        public string NameDeliverry { get; set; }
+        public string PhoneDeliverry { get; set; }
         public Nullable<decimal> ShippingCost { get; set; }
         [ForeignKey("IDCus")] //fix bug lỗi sai tên cột nếu có bảng sql này là 2 trong 1 
         public virtual Customer Customer { get; set; }

@@ -22,13 +22,22 @@ namespace TechStore.Models
         [Range(0, 100)]
         public decimal DiscountPercentage { get; set; }
 
-        public decimal? DiscountAmount { get; set; }
+        //Da dung bao nhieu
+        public int? isUsedLength { get; set; }
 
-        public decimal? MinimumOrder { get; set; }
+        //So luong con lai 
+        public int? RemainLength {get;set;}
 
-        public decimal? MaximumDiscount { get; set; }
+        public int? PriorityLength { get; set; }
 
-        public int Priority { get; set; }
+        public int? VoucherLength {get;set;}
+
+        public int? ApplyProduct {get;set;}
+
+        public string? ApplyCategory { get; set; }
+
+        [Required]
+        public string? TypeVoucher {get;set;}
 
         [Display(Name = "Ngày bắt đầu")]
         public DateTime StartDate { get; set; }
@@ -41,5 +50,14 @@ namespace TechStore.Models
 
         // Có thể mở rộng để liên kết với các sản phẩm cụ thể nếu cần
         // public virtual ICollection<Products> Products { get; set; }
+
+        [ForeignKey("ApplyCategory")]
+        public virtual Category? Category1 { get; set; }
+
+        [ForeignKey("ApplyProduct")]
+        public virtual Products? Products { get; set; }
+
+        public virtual ICollection<UsedPromotion> UsedPromotions { get; set; }
+
     }
 }

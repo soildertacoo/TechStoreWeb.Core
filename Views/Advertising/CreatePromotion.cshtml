@@ -5,46 +5,168 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h2>Tạo khuyến mãi mới</h2>
+<!-- Custom CSS nhỏ để form đẹp hơn -->
+<style>
+    .admin-card {
+        border-radius: 12px;
+        border: none;
+    }
+    .admin-card-header {
+        background-color: #fff;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 20px 25px;
+        border-radius: 12px 12px 0 0;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+    .form-control, .form-select {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .btn-action {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+</style>
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="CreatePromotion">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DiscountPercentage" class="control-label"></label>
-                <input asp-for="DiscountPercentage" class="form-control" type="number" step="0.01" />
-                <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StartDate" class="control-label"></label>
-                <input asp-for="StartDate" class="form-control" type="date" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EndDate" class="control-label"></label>
-                <input asp-for="EndDate" class="form-control" type="date" />
-                <span asp-validation-for="EndDate" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                </label>
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Tạo</button>
-                <a asp-action="Promotions" class="btn btn-secondary">Quay lại</a>
-            </div>
-        </form>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12">
+            
+            <!-- THẺ CARD BỌC TOÀN BỘ FORM -->
+            <div class="card admin-card shadow-sm">
+                <div class="card-header admin-card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 text-primary fw-bold">
+                        <i class="fas fa-ticket-alt me-2"></i> Tạo khuyến mãi mới
+                    </h4>
+                </div>
+                <div class="card-header admin-card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 text-primary fw-bold">
+                        <!-- <i class="fas fa-ticket-alt me-2"></i>-->
+                        @ViewBag.LoiTaoVoucher 
+                    </h4>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="CreatePromotion">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
+                        
+                        <!-- DÒNG 1: TÊN & MÔ TẢ -->
+                        <div class="row mb-4">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Name" class="form-label">Tên chương trình khuyến mãi <span class="text-danger">*</span></label>
+                                <input asp-for="Name" class="form-control" placeholder="Ví dụ: Siêu Sale Mùa Hè..." />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label asp-for="Description" class="form-label">Mô tả chi tiết</label>
+                                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Nhập nội dung hoặc điều kiện áp dụng..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="text-muted opacity-25 mb-4">
+
+                        <!-- DÒNG 2: THÔNG SỐ KHUYẾN MÃI -->
+                        <div class="row mb-4">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="DiscountPercentage" class="form-label">Phần trăm giảm (%)</label>
+                                <div class="input-group">
+                                    <input asp-for="DiscountPercentage" class="form-control" type="number" step="0.01" min="0" max="100" placeholder="0 - 100" />
+                                    <span class="input-group-text"><i class="fas fa-percent"></i></span>
+                                </div>
+                                <span asp-validation-for="DiscountPercentage" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="VoucherLength" class="form-label">Số lượng Voucher</label>
+                                <div class="input-group">
+                                    <input asp-for="VoucherLength" class="form-control" type="number" min="1" placeholder="Nhập số lượng..." />
+                                    <span class="input-group-text"><i class="fas fa-boxes"></i></span>
+                                </div>
+                                <span asp-validation-for="VoucherLength" class="text-danger small"></span> <!-- Đã sửa lại đúng biến -->
+                            </div>
+                        </div>
+
+                        <!-- DÒNG 3: ÁP DỤNG CHO AI -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ApplyProduct" class="form-label">Áp dụng cho Sản phẩm</label>
+                                <select asp-for="ApplyProduct" class="form-select" asp-items="@(new SelectList(ViewBag.ProductID, "ProductID", "NamePro"))">
+                                    <option value="">-- Tất cả sản phẩm --</option>
+                                </select>
+                                <span asp-validation-for="ApplyProduct" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Hoặc áp dụng Ngành hàng</label>
+                                <select asp-for="ApplyCategory" class="form-select" asp-items="@(new SelectList(ViewBag.CategoryID, "IDCate","NameCate" ))" >
+                                    <option value= "" disabled selected> --Tất cả ngành hàng--</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="ApplyCategory" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                                <label class="form-label">Chọn loại voucher</label>
+                                <select asp-for="TypeVoucher" class="form-select" required>
+                                    <option value= "" disabled selected> --Chọn loại voucher--</option>
+                                    <option value="Product">Sản phẩm</option>
+                                    <option value="Ship">Giảm tiền Ship</option>
+                                </select>
+                            </div>
+                        <span asp-validation-for="TypeVoucher" class="text-danger small"></span>
+                        <hr class="text-muted opacity-25 mb-4">
+
+                        <!-- DÒNG 4: THỜI GIAN & TRẠNG THÁI -->
+                        <div class="row mb-4 align-items-end">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="StartDate" class="form-label">Ngày bắt đầu</label>
+                                <input asp-for="StartDate" class="form-control" type="date" />
+                                <span asp-validation-for="StartDate" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="EndDate" class="form-label">Ngày kết thúc</label>
+                                <input asp-for="EndDate" class="form-control" type="date" />
+                                <span asp-validation-for="EndDate" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3 pb-2">
+                                <div class="form-check form-switch fs-5">
+                                    <input class="form-check-input" type="checkbox" role="switch" asp-for="IsActive" id="switchIsActive" checked>
+                                    <label class="form-check-label fs-6 ms-2 mt-1" for="switchIsActive" style="font-weight: 500;">
+                                        Kích hoạt ngay
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DÒNG CUỐI: NÚT BẤM -->
+                        <div class="d-flex justify-content-end gap-3 mt-5">
+                            <a asp-action="Promotions" class="btn btn-light btn-action border">
+                                <i class="fas fa-arrow-left me-1"></i> Hủy & Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-action">
+                                <i class="fas fa-save me-1"></i> Lưu khuyến mãi
+                            </button>
+                        </div>
+
+                    </form>
+                </div> 
+            </div> 
+            
+        </div>
     </div>
 </div>
